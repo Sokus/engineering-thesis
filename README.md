@@ -6,4 +6,4 @@ Krzysztof Weltrowski **144493** \
 Krzysztof Jajeśnica  **145367** \
 Dawid Bosy **145396**
 
-*Test change*
+
