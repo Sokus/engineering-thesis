@@ -1,0 +1,6 @@
+# C compilation results
+*.out
+*.o
+
+# user project files
+*.4coder

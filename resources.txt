@@ -1,0 +1,29 @@
+MULTITHREADING
+==============
+
+Keywords:
+---------
+volatile - informs the compiler that the variable may be modified outside the visible scope
+
+Linux:
+------
+TODO
+
+Windows:
+--------
+HANDLE CreateThread(0, 0, thread_callback, thread_argument, 0, 0) // create and run a thread
+DWORD ThreadProc(LPVOID lpParameter) // thread callback function
+void _WriteBarrier(void) // compiler write barrier
+LONG InterlockedIncrement(LONG volatile *Addend);
+HANDLE CreateSemaphoreExA(0,(LONG)initial_count, (LONG)max_count, 0, 0, SEMAPHORE_ALL_ACCESS);
+DWORD WaitForSingleObjectEx((HANDLE)handle, INFINITE, false);
+BOOL ReleaseSemaphore((HANDLE)semaphore, (LONG)release_count, (LPLONG)out_previous_count);
+
+x86/64:
+-------
+void _mm_sfence(void) // cpu write barrier
+
+Sources:
+--------
+https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html
+https://docs.microsoft.com/en-us/windows/win32/api/
