@@ -9,13 +9,18 @@ volatile - informs the compiler that the variable may be modified outside the vi
 
 Linux:
 ------
+// compile with -pthread
+
+#include <pthread.h>
 int pthread_create((pthread_t *)handle, 0, thread_callback, arg);
 void *thread_callback(void *arg);
+int pthread_detach(pthread_t thread);
 
 __atomic_signal_fence(__ATOMIC_SEQ_CST)
 type __sync_add_and_fetch(type *ptr, type value, ...)
 type __sync_val_compare_and_swap (type *ptr, type oldval, type newval, ...)
 
+#include <semaphore.h>
 int sem_init((sem_t *)sem, 0, (unsigned int)initial_value)
 int sem_wait((sem_t *)sem)
 
