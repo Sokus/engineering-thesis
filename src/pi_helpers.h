@@ -25,7 +25,7 @@ STATEMENT(fprintf(stderr, "%s:%d: %s\n", __FILE__, __LINE__, message); \
 RAISE_SEGMENTATION_FAULT();)
 #define ASSERT(expression) \
 STATEMENT( if(!(expression)) { ASSERT_BREAK(#expression); })
-#define INVALID_CODE_PATH() ASSERT_BREAK("Invalid code path!")
+#define INVALID_CODE_PATH ASSERT_BREAK("")
 
 
 #define ARRAY_COUNT(array) ( sizeof(array)/sizeof((array)[0]) )
