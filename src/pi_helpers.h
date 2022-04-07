@@ -52,6 +52,11 @@ typedef struct MemoryArena
     size_t used;
 } MemoryArena;
 
+#define ARENA_PUSH_STRUCT(arena, type) (type *)MemoryArenaPushSize(arena, sizeof(type))
+#define ARENA_PUSH_ARRAY(arena, type, count) (type *)MemoryArenaPushSize(arena, (count)*sizeof(type)) 
+#define ARENA_POP_STRUCT(arena, type) MemoryArenaPopSize(arena, sizeof(type))
+#define ARENA_POP_ARRAY(arena, type, count) MemoryArenaPopSize(arena, (count)*sizeof(type))
+
 void InitializeArena(MemoryArena *arena, uint8_t *base, size_t size)
 {
     arena->base = base;
@@ -59,26 +64,21 @@ void InitializeArena(MemoryArena *arena, uint8_t *base, size_t size)
     arena->used = 0;
 }
 
-#define PUSH_STRUCT(arena, type) (type *)MemoryArenaPushSize(arena, sizeof(type))
-#define PUSH_ARRAY(arena, type, count) (type *)MemoryArenaPushSize(arena, (count)*sizeof(type)) 
-#define POP_STRUCT(arena, type) MemoryArenaPopSize(arena, sizeof(type))
-#define POP_ARRAY(arena, type, count) MemoryArenaPopSize(arena, (count)*sizeof(type))
-
 void ClearArena(MemoryArena *arena)
 {
     arena->used = 0;
 }
 
-bool MemoryArenaCanFit(MemoryArena *arena, size_t size)
+size_t MemoryArenaFreeSpace(MemoryArena *arena)
 {
-    bool result = ((arena->used + size) <= arena->size);
+    size_t result = (arena->size - arena->used);
     return result;
 }
 
 void *MemoryArenaPushSize(MemoryArena *arena, size_t size)
 {
     void *result = 0;
-    bool can_fit = MemoryArenaCanFit(arena, size);
+    bool can_fit = ((arena->used + size) <= arena->size);
     ASSERT(can_fit);
     if(can_fit)
     {
@@ -97,6 +97,116 @@ void *MemoryArenaPopSize(MemoryArena *arena, size_t size)
     void *result = arena->base + new_used;
     return result;
 }
+
+// RING BUFFER
+// ===========
+
+struct RingBuffer
+{
+    uint8_t *base;
+    size_t write;
+    size_t read;
+    size_t size;
+    size_t used;
+};
+
+void InitializeRingBuffer(RingBuffer *rbuf, uint8_t *base, size_t size)
+{
+    ASSERT(rbuf != 0);
+    ASSERT(base != 0);
+    ASSERT(size > 0);
+    rbuf->base = base;
+    rbuf->write = 0;
+    rbuf->read = 0;
+    rbuf->size = size;
+    rbuf->used = 0;
+}
+
+void ClearRingBuffer(RingBuffer *rbuf)
+{
+    ASSERT(rbuf != 0);
+    rbuf->write = 0;
+    rbuf->read = 0;
+    rbuf->used = 0;
+}
+
+bool RingBufferIsFull(RingBuffer *rbuf)
+{
+    ASSERT(rbuf != 0);
+    bool result = (rbuf->used == rbuf->size);
+    return result;
+}
+
+bool RingBufferIsEmpty(RingBuffer *rbuf)
+{
+    ASSERT(rbuf != 0);
+    bool result = (rbuf->used == 0);
+    return result;
+}
+
+size_t RingBufferSize(RingBuffer *rbuf)
+{
+    ASSERT(rbuf != 0);
+    return rbuf->size;
+}
+
+size_t RingBufferUsedSpace(RingBuffer *rbuf)
+{
+    ASSERT(rbuf != 0);
+    return rbuf->used;
+}
+
+size_t RingBufferFreeSpace(RingBuffer *rbuf)
+{
+    ASSERT(rbuf != 0);
+    size_t result = rbuf->size - rbuf->used;
+    return result;
+}
+
+void RingBufferPushSize(RingBuffer *rbuf, uint8_t *data, size_t data_size)
+{
+    ASSERT(rbuf != 0);
+    bool can_fit = (rbuf->used + data_size <= rbuf->size);
+    ASSERT(can_fit);
+    
+    size_t contiguous_space = rbuf->size - rbuf->write;
+    if(data_size <= contiguous_space)
+    {
+        MEMORY_COPY(rbuf->base + rbuf->write, data, data_size);
+    }
+    else
+    {
+        size_t overhead = rbuf->write + data_size - rbuf->size;
+        MEMORY_COPY(rbuf->base + rbuf->write, data, contiguous_space);
+        MEMORY_COPY(rbuf->base, data + contiguous_space, overhead);
+    }
+    
+    rbuf->write = (rbuf->write + data_size) % rbuf->size;
+    rbuf->used += data_size;
+}
+
+void RingBufferPopSize(RingBuffer *rbuf, uint8_t *out_data, size_t data_size)
+{
+    ASSERT(rbuf != 0);
+    bool can_be_read = (data_size <= rbuf->used);
+    ASSERT(can_be_read);
+    
+    size_t contiguous_space = rbuf->size - rbuf->read;
+    if(data_size <= contiguous_space)
+    {
+        MEMORY_COPY(out_data, rbuf->base + rbuf->read, data_size);
+    }
+    else
+    {
+        size_t overhead = rbuf->read + data_size - rbuf->size;
+        MEMORY_COPY(out_data, rbuf->base + rbuf->read, contiguous_space);
+        MEMORY_COPY(out_data + contiguous_space, rbuf->base, overhead);
+    }
+    
+    rbuf->read = (rbuf->read + data_size) % rbuf->size;
+    rbuf->used -= data_size;
+}
+
 
 // STRING
 // ======

@@ -12,11 +12,13 @@ inc_dir="$location/external/include"
 
 # Source files to compile
 platform_src="$location/src/pi_linux_main.cpp"
-sources="$platform_src"
+client_src="$location/src/pi_linux_client_main.cpp"
+server_src="$location/src/pi_linux_server_main.cpp"
 
 external_flags="-pthread"
 
 mkdir -p build
 cd build
 
-g++ $sources -o pi.out $common $warnings $external_flags 
+g++ $client_src -o client.out $common $warnings $external_flags 
+#g++ $server_src -o server.out $common $warnings $external_flags
