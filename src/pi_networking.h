@@ -21,16 +21,8 @@ struct AddressComponents
 struct PacketHeader
 {
     uint16_t sequence;
-    uint8_t reliable;
-    uint16_t ack_sequence;
-    uint8_t ack_reliable;
-};
-
-struct NetSender
-{
-    uint8_t reliable_buffer[1024];
-    uint8_t standard_buffer[1024];
-    
+    uint16_t ack_reliable;
+    uint8_t is_reliable;
 };
 
 // platform agnostic
