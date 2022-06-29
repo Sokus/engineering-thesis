@@ -1,6 +1,11 @@
-# C compilation results
+# compilation results
 *.out
 *.o
+*.obj
+*.exe
+*.pdb
+
+imgui.ini
 
 # user project files
 *.4coder
