@@ -7,5 +7,7 @@
 
 imgui.ini
 
+.vs/
+
 # user project files
 *.4coder

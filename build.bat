@@ -23,7 +23,7 @@ REM C4505      'function' : unreferenced local function has been removed
 REM MSVC LINKER OPTIONS:
 REM /OPT:REF   Eliminates functions and data that are never referenced
 
-SET WarningFlags=/WX /W4 /wd4201 /wd4100 /wd4189 /wd4505
+SET WarningFlags=/W4 /wd4201 /wd4100 /wd4189 /wd4505
 SET DebugFlags=/Od /Z7 /MTd
 REM SET DebugFlags=/O2 /MT
 SET CommonCompilerFlags=/nologo /FC /Oi /GR- /EHa- %WarningFlags% %DebugFlags%
@@ -31,7 +31,7 @@ SET CommonCompilerFlags=/nologo /FC /Oi /GR- /EHa- %WarningFlags% %DebugFlags%
 
 SET CommonLinkerFlags=/SUBSYSTEM:CONSOLE /OPT:REF /LIBPATH:.\ext\SDL2\lib\x86 SDL2.lib SDL2main.lib user32.lib gdi32.lib winmm.lib Shell32.lib opengl32.lib
 
-SET GameSources=src\main.cpp
+SET GameSources=src\win32_main.cpp
 SET GLADSources=ext\glad\src\glad.c
 SET ImGUISources=ext\imgui\backends\imgui_impl_sdl.cpp ext\imgui\backends\imgui_impl_opengl3.cpp ext\imgui\imgui*.cpp
 SET Sources=%GameSources% %GLADSources% %ImGUISources%
@@ -39,7 +39,7 @@ SET Sources=%GameSources% %GLADSources% %ImGUISources%
 SET GLADInclude=/Iext\glad\include
 SET SDLInclude=/Iext\SDL2\include
 SET ImGUIInclude=/Iext\imgui /Iext\imgui\backends
-SET Includes=/Isrc %GLADInclude% %SDLInclude% %ImGUIInclude%
+SET Includes=/Isrc /Iext %GLADInclude% %SDLInclude% %ImGUIInclude%
 
 if not exist obj mkdir obj
 copy .\ext\SDL2\lib\x86\SDL2.dll .\SDL2.dll  >nul
