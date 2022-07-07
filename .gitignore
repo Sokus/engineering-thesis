@@ -5,9 +5,10 @@
 *.exe
 *.pdb
 
+# libraries
 imgui.ini
+/SDL2.dll
 
-.vs/
-
-# user project files
+# project files
 *.4coder
+.vs/
