@@ -161,3 +161,47 @@ EntityProgram CreateEntityProgram(const char *vertex_shader_source,
     result.program_handle = program_handle;
     return result;
 }
+
+class SpecialisedRenderer
+{
+    private:
+    GLsizei vertex_size;
+
+    protected:
+    GLuint vbo, vao, shader_program;
+    GLsizei vbo_capacity;
+
+    void init(GLsizei _vertex_size) 
+    {
+        vertex_size = _vertex_size;
+
+        glGenBuffers(1, &vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        vbo_capacity = 128;
+        glBufferData(GL_ARRAY_BUFFER, vbo_capacity * vertex_size, nullptr, GL_STREAM_DRAW);
+
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+    }
+
+    void ensure_capacity(GLsizei no_vertices)
+    {
+        // Reallocate the VBO if its too small
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        if(vbo_capacity < no_vertices) 
+        {
+            vbo_capacity = MAX(no_vertices, vbo_capacity * 3/2);
+            glBufferData(GL_ARRAY_BUFFER, vbo_capacity*vertex_size, nullptr, GL_STREAM_DRAW);
+        }
+    }
+
+    public:
+
+    void dispose() 
+    {
+        glDeleteProgram(shader_program);
+        glDeleteVertexArrays(1, &vao);
+        glDeleteBuffers(1, &vbo);
+    }
+};

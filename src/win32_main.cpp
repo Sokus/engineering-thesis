@@ -22,6 +22,7 @@
 #include "opengl3_platform.cpp"
 #include "opengl3_lights.cpp"
 #include "opengl3_postprocessing.cpp"
+#include "opengl3_shockwave.cpp"
 
 Texture LoadTextureAtlas(char *path, int tile_width, int tile_height, int channels)
 {
@@ -325,6 +326,9 @@ int main(int, char**)
         LightRenderer lightRenderer;
         lightRenderer.init();
 
+        ShockwaveRenderer shockwaveRenderer;
+        shockwaveRenderer.init();
+
         Framebuffers framebuffers;
         framebuffers.init(screen_width, screen_height);
             
@@ -429,6 +433,17 @@ int main(int, char**)
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffers.draw_fbo);
         glBlitFramebuffer(0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+        // render some shockwaves
+        Shockwave shockwave;
+        float progress =  (SDL_GetTicks() % 500) / 500.0f;
+        shockwave.center = Vec2(50, 25);
+        shockwave.radius = progress * 100;
+        shockwave.scale = 20;
+        shockwave.strength = 20;
+
+        shockwaveRenderer.render(projection_matrix, framebuffers.draw_texture, &shockwave, 1);
+
 
         // GAME CODE ENDS HERE
         

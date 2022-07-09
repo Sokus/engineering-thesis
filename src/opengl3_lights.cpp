@@ -78,7 +78,7 @@ struct Light
     }
 };
 
-class LightRenderer
+class LightRenderer : public SpecialisedRenderer
 {
     private:
 
@@ -88,21 +88,11 @@ class LightRenderer
         Light light;
     };
 
-    GLuint vbo, vao, shader_program;
-    GLsizei vbo_capacity;
-
     public:
 
     void init() 
     {
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        // note: we need to actually create the buffer before calling glVertexAttribPointer
-        vbo_capacity = 128;
-        glBufferData(GL_ARRAY_BUFFER, vbo_capacity * sizeof(Vertex), nullptr, GL_STREAM_DRAW);
-
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
+        SpecialisedRenderer::init(sizeof(Vertex));
 
         glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof(Vertex), (const void *) offsetof(Vertex, position));
         glVertexAttribPointer(1, 2, GL_FLOAT, false, sizeof(Vertex), (const void *) (offsetof(Vertex, light) + offsetof(Light, position)));
@@ -117,25 +107,10 @@ class LightRenderer
         shader_program = CreateProgramFromFiles("./res/shaders/omni.vs", "./res/shaders/omni.fs");
     }
 
-    void dispose() 
-    {
-        glDeleteProgram(shader_program);
-        glDeleteVertexArrays(1, &vao);
-        glDeleteBuffers(1, &vbo);
-    }
-
     void render(const mat4 &view_projection, const Light *lights, int count) 
     {
         constexpr int vertices_per_light = 6;
-        GLsizei no_vertices = vertices_per_light * count;
-
-        // Reallocate the VBO if its too small
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        if(vbo_capacity < no_vertices) 
-        {
-            vbo_capacity = MAX(no_vertices, vbo_capacity * 3/2);
-            glBufferData(GL_ARRAY_BUFFER, vbo_capacity*sizeof(Vertex), nullptr, GL_STREAM_DRAW);
-        }
+        ensure_capacity(vertices_per_light * count);
 
         // Fill the VBO
         Vertex *buffer = (Vertex *) glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
