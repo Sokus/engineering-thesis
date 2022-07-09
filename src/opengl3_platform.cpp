@@ -99,10 +99,21 @@ void SetFloatUniform(GLuint program, const char *name, float value)
     glUniform1f(uniform_location, value);
 }
 
+void SetVec2Uniform(GLuint program, const char *name, vec2 value)
+{
+    GLint uniform_location = glGetUniformLocation(program, name);
+    glUniform2f(uniform_location, value.x, value.y);
+}
+
 void SetMat4Uniform(GLuint program, const char *name, const mat4 *matrix)
 {
     GLint uniform_location = glGetUniformLocation(program, name);
     glUniformMatrix4fv(uniform_location, 1, GL_FALSE, &matrix->elements[0][0]);
+}
+void SetFloatArrayUniform(GLuint program, const char *name, const float *array, int count)
+{
+    GLint uniform_location = glGetUniformLocation(program, name);
+    glUniform1fv(uniform_location, count, array);
 }
 
 struct EntityProgram

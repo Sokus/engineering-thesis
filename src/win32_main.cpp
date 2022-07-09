@@ -379,8 +379,8 @@ int main(int, char**)
         glBlendEquation(GL_MAX);
         lightRenderer.render(projection_matrix, &light, 1);
 
-        // Render ingame objects into default framebuffer
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        // Render ingame objects into draw_fbo
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.draw_fbo);
 
         vec3 background_color = ambient_light;
         glClearColor(background_color.r, background_color.g, background_color.b, 1);
@@ -411,6 +411,24 @@ int main(int, char**)
 
         RenderEntity(&entity_program, &texture, player.position.x, player.position.y, playerTileIdx, player.facing == Facing::LEFT);
         //RenderEntity(&entity_program, &texture, 12.0f, 1.0f, 0, false);
+
+        // Apply postprocessing (blur)
+        if(input.keys_down[SDLK_b])
+        {
+            float kernel[15], variance = (SINF(SDL_GetTicks()/200.0f) + 1.001f)*2;
+            int no_passes = 5;
+            init_gaussian_blur_kernel_1d(kernel, ARRAY_SIZE(kernel), variance);
+            ping_pong_blur(
+                kernel, ARRAY_SIZE(kernel), no_passes, 
+                framebuffers.draw_fbo, framebuffers.draw_texture, 
+                framebuffers.buf_fbo, framebuffers.buf_texture
+            );
+        }
+
+        // Blit (copy) postprocessing results into default framebuffer
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffers.draw_fbo);
+        glBlitFramebuffer(0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
         // GAME CODE ENDS HERE
         
