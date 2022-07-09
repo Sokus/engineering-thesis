@@ -20,6 +20,7 @@
 #include "platform.cpp"
 #include "sdl2_platform.cpp"
 #include "opengl3_platform.cpp"
+#include "opengl3_lights.cpp"
 
 Texture LoadTextureAtlas(char *path, int tile_width, int tile_height, int channels)
 {
@@ -199,7 +200,7 @@ void RenderEntity(EntityProgram *entity_program, Texture *texture, float pos_x, 
     glUseProgram(0);
 }
 
-void EntityProgramUpdateView(EntityProgram *entity_program, int screen_width, int screen_height, float scale)
+mat4 CreateProjectionMatrix(int screen_width, int screen_height, float scale)
 {
     mat4 scale_matrix = Scale(Mat4d(1.0f), scale, scale, 1.0f);
     
@@ -214,9 +215,11 @@ void EntityProgramUpdateView(EntityProgram *entity_program, int screen_width, in
                                                 -half_screen_height, half_screen_height,
                                                 -1.0f, 1.0f);
 #endif
-    
-    mat4 camera_to_clip = MultiplyMat4(orthographic_projection, scale_matrix);
-    
+    return MultiplyMat4(orthographic_projection, scale_matrix);
+}
+
+void EntityProgramUpdateView(EntityProgram *entity_program, const mat4 &camera_to_clip)
+{  
     glUseProgram(entity_program->program_handle);
     SetMat4Uniform(entity_program->program_handle, "u_camera_to_clip", &camera_to_clip);
     glUseProgram(0);
@@ -273,7 +276,7 @@ struct Player
 
 const float Player::move_speed = 1.5f;
 const float Player::jump_speed = 3.0f;
-const float Player::gravitational_acceleration = 0.1;
+const float Player::gravitational_acceleration = 0.1f;
 
 int main(int, char**)
 {
@@ -315,6 +318,9 @@ int main(int, char**)
             Win32_FreeFileMemory(&vertex_shader_file);
             Win32_FreeFileMemory(&fragment_shader_file);
         }
+
+        LightRenderer lightRenderer;
+        lightRenderer.init();
             
         Texture texture = LoadTextureAtlas("./res/character.png", 16, 24, 4);
             
@@ -342,7 +348,8 @@ int main(int, char**)
         player.control(input);
         player.update();
         
-        EntityProgramUpdateView(&entity_program, screen_width, screen_height, 4.0f);
+        const mat4 projection_matrix = CreateProjectionMatrix(screen_width, screen_height, 4.0f);
+        EntityProgramUpdateView(&entity_program, projection_matrix);
 
         int playerTileIdx;
         if(!player.is_standing_on_ground())
@@ -354,10 +361,16 @@ int main(int, char**)
         else
             // Player is moving
             playerTileIdx = (player.lifetime / 10) % 4 + 8;
-        
+
         RenderEntity(&entity_program, &texture, player.position.x, player.position.y, playerTileIdx, player.facing == Facing::LEFT);
         //RenderEntity(&entity_program, &texture, 12.0f, 1.0f, 0, false);
+
+        Light light;
+        light.position = Vec2(0,0);
+        light.color = Vec3(0.5f, 0.5f, 0.25f);
+        light.attenuation = Vec4(0.001, 0.1, 1, 0.1);
         
+        lightRenderer.render(projection_matrix, &light, 1);
         // GAME CODE ENDS HERE
         
         ImGui::Render();

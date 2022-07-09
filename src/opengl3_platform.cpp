@@ -81,25 +81,25 @@ GLuint CreateProgramFromFiles(
     return result;
 }
 
-void SetBoolUniform(GLuint program, char *name, bool value)
+void SetBoolUniform(GLuint program, const char *name, bool value)
 {
     GLint uniform_location = glGetUniformLocation(program, name);
     glUniform1i(uniform_location, (int)value);
 }
 
-void SetIntUniform(GLuint program, char *name, int value)
+void SetIntUniform(GLuint program, const char *name, int value)
 {
     GLint uniform_location = glGetUniformLocation(program, name);
     glUniform1i(uniform_location, value);
 }
 
-void SetFloatUniform(GLuint program, char *name, float value)
+void SetFloatUniform(GLuint program, const char *name, float value)
 {
     GLint uniform_location = glGetUniformLocation(program, name);
     glUniform1f(uniform_location, value);
 }
 
-void SetMat4Uniform(GLuint program, char *name, mat4 *matrix)
+void SetMat4Uniform(GLuint program, const char *name, const mat4 *matrix)
 {
     GLint uniform_location = glGetUniformLocation(program, name);
     glUniformMatrix4fv(uniform_location, 1, GL_FALSE, &matrix->elements[0][0]);
