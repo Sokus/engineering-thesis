@@ -368,7 +368,7 @@ int main(int, char**)
         Light light;
         light.position = Vec2(0,0);
         light.color = Vec3(0.5f, 0.5f, 0.25f);
-        light.attenuation = Vec4(0.001, 0.1, 1, 0.1);
+        light.set_range(30);
         
         lightRenderer.render(projection_matrix, &light, 1);
         // GAME CODE ENDS HERE

@@ -1,20 +1,3 @@
-struct Light
-{
-    vec2 position;
-    vec3 color;
-    /* Formula for light intensity:
-       max(0, color / (k_quadratic*d*d + k_linear*d + k_const) - k_bias)
-       where d=distance from center
-    */
-    union
-    {
-        vec4 attenuation;
-        struct {
-            float k_quadratic, k_linear, k_const, k_bias;
-        };
-    };
-};
-
 /* Solves a quadratic equation
  *  
  * a,b,c - coefficients of the equation
@@ -54,6 +37,46 @@ int solve_quadratic(float a, float b, float c, float *x1, float *x2)
     }
     else return 0;
 }
+
+struct Light
+{
+    vec2 position = Vec2(0,0);
+    vec3 color = Vec3(1,1,1);
+    /* Formula for light intensity:
+       max(0, color / (k_quadratic*d*d + k_linear*d + k_const) - k_bias)
+       where d=distance from center
+    */
+    union
+    {
+        vec4 attenuation = Vec4(6,3,1,0.1f);
+        struct {
+            float k_quadratic, k_linear, k_const, k_bias;
+        };
+    };
+
+    float get_range() const 
+    {
+        float brightest_component = MAX(MAX(color.r, color.g), color.b);
+        float range;
+        if(!solve_quadratic(
+            k_quadratic * k_bias,
+            k_linear * k_bias,
+            k_const * k_bias - brightest_component,
+            nullptr, &range
+        )) range = -1;
+        return range;
+    }
+
+    void set_range(float new_range)
+    {
+        float ratio = new_range / get_range();
+        if(ratio >= 0)
+        {
+            k_quadratic /= ratio*ratio;
+            k_linear /= ratio;
+        }
+    }
+};
 
 class LightRenderer
 {
@@ -129,16 +152,7 @@ class LightRenderer
         for(int i=0; i<count; ++i) 
         {
             Light light = lights[i];
-            float brightest_component = MAX(MAX(light.color.r, light.color.g), light.color.b);
-            float range;
-
-            // Skip lights for which range can not be calculated
-            if(!solve_quadratic(
-                light.k_quadratic * light.k_bias,
-                light.k_linear * light.k_bias,
-                light.k_const * light.k_bias - brightest_component,
-                nullptr, &range
-            )) continue;
+            float range = light.get_range();
 
             // Skip lights with range <= 0
             if(range <= 0) 
