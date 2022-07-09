@@ -226,11 +226,19 @@ enum class Facing {LEFT, RIGHT};
 
 struct Player
 {
+    static const float move_speed;
+    static const float jump_speed;
+    static const float gravitational_acceleration;
+
     vec2 position = Vec2(0.0f, 0.0f);
     vec2 velocity = Vec2(0.0f, 0.0f);
     int lifetime = 0;
     Facing facing = Facing::RIGHT;
-    static const vec2 max_velocity;
+
+    bool is_standing_on_ground() const 
+    {
+        return position.y <= 1;
+    }
 
     void update()
     {
@@ -238,6 +246,13 @@ struct Player
 
         if(velocity.x < 0) facing = Facing::LEFT;
         if(velocity.x > 0) facing = Facing::RIGHT;
+
+        if(is_standing_on_ground())
+        {
+            velocity.y = MAX(velocity.y, 0);
+            position.y = MAX(position.y, 0);
+        }
+        else velocity.y -= gravitational_acceleration;
         
         ++lifetime;
     }
@@ -245,14 +260,20 @@ struct Player
     void control(const Input &input) 
     {
         vec2 move_dir = Vec2(0.0f, 0.0f);
+        // Left/right movement
         if(input.keys_down[SDLK_a]) move_dir.x -= 1;
         if(input.keys_down[SDLK_d]) move_dir.x += 1;
+        // Jumping
+        if(input.keys_down[SDLK_w] && is_standing_on_ground()) move_dir.y += 1;
 
-        velocity = MultiplyVec2(move_dir, max_velocity);
+        velocity.x = move_speed * move_dir.x;
+        velocity.y += jump_speed * move_dir.y;
     }
 };
 
-const vec2 Player::max_velocity = Vec2(1.0f, 5.0f);
+const float Player::move_speed = 1.5f, 
+const float Player::jump_speed = 3.0f, 
+const float Player::gravitational_acceleration = 0.1;
 
 int main(int, char**)
 {
@@ -324,7 +345,10 @@ int main(int, char**)
         EntityProgramUpdateView(&entity_program, screen_width, screen_height, 4.0f);
 
         int playerTileIdx;
-        if(ABS(player.velocity.x) <= 0.001)
+        if(!player.is_standing_on_ground())
+            // Player is jumping/falling
+            playerTileIdx = 8;
+        else if(ABS(player.velocity.x) <= 0.001)
             // Player isn't moving
             playerTileIdx = (player.lifetime / 10) % 4;
         else
