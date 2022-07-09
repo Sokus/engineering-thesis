@@ -222,6 +222,38 @@ void EntityProgramUpdateView(EntityProgram *entity_program, int screen_width, in
     glUseProgram(0);
 }
 
+enum class Facing {LEFT, RIGHT};
+
+struct Player
+{
+    vec2 position = Vec2(0.0f, 0.0f);
+    vec2 velocity = Vec2(0.0f, 0.0f);
+    int lifetime = 0;
+    Facing facing = Facing::RIGHT;
+    static const vec2 max_velocity;
+
+    void update()
+    {
+        position = AddVec2(position, velocity);
+
+        if(velocity.x < 0) facing = Facing::LEFT;
+        if(velocity.x > 0) facing = Facing::RIGHT;
+        
+        ++lifetime;
+    }
+
+    void control(const Input &input) 
+    {
+        vec2 move_dir = Vec2(0.0f, 0.0f);
+        if(input.keys_down[SDLK_a]) move_dir.x -= 1;
+        if(input.keys_down[SDLK_d]) move_dir.x += 1;
+
+        velocity = MultiplyVec2(move_dir, max_velocity);
+    }
+};
+
+const vec2 Player::max_velocity = Vec2(1.0f, 5.0f);
+
 int main(int, char**)
 {
     bool is_running = false;
@@ -250,7 +282,7 @@ int main(int, char**)
         Input input = CreateInput();
         bool fullscreen = false;
             
-        vec2 player_p = Vec2(0.0f, 0.0f);
+        Player player;
         vec2 camera_p = Vec2(0.0f, 0.0f);
             
         EntityProgram entity_program;
@@ -285,10 +317,21 @@ int main(int, char**)
         // GAME CODE BEGINS HERE
         
         UpdateInput(&input, dt);
+
+        player.control(input);
+        player.update();
         
         EntityProgramUpdateView(&entity_program, screen_width, screen_height, 4.0f);
+
+        int playerTileIdx;
+        if(ABS(player.velocity.x) <= 0.001)
+            // Player isn't moving
+            playerTileIdx = (player.lifetime / 10) % 4;
+        else
+            // Player is moving
+            playerTileIdx = (player.lifetime / 10) % 4 + 8;
         
-        RenderEntity(&entity_program, &texture, 0.0f, 0.0f, 0, false);
+        RenderEntity(&entity_program, &texture, player.position.x, player.position.y, playerTileIdx, player.facing == Facing::LEFT);
         //RenderEntity(&entity_program, &texture, 12.0f, 1.0f, 0, false);
         
         // GAME CODE ENDS HERE
