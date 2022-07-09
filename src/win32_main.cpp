@@ -21,6 +21,7 @@
 #include "sdl2_platform.cpp"
 #include "opengl3_platform.cpp"
 #include "opengl3_lights.cpp"
+#include "opengl3_postprocessing.cpp"
 
 Texture LoadTextureAtlas(char *path, int tile_width, int tile_height, int channels)
 {
@@ -185,12 +186,14 @@ void RenderEntity(EntityProgram *entity_program, Texture *texture, float pos_x, 
     mat4 scale = Scale(Mat4d(1.0f), scale_x, scale_y, 1.0f);
     mat4 model_to_world = Translate(scale, pos_x, pos_y, 0.0f);
     
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture->id);
     glBindVertexArray(entity_program->vao_handle);
     glUseProgram(entity_program->program_handle);
     
     SetMat4Uniform(entity_program->program_handle, "u_model_to_world", &model_to_world);
     SetIntUniform(entity_program->program_handle, "u_layer", layer);
+    SetIntUniform(entity_program->program_handle, "u_textures", 0);
     SetBoolUniform(entity_program->program_handle, "u_flip", flip);
     
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -321,14 +324,25 @@ int main(int, char**)
 
         LightRenderer lightRenderer;
         lightRenderer.init();
+
+        Framebuffers framebuffers;
+        framebuffers.init(screen_width, screen_height);
             
         Texture texture = LoadTextureAtlas("./res/character.png", 16, 24, 4);
             
         while(is_running)
         {
             SDL_GetWindowSize(sdl2_context.window, &screen_width, &screen_height);
+
+            if(
+                screen_width != framebuffers.fbo_width || 
+                screen_height != framebuffers.fbo_height
+            ) {
+                framebuffers.dispose();
+                framebuffers.init(screen_width, screen_height);
+            }
+
             glViewport(0, 0, screen_width, screen_height);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                     
             SDL_Event event;
             while (SDL_PollEvent(&event))
@@ -347,9 +361,42 @@ int main(int, char**)
 
         player.control(input);
         player.update();
-        
+
         const mat4 projection_matrix = CreateProjectionMatrix(screen_width, screen_height, 4.0f);
+
+        // Render lights into light map
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.light_map);
+
+        vec3 ambient_light = Vec3(0.1f, 0.15f, 0.2f);
+        glClearColor(ambient_light.r, ambient_light.g, ambient_light.b, 1);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        Light light;
+        light.position = Vec2(0,0);
+        light.color = Vec3(1, 1, 0.8f);
+        light.set_range(120);
+        
+        glBlendEquation(GL_MAX);
+        lightRenderer.render(projection_matrix, &light, 1);
+
+        // Render ingame objects into default framebuffer
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+        vec3 background_color = ambient_light;
+        glClearColor(background_color.r, background_color.g, background_color.b, 1);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // Render lights again
+        light.color = MultiplyVec3(light.color, Vec3(0.5f, 0.5f, 0.5f));
+        glBlendEquation(GL_FUNC_ADD);
+        lightRenderer.render(projection_matrix, &light, 1);
+        
+        // Render the player
         EntityProgramUpdateView(&entity_program, projection_matrix);
+        glUseProgram(entity_program.program_handle);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, framebuffers.light_map);
+        SetIntUniform(entity_program.program_handle, "light_map", 1);
 
         int playerTileIdx;
         if(!player.is_standing_on_ground())
@@ -365,12 +412,6 @@ int main(int, char**)
         RenderEntity(&entity_program, &texture, player.position.x, player.position.y, playerTileIdx, player.facing == Facing::LEFT);
         //RenderEntity(&entity_program, &texture, 12.0f, 1.0f, 0, false);
 
-        Light light;
-        light.position = Vec2(0,0);
-        light.color = Vec3(0.5f, 0.5f, 0.25f);
-        light.set_range(30);
-        
-        lightRenderer.render(projection_matrix, &light, 1);
         // GAME CODE ENDS HERE
         
         ImGui::Render();
