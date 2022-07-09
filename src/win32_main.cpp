@@ -127,7 +127,7 @@ void Win32_FreeFileMemory(EntireFile *file)
     file->size = 0;
 }
 
-EntireFile Win32_ReadEntireFile(char *filename, bool null_terminate)
+EntireFile Win32_ReadEntireFile(const char *filename, bool null_terminate)
 {
     EntireFile result = {0};
     
@@ -271,8 +271,8 @@ struct Player
     }
 };
 
-const float Player::move_speed = 1.5f, 
-const float Player::jump_speed = 3.0f, 
+const float Player::move_speed = 1.5f;
+const float Player::jump_speed = 3.0f;
 const float Player::gravitational_acceleration = 0.1;
 
 int main(int, char**)

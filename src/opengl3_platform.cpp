@@ -66,6 +66,21 @@ GLuint CreateProgram(const char *vertex_shader_source,
     return program_handle;
 }
 
+GLuint CreateProgramFromFiles(
+    const char *vertex_shader_path,
+    const char *fragment_shader_path
+) {
+    EntireFile vertex_shader_source = Win32_ReadEntireFile(vertex_shader_path, true);
+    EntireFile fragment_shader_source = Win32_ReadEntireFile(fragment_shader_path, true);
+    GLuint result = CreateProgram(
+        (const char*)vertex_shader_source.data, 
+        (const char*)fragment_shader_source.data
+    );
+    Win32_FreeFileMemory(&vertex_shader_source);
+    Win32_FreeFileMemory(&fragment_shader_source);
+    return result;
+}
+
 void SetBoolUniform(GLuint program, char *name, bool value)
 {
     GLint uniform_location = glGetUniformLocation(program, name);

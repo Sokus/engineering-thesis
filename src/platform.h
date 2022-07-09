@@ -19,6 +19,9 @@ typedef struct EntireFile
     unsigned int size;
 } EntireFile;
 
+void Win32_FreeFileMemory(EntireFile *file);
+EntireFile Win32_ReadEntireFile(const char *filename, bool null_terminate);
+
 typedef struct Texture
 {
     bool is_valid;
