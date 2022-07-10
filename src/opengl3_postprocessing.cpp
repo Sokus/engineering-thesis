@@ -38,6 +38,17 @@ GLuint convolution_1d_program()
     return program;
 }
 
+GLuint extract_bright_fragments_program()
+{
+    static GLuint program = 0;
+    if(!program)
+        program = CreateProgramFromFiles(
+            "./res/shaders/postprocessing.vs",
+            "./res/shaders/extract_bright_fragments.fs"
+        );
+    return program;
+}
+
 // Allocates an empty texture with specified dimensions and internal format
 GLuint alloc_texture(int width, int height, GLenum internal_format)
 {
@@ -61,6 +72,10 @@ struct Framebuffers
     GLuint draw_fbo;
     GLuint draw_texture;
 
+    // Fbo used for computing the bloom effect
+    GLuint bloom_fbo;
+    GLuint bloom_texture;
+
     // Buffer fbo (e.g. for ping pong blur)
     GLuint buf_fbo;
     GLuint buf_texture;
@@ -80,6 +95,11 @@ struct Framebuffers
         draw_texture = alloc_texture(width, height, GL_RGBA16F);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, draw_texture, 0);
 
+        glGenFramebuffers(1, &bloom_fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, bloom_fbo);
+        bloom_texture = alloc_texture(width, height, GL_RGBA16F);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bloom_texture, 0);
+
         glGenFramebuffers(1, &buf_fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, buf_fbo);
         buf_texture = alloc_texture(width, height, GL_RGBA16F);
@@ -92,6 +112,9 @@ struct Framebuffers
     {
         glDeleteFramebuffers(1, &buf_fbo);
         glDeleteTextures(1, &buf_texture);
+
+        glDeleteFramebuffers(1, &bloom_fbo);
+        glDeleteTextures(1, &bloom_texture);
 
         glDeleteFramebuffers(1, &draw_fbo);
         glDeleteTextures(1, &draw_texture);

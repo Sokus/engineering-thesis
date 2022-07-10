@@ -377,8 +377,8 @@ int main(int, char**)
 
         Light light;
         light.position = Vec2(0,0);
-        light.color = Vec3(1, 1, 0.8f);
-        light.set_range(120);
+        light.color = Vec3(2, 2, 1.5f);
+        light.set_range(200);
         
         glBlendEquation(GL_MAX);
         lightRenderer.render(projection_matrix, &light, 1);
@@ -391,7 +391,7 @@ int main(int, char**)
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Render lights again
-        light.color = MultiplyVec3(light.color, Vec3(0.5f, 0.5f, 0.5f));
+        light.color = MultiplyVec3(light.color, Vec3(0.15f, 0.15f, 0.15f));
         glBlendEquation(GL_FUNC_ADD);
         lightRenderer.render(projection_matrix, &light, 1);
         
@@ -416,18 +416,39 @@ int main(int, char**)
         RenderEntity(&entity_program, &texture, player.position.x, player.position.y, playerTileIdx, player.facing == Facing::LEFT);
         //RenderEntity(&entity_program, &texture, 12.0f, 1.0f, 0, false);
 
-        // Apply postprocessing (blur)
-        if(input.keys_down[SDLK_b])
-        {
-            float kernel[15], variance = (SINF(SDL_GetTicks()/200.0f) + 1.001f)*2;
-            int no_passes = 5;
-            init_gaussian_blur_kernel_1d(kernel, ARRAY_SIZE(kernel), variance);
-            ping_pong_blur(
-                kernel, ARRAY_SIZE(kernel), no_passes, 
-                framebuffers.draw_fbo, framebuffers.draw_texture, 
-                framebuffers.buf_fbo, framebuffers.buf_texture
-            );
-        }
+        // Extract bright fragments from draw_fbo into bloom_fbo
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.bloom_fbo);
+        glClearColor(0,0,0,1);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glUseProgram(extract_bright_fragments_program());
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, framebuffers.draw_texture);
+        SetIntUniform(extract_bright_fragments_program(), "tex", 0);
+
+        bind_dummy_vao();
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        // Apply blur to bloom_fbo
+        float kernel[15], variance = 5;
+        int no_passes = 5;
+        init_gaussian_blur_kernel_1d(kernel, ARRAY_SIZE(kernel), variance);
+        ping_pong_blur(
+            kernel, ARRAY_SIZE(kernel), no_passes, 
+            framebuffers.bloom_fbo, framebuffers.bloom_texture, 
+            framebuffers.buf_fbo, framebuffers.buf_texture
+        );
+
+        // Apply bloom effect
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.draw_fbo);
+        glUseProgram(identity_program());
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, framebuffers.bloom_texture);
+        SetIntUniform(identity_program(), "tex", 0);
+        bind_dummy_vao();
+        glBlendFunc(GL_ONE, GL_ONE);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // Blit (copy) postprocessing results into default framebuffer
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
