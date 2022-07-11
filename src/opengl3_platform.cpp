@@ -66,10 +66,9 @@ GLuint CreateProgram(const char *vertex_shader_source,
     return program_handle;
 }
 
-GLuint CreateProgramFromFiles(
-    const char *vertex_shader_path,
-    const char *fragment_shader_path
-) {
+GLuint CreateProgramFromFiles(const char *vertex_shader_path,
+                              const char *fragment_shader_path)
+{
     EntireFile vertex_shader_source = Win32_ReadEntireFile(vertex_shader_path, true);
     EntireFile fragment_shader_source = Win32_ReadEntireFile(fragment_shader_path, true);
     GLuint result = CreateProgram(
@@ -174,7 +173,7 @@ EntityProgram CreateEntityProgram(const char *vertex_shader_source,
     
     GLuint program_handle = CreateProgram(vertex_shader_source, fragment_shader_source);
     
-     EntityProgram result = {0};
+    EntityProgram result = {0};
     result.vao_handle = vao_handle;
     result.vbo_handle = vbo_handle;
     result.program_handle = program_handle;

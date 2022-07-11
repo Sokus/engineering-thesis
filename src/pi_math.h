@@ -805,4 +805,110 @@ mat4 LookAt(vec3 eye, vec3 center, vec3 up)
     return result;
 }
 
+#ifdef __cplusplus
+
+vec2 operator+(vec2 a, vec2 b) { return AddVec2(a, b); }
+vec3 operator+(vec3 a, vec3 b) { return AddVec3(a, b); }
+vec4 operator+(vec4 a, vec4 b) { return AddVec4(a, b); }
+mat4 operator+(mat4 a, mat4 b) { return AddMat4(a, b); }
+
+vec2 operator-(vec2 a, vec2 b) { return SubtractVec2(a, b); }
+vec3 operator-(vec3 a, vec3 b) { return SubtractVec3(a, b); }
+vec4 operator-(vec4 a, vec4 b) { return SubtractVec4(a, b); }
+mat4 operator-(mat4 a, mat4 b) { return SubtractMat4(a, b); }
+
+vec2 operator*(vec2 a, vec2 b) { return MultiplyVec2(a, b); }
+vec3 operator*(vec3 a, vec3 b) { return MultiplyVec3(a, b); }
+vec4 operator*(vec4 a, vec4 b) { return MultiplyVec4(a, b); }
+mat4 operator*(mat4 a, mat4 b) { return MultiplyMat4(a, b); }
+
+vec2 operator*(vec2 a, float b) { return MultiplyVec2f(a, b); }
+vec3 operator*(vec3 a, float b) { return MultiplyVec3f(a, b); }
+vec4 operator*(vec4 a, float b) { return MultiplyVec4f(a, b); }
+mat4 operator*(mat4 a, float b) { return MultiplyMat4f(a, b); }
+
+vec2 operator*(float a, vec2 b) { return MultiplyVec2f(b, a); }
+vec3 operator*(float a, vec3 b) { return MultiplyVec3f(b, a); }
+vec4 operator*(float a, vec4 b) { return MultiplyVec4f(b, a); }
+mat4 operator*(float a, mat4 b) { return MultiplyMat4f(b, a); }
+
+vec2 operator/(vec2 a, vec2 b) { return DivideVec2(a, b); }
+vec3 operator/(vec3 a, vec3 b) { return DivideVec3(a, b); }
+vec4 operator/(vec4 a, vec4 b) { return DivideVec4(a, b); }
+
+vec2 operator/(vec2 a, float b) { return DivideVec2f(a, b); }
+vec3 operator/(vec3 a, float b) { return DivideVec3f(a, b); }
+vec4 operator/(vec4 a, float b) { return DivideVec4f(a, b); }
+mat4 operator/(mat4 a, float b) { return DivideMat4f(a, b); }
+
+vec2 operator/(float a, vec2 b) { return DivideVec2f(b, a); }
+vec3 operator/(float a, vec3 b) { return DivideVec3f(b, a); }
+vec4 operator/(float a, vec4 b) { return DivideVec4f(b, a); }
+mat4 operator/(float a, mat4 b) { return DivideMat4f(b, a); }
+
+vec2 &operator+=(vec2 &a, vec2 b) { return (a = a + b); }
+vec3 &operator+=(vec3 &a, vec3 b) { return (a = a + b); }
+vec4 &operator+=(vec4 &a, vec4 b) { return (a = a + b); }
+mat4 &operator+=(mat4 &a, mat4 b) { return (a = a + b); }
+
+vec2 &operator-=(vec2 &a, vec2 b) { return (a = a - b); }
+vec3 &operator-=(vec3 &a, vec3 b) { return (a = a - b); }
+vec4 &operator-=(vec4 &a, vec4 b) { return (a = a - b); }
+mat4 &operator-=(mat4 &a, mat4 b) { return (a = a - b); }
+
+vec2 &operator*=(vec2 &a, vec2 b) { return (a = a * b); }
+vec3 &operator*=(vec3 &a, vec3 b) { return (a = a * b); }
+vec4 &operator*=(vec4 &a, vec4 b) { return (a = a * b); }
+
+vec2 &operator*=(vec2 &a, float b) { return (a = a * b); }
+vec3 &operator*=(vec3 &a, float b) { return (a = a * b); }
+vec4 &operator*=(vec4 &a, float b) { return (a = a * b); }
+mat4 &operator*=(mat4 &a, float b) { return (a = a * b); }
+
+vec2 &operator/=(vec2 &a, vec2 b) { return (a = a / b); }
+vec3 &operator/=(vec3 &a, vec3 b) { return (a = a / b); }
+vec4 &operator/=(vec4 &a, vec4 b) { return (a = a / b); }
+
+vec2 &operator/=(vec2 &a, float b) { return (a = a / b); }
+vec3 &operator/=(vec3 &a, float b) { return (a = a / b); }
+vec4 &operator/=(vec4 &a, float b) { return (a = a / b); }
+mat4 &operator/=(mat4 &a, float b) { return (a = a / b); }
+
+bool operator==(vec2 a, vec2 b) { return EqualsVec2(a, b); }
+bool operator==(vec3 a, vec3 b) { return EqualsVec3(a, b); }
+bool operator==(vec4 a, vec4 b) { return EqualsVec4(a, b); }
+
+bool operator!=(vec2 a, vec2 b) { return !EqualsVec2(a, b); }
+bool operator!=(vec3 a, vec3 b) { return !EqualsVec3(a, b); }
+bool operator!=(vec4 a, vec4 b) { return !EqualsVec4(a, b); }
+
+vec2 operator-(vec2 a)
+{
+	vec2 result;
+	result.x = -a.x;
+	result.y = -a.y;
+	return result;
+}
+
+vec3 operator-(vec3 a)
+{
+	vec3 result;
+	result.x = -a.x;
+	result.y = -a.y;
+	result.z = -a.z;
+	return result;
+}
+
+vec4 operator-(vec4 a)
+{
+	vec4 result;
+	result.x = -a.x;
+	result.y = -a.y;
+	result.z = -a.z;
+	result.w = -a.w;
+	return result;
+}
+
+#endif // __cplusplus
+
 #endif //PI_MATH_H
