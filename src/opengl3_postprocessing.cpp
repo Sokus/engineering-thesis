@@ -13,41 +13,23 @@ void bind_dummy_vao()
 
    Might be useful for debugging or when used with blending.
 */
-GLuint identity_program()
-{
-    static GLuint program = 0;
-    if(!program)
-        program = CreateProgramFromFiles(
-            "./res/shaders/postprocessing.vs", 
-            "./res/shaders/identity.fs"
-        );
-    return program;
-}
+LazyProgram identity_program(
+    "./res/shaders/postprocessing.vs", 
+    "./res/shaders/identity.fs"
+);
 
 /* Postprocessing program which applies a 1D convolution filter
    over the source texture.
 */
-GLuint convolution_1d_program()
-{
-    static GLuint program = 0;
-    if(!program)
-        program = CreateProgramFromFiles(
-            "./res/shaders/postprocessing.vs", 
-            "./res/shaders/convolution_1d.fs"
-        );
-    return program;
-}
+LazyProgram convolution_1d_program(
+    "./res/shaders/postprocessing.vs", 
+    "./res/shaders/convolution_1d.fs"
+);
 
-GLuint extract_bright_fragments_program()
-{
-    static GLuint program = 0;
-    if(!program)
-        program = CreateProgramFromFiles(
-            "./res/shaders/postprocessing.vs",
-            "./res/shaders/extract_bright_fragments.fs"
-        );
-    return program;
-}
+LazyProgram extract_bright_fragments_program(
+    "./res/shaders/postprocessing.vs",
+    "./res/shaders/extract_bright_fragments.fs"
+);
 
 // Allocates an empty texture with specified dimensions and internal format
 GLuint alloc_texture(int width, int height, GLenum internal_format)
@@ -171,7 +153,7 @@ void ping_pong_blur(
     float ystep = 1.0f / viewport[3];
 
     // Initialize shader program
-    GLuint program = convolution_1d_program();
+    GLuint program = convolution_1d_program;
     glUseProgram(program);
     SetFloatArrayUniform(program, "kernel", kernel, length);
     SetIntUniform(program, "kernel_length", length);

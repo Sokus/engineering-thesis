@@ -421,10 +421,10 @@ int main(int, char**)
         glClearColor(0,0,0,1);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(extract_bright_fragments_program());
+        glUseProgram(extract_bright_fragments_program);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, framebuffers.draw_texture);
-        SetIntUniform(extract_bright_fragments_program(), "tex", 0);
+        SetIntUniform(extract_bright_fragments_program, "tex", 0);
 
         bind_dummy_vao();
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -441,10 +441,10 @@ int main(int, char**)
 
         // Apply bloom effect
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.draw_fbo);
-        glUseProgram(identity_program());
+        glUseProgram(identity_program);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, framebuffers.bloom_texture);
-        SetIntUniform(identity_program(), "tex", 0);
+        SetIntUniform(identity_program, "tex", 0);
         bind_dummy_vao();
         glBlendFunc(GL_ONE, GL_ONE);
         glDrawArrays(GL_TRIANGLES, 0, 6);
