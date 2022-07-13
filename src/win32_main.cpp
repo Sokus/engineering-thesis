@@ -46,13 +46,12 @@ Texture LoadTextureAtlas(char *path, int tile_width, int tile_height, int channe
                     path);
         }
         
-            GLint format = (channels == 3 ? GL_RGB :
-                            channels == 4 ? GL_RGBA : GL_RGBA);
-                    
-            if(format == 0)
-            {
-            fprintf(stderr, "ERROR: Channels count (%d) not supported! (%s)",
-                    channels, path);
+        GLint format = (channels == 3 ? GL_RGB :
+                        channels == 4 ? GL_RGBA : GL_RGBA);
+        
+        if(format == 0)
+        {
+            fprintf(stderr, "ERROR: Channels count (%d) not supported! (%s)", channels, path);
             stbi_image_free(data);
             return result;
         }
@@ -208,17 +207,11 @@ mat4 CreateProjectionMatrix(int screen_width, int screen_height, float scale)
 {
     mat4 scale_matrix = Scale(Mat4d(1.0f), scale, scale, 1.0f);
     
-    #if 0
-    mat4 orthographic_projection = Orthographic(0.0f, (float)screen_width,
-                                                0.0f, (float)screen_height,
-                                                -1.0f, 1.0f);
-#else
     float half_screen_width = (float)screen_width / 2.0f;
     float half_screen_height = (float)screen_height / 2.0f;
     mat4 orthographic_projection = Orthographic(-half_screen_width, half_screen_width,
                                                 -half_screen_height, half_screen_height,
                                                 -1.0f, 1.0f);
-#endif
     return MultiplyMat4(orthographic_projection, scale_matrix);
 }
 
@@ -236,24 +229,24 @@ struct Player
     static const float move_speed;
     static const float jump_speed;
     static const float gravitational_acceleration;
-
+    
     vec2 position = Vec2(0.0f, 0.0f);
     vec2 velocity = Vec2(0.0f, 0.0f);
     int lifetime = 0;
     Facing facing = Facing::RIGHT;
-
+    
     bool is_standing_on_ground() const 
     {
         return position.y <= 1;
     }
-
+    
     void update()
     {
         position = AddVec2(position, velocity);
-
+        
         if(velocity.x < 0) facing = Facing::LEFT;
         if(velocity.x > 0) facing = Facing::RIGHT;
-
+        
         if(is_standing_on_ground())
         {
             velocity.y = MAX(velocity.y, 0);
@@ -263,7 +256,7 @@ struct Player
         
         ++lifetime;
     }
-
+    
     void control(const Input &input) 
     {
         vec2 move_dir = Vec2(0.0f, 0.0f);
@@ -272,7 +265,7 @@ struct Player
         if(input.keys_down[SDLK_d]) move_dir.x += 1;
         // Jumping
         if(input.keys_down[SDLK_w] && is_standing_on_ground()) move_dir.y += 1;
-
+        
         velocity.x = move_speed * move_dir.x;
         velocity.y += jump_speed * move_dir.y;
     }
@@ -290,91 +283,90 @@ int main(int, char**)
     
     char *window_title = "Nie patrz mi się na tytuł";
     int screen_width = 960;
-        int screen_height = 640;
-            
-        SDL2_Context sdl2_context = SDL2_CreateContext(window_title, screen_width, screen_height);
-            
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
-        //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-        ImGui::StyleColorsDark();
-            
-        const char *glsl_version = "#version 420";
-        ImGui_ImplSDL2_InitForOpenGL(sdl2_context.window, sdl2_context.gl_context);
-        ImGui_ImplOpenGL3_Init(glsl_version);
-            
-        Uint64 last_counter = SDL_GetPerformanceCounter();
-        is_running = true;
-            
-        Input input = CreateInput();
-        bool fullscreen = false;
-            
-        Player player;
-        vec2 camera_p = Vec2(0.0f, 0.0f);
-            
-        EntityProgram entity_program;
-        {
-            EntireFile vertex_shader_file = Win32_ReadEntireFile("./res/shaders/standard.vs", true);
-            EntireFile fragment_shader_file = Win32_ReadEntireFile("./res/shaders/standard.fs", true);
+    int screen_height = 640;
+    
+    SDL2_Context sdl2_context = SDL2_CreateContext(window_title, screen_width, screen_height);
+    
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    ImGui::StyleColorsDark();
+    
+    const char *glsl_version = "#version 420";
+    ImGui_ImplSDL2_InitForOpenGL(sdl2_context.window, sdl2_context.gl_context);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+    
+    Uint64 last_counter = SDL_GetPerformanceCounter();
+    is_running = true;
+    
+    Input input = CreateInput();
+    bool fullscreen = false;
+    
+    Player player;
+    vec2 camera_p = Vec2(0.0f, 0.0f);
+    
+    EntityProgram entity_program;
+    {
+        EntireFile vertex_shader_file = Win32_ReadEntireFile("./res/shaders/standard.vs", true);
+        EntireFile fragment_shader_file = Win32_ReadEntireFile("./res/shaders/standard.fs", true);
         entity_program = CreateEntityProgram((const char *)vertex_shader_file.data,
                                              (const char *)fragment_shader_file.data);
-            Win32_FreeFileMemory(&vertex_shader_file);
-            Win32_FreeFileMemory(&fragment_shader_file);
-        }
-
-        LightRenderer lightRenderer;
-        lightRenderer.init();
-
-        ShockwaveRenderer shockwaveRenderer;
-        shockwaveRenderer.init();
-
-        Framebuffers framebuffers;
-        framebuffers.init(screen_width, screen_height);
-            
-        Texture texture = LoadTextureAtlas("./res/character.png", 16, 24, 4);
-            
-        while(is_running)
+        Win32_FreeFileMemory(&vertex_shader_file);
+        Win32_FreeFileMemory(&fragment_shader_file);
+    }
+    
+    LightRenderer lightRenderer;
+    lightRenderer.init();
+    
+    ShockwaveRenderer shockwaveRenderer;
+    shockwaveRenderer.init();
+    
+    Framebuffers framebuffers;
+    framebuffers.init(screen_width, screen_height);
+    
+    Texture texture = LoadTextureAtlas("./res/character.png", 16, 24, 4);
+    
+    while(is_running)
+    {
+        SDL_GetWindowSize(sdl2_context.window, &screen_width, &screen_height);
+        
+        if(screen_width != framebuffers.fbo_width || 
+           screen_height != framebuffers.fbo_height)
         {
-            SDL_GetWindowSize(sdl2_context.window, &screen_width, &screen_height);
-
-            if(
-                screen_width != framebuffers.fbo_width || 
-                screen_height != framebuffers.fbo_height
-            ) {
-                framebuffers.dispose();
-                framebuffers.init(screen_width, screen_height);
-            }
-
-            glViewport(0, 0, screen_width, screen_height);
-                    
-            SDL_Event event;
-            while (SDL_PollEvent(&event))
-            {
-                ImGui_ImplSDL2_ProcessEvent(&event);
-                SDL2_ProcessEvent(&event, sdl2_context.window, &input, &is_running, &fullscreen, dt);
-            }
-                    
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplSDL2_NewFrame();
-            ImGui::NewFrame();
+            framebuffers.dispose();
+            framebuffers.init(screen_width, screen_height);
+        }
+        
+        glViewport(0, 0, screen_width, screen_height);
+        
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            ImGui_ImplSDL2_ProcessEvent(&event);
+            SDL2_ProcessEvent(&event, sdl2_context.window, &input, &is_running, &fullscreen, dt);
+        }
+        
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
+        ImGui::NewFrame();
         
         // GAME CODE BEGINS HERE
         
         UpdateInput(&input, dt);
-
+        
         player.control(input);
         player.update();
-
+        
         const mat4 projection_matrix = CreateProjectionMatrix(screen_width, screen_height, 4.0f);
-
+        
         // Render lights into light map
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.light_map);
-
+        
         vec3 ambient_light = Vec3(0.1f, 0.15f, 0.2f);
         glClearColor(ambient_light.r, ambient_light.g, ambient_light.b, 1);
         glClear(GL_COLOR_BUFFER_BIT);
-
+        
         Light light;
         light.position = Vec2(0,0);
         light.color = Vec3(2, 2, 1.5f);
@@ -382,14 +374,14 @@ int main(int, char**)
         
         glBlendEquation(GL_MAX);
         lightRenderer.render(projection_matrix, &light, 1);
-
+        
         // Render ingame objects into draw_fbo
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.draw_fbo);
-
+        
         vec3 background_color = ambient_light;
         glClearColor(background_color.r, background_color.g, background_color.b, 1);
         glClear(GL_COLOR_BUFFER_BIT);
-
+        
         // Render lights again
         light.color = MultiplyVec3(light.color, Vec3(0.15f, 0.15f, 0.15f));
         glBlendEquation(GL_FUNC_ADD);
@@ -401,7 +393,7 @@ int main(int, char**)
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, framebuffers.light_map);
         SetIntUniform(entity_program.program_handle, "light_map", 1);
-
+        
         int playerTileIdx;
         if(!player.is_standing_on_ground())
             // Player is jumping/falling
@@ -412,33 +404,31 @@ int main(int, char**)
         else
             // Player is moving
             playerTileIdx = (player.lifetime / 10) % 4 + 8;
-
+        
         RenderEntity(&entity_program, &texture, player.position.x, player.position.y, playerTileIdx, player.facing == Facing::LEFT);
         //RenderEntity(&entity_program, &texture, 12.0f, 1.0f, 0, false);
-
+        
         // Extract bright fragments from draw_fbo into bloom_fbo
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.bloom_fbo);
         glClearColor(0,0,0,1);
         glClear(GL_COLOR_BUFFER_BIT);
-
+        
         glUseProgram(extract_bright_fragments_program);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, framebuffers.draw_texture);
         SetIntUniform(extract_bright_fragments_program, "tex", 0);
-
+        
         bind_dummy_vao();
         glDrawArrays(GL_TRIANGLES, 0, 6);
-
+        
         // Apply blur to bloom_fbo
         float kernel[15], variance = 5;
         int no_passes = 5;
         init_gaussian_blur_kernel_1d(kernel, ARRAY_SIZE(kernel), variance);
-        ping_pong_blur(
-            kernel, ARRAY_SIZE(kernel), no_passes, 
-            framebuffers.bloom_fbo, framebuffers.bloom_texture, 
-            framebuffers.buf_fbo, framebuffers.buf_texture
-        );
-
+        ping_pong_blur(kernel, ARRAY_SIZE(kernel), no_passes, 
+                       framebuffers.bloom_fbo, framebuffers.bloom_texture, 
+                       framebuffers.buf_fbo, framebuffers.buf_texture);
+        
         // Apply bloom effect
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.draw_fbo);
         glUseProgram(identity_program);
@@ -449,12 +439,12 @@ int main(int, char**)
         glBlendFunc(GL_ONE, GL_ONE);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+        
         // Blit (copy) postprocessing results into default framebuffer
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffers.draw_fbo);
         glBlitFramebuffer(0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
+        
         // render some shockwaves
         Shockwave shockwave;
         float progress =  (SDL_GetTicks() % 500) / 500.0f;
@@ -462,10 +452,10 @@ int main(int, char**)
         shockwave.radius = progress * 100;
         shockwave.scale = 20;
         shockwave.strength = 20;
-
+        
         shockwaveRenderer.render(projection_matrix, framebuffers.draw_texture, &shockwave, 1);
-
-
+        
+        
         // GAME CODE ENDS HERE
         
         ImGui::Render();
@@ -477,12 +467,12 @@ int main(int, char**)
         float work_in_seconds = SDL2_GetSecondsElapsed(last_counter, work_counter);
         if(work_in_seconds < dt)
         {
-            float sec_to_sleep = dt - work_in_seconds;
+		    float sec_to_sleep = dt - work_in_seconds;
             unsigned int ms_to_sleep = (unsigned int)(sec_to_sleep * 1000.0f) + 1;
             SDL_Delay(ms_to_sleep);
         }
         last_counter = SDL_GetPerformanceCounter();
-        }
+    }
     
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
