@@ -7,10 +7,10 @@ add_library(glad::glad ALIAS glad)
 target_include_directories(glad
 	PUBLIC glad/include)
 
-add_library(sdl2 INTERFACE)
-add_library(sdl2::sdl2 ALIAS sdl2)
-target_include_directories(sdl2
-	INTERFACE SDL/include)
+set(SDL_SHARED ON CACHE BOOL "" FORCE)
+set(SDL_STATIC OFF  CACHE BOOL "" FORCE)
+add_subdirectory(SDL EXCLUDE_FROM_ALL)
+find_package(SDL2 REQUIRED)
 
 file(GLOB IMGUI_SRC imgui/imgui*.cpp)
 add_library(imgui
@@ -22,7 +22,7 @@ target_include_directories(imgui
 	PUBLIC
 		imgui
 		imgui/backends)
-target_link_libraries(imgui sdl2::sdl2)
+target_link_libraries(imgui PRIVATE SDL2::SDL2)
 
 add_library(stb INTERFACE)
 add_library(stb::image ALIAS stb)

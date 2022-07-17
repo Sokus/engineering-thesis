@@ -10,6 +10,7 @@
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
 
+#define SDL_MAIN_HANDLED
 #include "SDL.h"
 #include "glad/glad.h"
 #include "SDL_opengl.h"
