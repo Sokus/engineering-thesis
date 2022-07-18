@@ -33,7 +33,8 @@ struct ShockwaveRenderer : public SpecialisedRenderer
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
-        shader_program = CreateProgramFromFiles("./res/shaders/shockwave.vs", "./res/shaders/shockwave.fs");
+        shader_program = CreateProgramFromFiles(RESOURCE_PATH "/shaders/shockwave.vs",
+                                                RESOURCE_PATH "/shaders/shockwave.fs");
     }
 
     void render(const mat4 &view_projection, GLuint src_texture, const Shockwave *shockwaves, int count) 

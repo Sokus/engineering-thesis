@@ -8,9 +8,14 @@ target_include_directories(glad
 	PUBLIC glad/include)
 
 set(SDL_SHARED ON CACHE BOOL "" FORCE)
-set(SDL_STATIC OFF  CACHE BOOL "" FORCE)
+set(SDL_STATIC OFF CACHE BOOL "" FORCE)
 add_subdirectory(SDL EXCLUDE_FROM_ALL)
 find_package(SDL2 REQUIRED)
+
+if(SDL_SHARED)
+install(TARGETS SDL2
+		DESTINATION "${CMAKE_INSTALL_PREFIX}")
+endif()
 
 file(GLOB IMGUI_SRC imgui/imgui*.cpp)
 add_library(imgui
