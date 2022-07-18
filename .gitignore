@@ -4,6 +4,7 @@
 *.obj
 *.exe
 *.pdb
+build/
 
 # libraries
 imgui.ini

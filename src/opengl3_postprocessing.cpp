@@ -14,21 +14,21 @@ void bind_dummy_vao()
    Might be useful for debugging or when used with blending.
 */
 LazyProgram identity_program(
-    "./res/shaders/postprocessing.vs", 
-    "./res/shaders/identity.fs"
+    RESOURCE_PATH "/shaders/postprocessing.vs", 
+    RESOURCE_PATH "/shaders/identity.fs"
 );
 
 /* Postprocessing program which applies a 1D convolution filter
    over the source texture.
 */
 LazyProgram convolution_1d_program(
-    "./res/shaders/postprocessing.vs", 
-    "./res/shaders/convolution_1d.fs"
+    RESOURCE_PATH "/shaders/postprocessing.vs", 
+    RESOURCE_PATH "/shaders/convolution_1d.fs"
 );
 
 LazyProgram extract_bright_fragments_program(
-    "./res/shaders/postprocessing.vs",
-    "./res/shaders/extract_bright_fragments.fs"
+    RESOURCE_PATH "/shaders/postprocessing.vs",
+    RESOURCE_PATH "/shaders/extract_bright_fragments.fs"
 );
 
 // Allocates an empty texture with specified dimensions and internal format

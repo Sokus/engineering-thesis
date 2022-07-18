@@ -104,7 +104,8 @@ class LightRenderer : public SpecialisedRenderer
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
-        shader_program = CreateProgramFromFiles("./res/shaders/omni.vs", "./res/shaders/omni.fs");
+        shader_program = CreateProgramFromFiles(RESOURCE_PATH "/shaders/omni.vs",
+                                                RESOURCE_PATH "/shaders/omni.fs");
     }
 
     void render(const mat4 &view_projection, const Light *lights, int count) 

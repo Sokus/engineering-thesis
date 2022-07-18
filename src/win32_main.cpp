@@ -10,6 +10,7 @@
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
 
+#define SDL_MAIN_HANDLED
 #include "SDL.h"
 #include "glad/glad.h"
 #include "SDL_opengl.h"
@@ -17,6 +18,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 
+#include "config.h"
 #include "platform.cpp"
 #include "sdl2_platform.cpp"
 #include "opengl3_platform.cpp"
@@ -308,8 +310,8 @@ int main(int, char**)
     
     EntityProgram entity_program;
     {
-        EntireFile vertex_shader_file = Win32_ReadEntireFile("./res/shaders/standard.vs", true);
-        EntireFile fragment_shader_file = Win32_ReadEntireFile("./res/shaders/standard.fs", true);
+        EntireFile vertex_shader_file = Win32_ReadEntireFile(RESOURCE_PATH "/shaders/standard.vs", true);
+        EntireFile fragment_shader_file = Win32_ReadEntireFile(RESOURCE_PATH "/shaders/standard.fs", true);
         entity_program = CreateEntityProgram((const char *)vertex_shader_file.data,
                                              (const char *)fragment_shader_file.data);
         Win32_FreeFileMemory(&vertex_shader_file);
@@ -325,7 +327,7 @@ int main(int, char**)
     Framebuffers framebuffers;
     framebuffers.init(screen_width, screen_height);
     
-    Texture texture = LoadTextureAtlas("./res/character.png", 16, 24, 4);
+    Texture texture = LoadTextureAtlas(RESOURCE_PATH "/character.png", 16, 24, 4);
     
     while(is_running)
     {
