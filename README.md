@@ -11,14 +11,14 @@ Dawid Bosy **145396**
 git clone --recursive https://github.com/DawidBosy/PracaInzynierska
 cd PracaInzynierska
 mkdir build && cd build
-cmake ..
+cmake .. -D DISTRIBUTE=OFF
 cmake --build .
 ```
 
 ## Dystrybucja:
 ```sh
 # while in the build directory:
-cmake .. -D USE_INSTALL_RESOURCE_PATH=ON
+cmake .. -D DISTRIBUTE=ON
 cmake --build . --config Release
 cmake --install .
 ```

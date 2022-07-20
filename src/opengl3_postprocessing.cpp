@@ -123,7 +123,9 @@ void init_gaussian_blur_kernel_1d(float *kernel, int length, float variance)
     for(int i=0; i<length; ++i)
     {
         float x = i + offset;
-        kernel[i] = EXPF(-x*x/(2*variance))/SQRTF(2*PI32*variance);
+        float exp = glm::exp(-x*x / (2*variance));
+        float sqrt = glm::sqrt(2 * glm::pi<float>() * variance);
+        kernel[i] = exp / sqrt;
     }
     normalize_kernel_1d(kernel, length);
 }
@@ -179,7 +181,7 @@ void ping_pong_blur(
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, subpass == 0 ? buf_fbo : fbo);
             glClear(GL_COLOR_BUFFER_BIT);
             SetIntUniform(program, "tex", subpass == 0 ? 0 : 1);
-            SetVec2Uniform(program, "sampling_step", Vec2(subpass*xstep, (1-subpass)*ystep));
+            SetVec2Uniform(program, "sampling_step", glm::vec2(subpass*xstep, (1-subpass)*ystep));
             glDrawArrays(GL_TRIANGLES, 0, 6);
         } 
     }

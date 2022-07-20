@@ -8,9 +8,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 # This is Temporary
 set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install")
 
-option(USE_INSTALL_RESOURCE_PATH "Set resource path to install location" OFF)
+option(DISTRIBUTE "Compile for distribution" OFF)
 
-if(USE_INSTALL_RESOURCE_PATH)
+if(DISTRIBUTE)
 	set(RESOURCE_PATH "./res")
 else()
 	set(RESOURCE_PATH "${PROJECT_SOURCE_DIR}/res")
@@ -26,6 +26,7 @@ add_subdirectory(ext)
 target_link_libraries(${PROJECT_NAME}
 	SDL2::SDL2
 	glad::glad
+	glm::glm
 	imgui::imgui
 	stb::image
 )
