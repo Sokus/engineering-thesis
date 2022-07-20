@@ -1,6 +1,6 @@
 struct Shockwave
 {
-    vec2 center; //where the shockwave started
+    glm::vec2 center; //where the shockwave started
     float radius; //distance from center to the current wave position
     float scale; //how wide is the shockwave
     float strength; //how strongly the shockwave distorts the image
@@ -12,7 +12,7 @@ struct ShockwaveRenderer : public SpecialisedRenderer
 
     struct Vertex
     {
-        vec2 position;
+        glm::vec2 position;
         Shockwave shockwave;
     };
 
@@ -37,16 +37,16 @@ struct ShockwaveRenderer : public SpecialisedRenderer
                                                 RESOURCE_PATH "/shaders/shockwave.fs");
     }
 
-    void render(const mat4 &view_projection, GLuint src_texture, const Shockwave *shockwaves, int count) 
+    void render(const glm::mat4 &view_projection, GLuint src_texture, const Shockwave *shockwaves, int count) 
     {
         constexpr int vertices_per_shockwave = 6;
         ensure_capacity(vertices_per_shockwave * count);
 
         Vertex *buffer = (Vertex *) glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
-        vec2 position_lookup[vertices_per_shockwave] = {
-            Vec2(-1,-1), Vec2(1,-1), Vec2(-1,1),
-            Vec2(-1,1), Vec2(1,-1), Vec2(1,1)
+        glm::vec2 position_lookup[vertices_per_shockwave] = {
+            glm::vec2(-1,-1), glm::vec2(1,-1), glm::vec2(-1,1),
+            glm::vec2(-1,1), glm::vec2(1,-1), glm::vec2(1,1)
         };
 
         int no_vertices_written = 0;
@@ -60,7 +60,7 @@ struct ShockwaveRenderer : public SpecialisedRenderer
 
             for(int j=0; j<vertices_per_shockwave; ++j)
             {
-                vec2 vertex_pos = AddVec2(MultiplyVec2(position_lookup[j], Vec2(bounding_circle_radius, bounding_circle_radius)), shockwave.center);
+                glm::vec2 vertex_pos = position_lookup[j] * glm::vec2(bounding_circle_radius) + shockwave.center;
                 buffer[no_vertices_written++] = {vertex_pos, shockwave};
             }
         }
@@ -68,7 +68,7 @@ struct ShockwaveRenderer : public SpecialisedRenderer
 
         glBindVertexArray(vao);
         glUseProgram(shader_program);
-        SetMat4Uniform(shader_program, "view_projection", &view_projection);
+        SetMat4Uniform(shader_program, "view_projection", view_projection);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, src_texture);
         SetIntUniform(shader_program, "tex", 0);

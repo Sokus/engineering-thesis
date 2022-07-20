@@ -1,10 +1,14 @@
 #include "helpers.h"
 #include "platform.h"
-#include "pi_math.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
+
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "glm/exponential.hpp"
+#include "glm/ext/scalar_constants.hpp"
 
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
@@ -185,15 +189,15 @@ void RenderEntity(EntityProgram *entity_program, Texture *texture, float pos_x, 
     
     float scale_x = (float)texture->tile_width;
     float scale_y = (float)texture->tile_height;
-    mat4 scale = Scale(Mat4d(1.0f), scale_x, scale_y, 1.0f);
-    mat4 model_to_world = Translate(scale, pos_x, pos_y, 0.0f);
+    glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(scale_x, scale_y, 1.0f));
+    glm::mat4 model_to_world = glm::translate(scale, glm::vec3(pos_x, pos_y, 0.0f));
     
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture->id);
     glBindVertexArray(entity_program->vao_handle);
     glUseProgram(entity_program->program_handle);
     
-    SetMat4Uniform(entity_program->program_handle, "u_model_to_world", &model_to_world);
+    SetMat4Uniform(entity_program->program_handle, "u_model_to_world", model_to_world);
     SetIntUniform(entity_program->program_handle, "u_layer", layer);
     SetIntUniform(entity_program->program_handle, "u_textures", 0);
     SetBoolUniform(entity_program->program_handle, "u_flip", flip);
@@ -205,22 +209,23 @@ void RenderEntity(EntityProgram *entity_program, Texture *texture, float pos_x, 
     glUseProgram(0);
 }
 
-mat4 CreateProjectionMatrix(int screen_width, int screen_height, float scale)
+glm::mat4 CreateProjectionMatrix(int screen_width, int screen_height, float scale)
 {
-    mat4 scale_matrix = Scale(Mat4d(1.0f), scale, scale, 1.0f);
+    glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, 1.0f));
     
     float half_screen_width = (float)screen_width / 2.0f;
     float half_screen_height = (float)screen_height / 2.0f;
-    mat4 orthographic_projection = Orthographic(-half_screen_width, half_screen_width,
+    glm::mat4 orthographic_projection = glm::ortho(-half_screen_width, half_screen_width,
                                                 -half_screen_height, half_screen_height,
                                                 -1.0f, 1.0f);
-    return MultiplyMat4(orthographic_projection, scale_matrix);
+    glm::mat4 result = orthographic_projection * scale_matrix;
+    return result;
 }
 
-void EntityProgramUpdateView(EntityProgram *entity_program, const mat4 &camera_to_clip)
+void EntityProgramUpdateView(EntityProgram *entity_program, const glm::mat4 &camera_to_clip)
 {  
     glUseProgram(entity_program->program_handle);
-    SetMat4Uniform(entity_program->program_handle, "u_camera_to_clip", &camera_to_clip);
+    SetMat4Uniform(entity_program->program_handle, "u_camera_to_clip", camera_to_clip);
     glUseProgram(0);
 }
 
@@ -232,8 +237,8 @@ struct Player
     static const float jump_speed;
     static const float gravitational_acceleration;
     
-    vec2 position = Vec2(0.0f, 0.0f);
-    vec2 velocity = Vec2(0.0f, 0.0f);
+    glm::vec2 position = glm::vec2(0.0f, 0.0f);
+    glm::vec2 velocity = glm::vec2(0.0f, 0.0f);
     int lifetime = 0;
     Facing facing = Facing::RIGHT;
     
@@ -242,9 +247,9 @@ struct Player
         return position.y <= 1;
     }
     
-    void update()
+    void update(float dt)
     {
-        position = AddVec2(position, velocity);
+        position += velocity * dt;
         
         if(velocity.x < 0) facing = Facing::LEFT;
         if(velocity.x > 0) facing = Facing::RIGHT;
@@ -261,7 +266,7 @@ struct Player
     
     void control(const Input &input) 
     {
-        vec2 move_dir = Vec2(0.0f, 0.0f);
+        glm::vec2 move_dir = glm::vec2(0.0f, 0.0f);
         // Left/right movement
         if(input.keys_down[SDLK_a]) move_dir.x -= 1;
         if(input.keys_down[SDLK_d]) move_dir.x += 1;
@@ -273,7 +278,7 @@ struct Player
     }
 };
 
-const float Player::move_speed = 1.5f;
+const float Player::move_speed = 0.25f;
 const float Player::jump_speed = 3.0f;
 const float Player::gravitational_acceleration = 0.1f;
 
@@ -306,7 +311,7 @@ int main(int, char**)
     bool fullscreen = false;
     
     Player player;
-    vec2 camera_p = Vec2(0.0f, 0.0f);
+    glm::vec2 camera_p = glm::vec2(0.0f, 0.0f);
     
     EntityProgram entity_program;
     {
@@ -358,20 +363,20 @@ int main(int, char**)
         UpdateInput(&input, dt);
         
         player.control(input);
-        player.update();
+        player.update(dt);
         
-        const mat4 projection_matrix = CreateProjectionMatrix(screen_width, screen_height, 4.0f);
+        const glm::mat4 projection_matrix = CreateProjectionMatrix(screen_width, screen_height, 4.0f);
         
         // Render lights into light map
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.light_map);
         
-        vec3 ambient_light = Vec3(0.1f, 0.15f, 0.2f);
+        glm::vec3 ambient_light = glm::vec3(0.1f, 0.15f, 0.2f);
         glClearColor(ambient_light.r, ambient_light.g, ambient_light.b, 1);
         glClear(GL_COLOR_BUFFER_BIT);
         
         Light light;
-        light.position = Vec2(0,0);
-        light.color = Vec3(2, 2, 1.5f);
+        light.position = glm::vec2(0,0);
+        light.color = glm::vec3(2, 2, 1.5f);
         light.set_range(200);
         
         glBlendEquation(GL_MAX);
@@ -380,12 +385,12 @@ int main(int, char**)
         // Render ingame objects into draw_fbo
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.draw_fbo);
         
-        vec3 background_color = ambient_light;
+        glm::vec3 background_color = ambient_light;
         glClearColor(background_color.r, background_color.g, background_color.b, 1);
         glClear(GL_COLOR_BUFFER_BIT);
         
         // Render lights again
-        light.color = MultiplyVec3(light.color, Vec3(0.15f, 0.15f, 0.15f));
+        light.color = 0.15f * light.color;
         glBlendEquation(GL_FUNC_ADD);
         lightRenderer.render(projection_matrix, &light, 1);
         
@@ -450,7 +455,7 @@ int main(int, char**)
         // render some shockwaves
         Shockwave shockwave;
         float progress =  (SDL_GetTicks() % 500) / 500.0f;
-        shockwave.center = Vec2(50, 25);
+        shockwave.center = glm::vec2(50, 25);
         shockwave.radius = progress * 100;
         shockwave.scale = 20;
         shockwave.strength = 20;

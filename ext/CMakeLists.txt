@@ -17,6 +17,8 @@ install(TARGETS SDL2
 		DESTINATION "${CMAKE_INSTALL_PREFIX}")
 endif()
 
+add_subdirectory(glm)
+
 file(GLOB IMGUI_SRC imgui/imgui*.cpp)
 add_library(imgui
 	imgui/backends/imgui_impl_sdl.cpp

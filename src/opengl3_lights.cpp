@@ -40,15 +40,15 @@ int solve_quadratic(float a, float b, float c, float *x1, float *x2)
 
 struct Light
 {
-    vec2 position = Vec2(0,0);
-    vec3 color = Vec3(1,1,1);
+    glm::vec2 position = glm::vec2(0.0f, 0.0f);
+    glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
     /* Formula for light intensity:
        max(0, color / (k_quadratic*d*d + k_linear*d + k_const) - k_bias)
        where d=distance from center
     */
     union
     {
-        vec4 attenuation = Vec4(6,3,1,0.1f);
+        glm::vec4 attenuation = glm::vec4(6.0f, 3.0f, 1.0f, 0.1f);
         struct {
             float k_quadratic, k_linear, k_const, k_bias;
         };
@@ -84,7 +84,7 @@ class LightRenderer : public SpecialisedRenderer
 
     struct Vertex 
     {
-        vec2 position;
+        glm::vec2 position;
         Light light;
     };
 
@@ -108,7 +108,7 @@ class LightRenderer : public SpecialisedRenderer
                                                 RESOURCE_PATH "/shaders/omni.fs");
     }
 
-    void render(const mat4 &view_projection, const Light *lights, int count) 
+    void render(const glm::mat4 &view_projection, const Light *lights, int count) 
     {
         constexpr int vertices_per_light = 6;
         ensure_capacity(vertices_per_light * count);
@@ -119,9 +119,9 @@ class LightRenderer : public SpecialisedRenderer
         // We will render a quad for each light
         // The size of the quad will be determined by the maximum range of the light
         // (how far the light can reach)
-        vec2 position_lookup[vertices_per_light] = {
-            Vec2(-1,-1), Vec2(1,-1), Vec2(-1,1),
-            Vec2(-1,1), Vec2(1,-1), Vec2(1,1)
+        glm::vec2 position_lookup[vertices_per_light] = {
+            glm::vec2(-1,-1), glm::vec2(1,-1), glm::vec2(-1,1),
+            glm::vec2(-1,1), glm::vec2(1,-1), glm::vec2(1,1)
         };
 
         int no_vertices_written = 0;
@@ -136,7 +136,7 @@ class LightRenderer : public SpecialisedRenderer
 
             for(int j=0; j<vertices_per_light; ++j)
             {
-                vec2 vertex_pos = AddVec2(MultiplyVec2(position_lookup[j], Vec2(range, range)), light.position);
+                glm::vec2 vertex_pos = position_lookup[j] * glm::vec2(range) + light.position;
                 buffer[no_vertices_written++] = {vertex_pos, light};
             }
         }
@@ -146,7 +146,7 @@ class LightRenderer : public SpecialisedRenderer
         // Render the lights
         glBindVertexArray(vao);
         glUseProgram(shader_program);
-        SetMat4Uniform(shader_program, "view_projection", &view_projection);
+        SetMat4Uniform(shader_program, "view_projection", view_projection);
         glBlendFunc(GL_ONE, GL_ONE);
         glDrawArrays(GL_TRIANGLES, 0, no_vertices_written);
 
