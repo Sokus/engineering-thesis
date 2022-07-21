@@ -21,7 +21,7 @@ configure_file(src/config.h.in config.h)
 add_executable(${PROJECT_NAME} 	
 	src/win32_main.cpp)
 
-add_subdirectory(ext)
+add_subdirectory(lib)
 
 target_link_libraries(${PROJECT_NAME}
 	SDL2::SDL2

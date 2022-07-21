@@ -13,15 +13,6 @@ typedef struct Input
     float keys_down_duration_previous[INPUT_KEY_COUNT];
 } Input;
 
-typedef struct EntireFile
-{
-    void *data;
-    unsigned int size;
-} EntireFile;
-
-void Win32_FreeFileMemory(EntireFile *file);
-EntireFile Win32_ReadEntireFile(const char *filename, bool null_terminate);
-
 typedef struct Texture
 {
     bool is_valid;
