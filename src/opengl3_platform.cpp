@@ -1,5 +1,7 @@
+#include "os/filesystem.h"
+
 /** Converts a GLenum to a C string.
- * 
+ *
  *  Returns "???" for unknown (or unhandled) GLenums.
  */
 const char *GLenumToCStr(GLenum e)
@@ -15,7 +17,7 @@ const char *GLenumToCStr(GLenum e)
     #undef mkcase
 }
 
-GLuint CreateShader(GLenum type, const char *source) 
+GLuint CreateShader(GLenum type, const char *source)
 {
     int compileStatus, infoLogLength;
 
@@ -26,7 +28,7 @@ GLuint CreateShader(GLenum type, const char *source)
 
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
 
-    if(compileStatus != GL_TRUE) 
+    if(compileStatus != GL_TRUE)
     {
         // Fetch info log if compilation failed
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
@@ -46,7 +48,7 @@ GLuint CreateProgram(const char *vertex_shader_source,
 
     GLuint vertex_shader_handle   = CreateShader(GL_VERTEX_SHADER, vertex_shader_source),
            fragment_shader_handle = CreateShader(GL_FRAGMENT_SHADER, fragment_shader_source);
-    
+
     GLuint program_handle = glCreateProgram();
     glAttachShader(program_handle, vertex_shader_handle);
     glAttachShader(program_handle, fragment_shader_handle);
@@ -57,26 +59,26 @@ GLuint CreateProgram(const char *vertex_shader_source,
         glGetShaderInfoLog(program_handle, 512, 0, info_log);
         fprintf(stderr, "ERROR: (program link) %s\n", info_log);
     }
-    
+
     glDetachShader(program_handle, vertex_shader_handle);
     glDeleteShader(vertex_shader_handle);
     glDetachShader(program_handle, fragment_shader_handle);
     glDeleteShader(fragment_shader_handle);
-    
+
     return program_handle;
 }
 
 GLuint CreateProgramFromFiles(const char *vertex_shader_path,
                               const char *fragment_shader_path)
 {
-    EntireFile vertex_shader_source = Win32_ReadEntireFile(vertex_shader_path, true);
-    EntireFile fragment_shader_source = Win32_ReadEntireFile(fragment_shader_path, true);
+    EntireFile vertex_shader_source = ReadEntireFile(vertex_shader_path, true);
+    EntireFile fragment_shader_source = ReadEntireFile(fragment_shader_path, true);
     GLuint result = CreateProgram(
-        (const char*)vertex_shader_source.data, 
+        (const char*)vertex_shader_source.data,
         (const char*)fragment_shader_source.data
     );
-    Win32_FreeFileMemory(&vertex_shader_source);
-    Win32_FreeFileMemory(&fragment_shader_source);
+    FreeFileMemory(&vertex_shader_source);
+    FreeFileMemory(&fragment_shader_source);
     return result;
 }
 
@@ -148,31 +150,31 @@ EntityProgram CreateEntityProgram(const char *vertex_shader_source,
     glGenVertexArrays(1, &vao_handle);
     glGenBuffers(1, &vbo_handle);
     glBindVertexArray(vao_handle);
-    
+
     float quad_vertices[] =
     {
         // Position, UVs
         0.0f, 0.0f, 0.0f, 0.0f, // lower left
         1.0f, 0.0f, 1.0f, 0.0f,  // rower right
         1.0f, 1.0f, 1.0f, 1.0f,   // upper right
-        
+
         0.0f, 0.0f, 0.0f, 0.0f, // lower right
         1.0f, 1.0f, 1.0f, 1.0f,   // upper right
         0.0f, 1.0f, 0.0f, 1.0f   // upper left
     };
-    
+
     glBindBuffer(GL_ARRAY_BUFFER, vbo_handle);
     glBufferData(GL_ARRAY_BUFFER, sizeof(quad_vertices), quad_vertices, GL_STATIC_DRAW);
-    
+
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2*sizeof(float)));
     glEnableVertexAttribArray(1);
-    
+
     glBindVertexArray(0);
-    
+
     GLuint program_handle = CreateProgram(vertex_shader_source, fragment_shader_source);
-    
+
     EntityProgram result = {0};
     result.vao_handle = vao_handle;
     result.vbo_handle = vbo_handle;
@@ -189,7 +191,7 @@ class SpecialisedRenderer
     GLuint vbo, vao, shader_program;
     GLsizei vbo_capacity;
 
-    void init(GLsizei _vertex_size) 
+    void init(GLsizei _vertex_size)
     {
         vertex_size = _vertex_size;
 
@@ -207,7 +209,7 @@ class SpecialisedRenderer
     {
         // Reallocate the VBO if its too small
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        if(vbo_capacity < no_vertices) 
+        if(vbo_capacity < no_vertices)
         {
             vbo_capacity = MAX(no_vertices, vbo_capacity * 3/2);
             glBufferData(GL_ARRAY_BUFFER, vbo_capacity*vertex_size, nullptr, GL_STREAM_DRAW);
@@ -216,7 +218,7 @@ class SpecialisedRenderer
 
     public:
 
-    void dispose() 
+    void dispose()
     {
         glDeleteProgram(shader_program);
         glDeleteVertexArrays(1, &vao);

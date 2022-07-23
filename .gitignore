@@ -13,3 +13,4 @@ imgui.ini
 # project files
 *.4coder
 .vs/
+.vscode/

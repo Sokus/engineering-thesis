@@ -1,6 +1,9 @@
-#include "os/os.h"
+#include "../filesystem.h"
 
+#include <stdio.h>
 #include <windows.h>
+
+#include "base/base.h"
 
 void FreeFileMemory(EntireFile *file)
 {
@@ -10,13 +13,20 @@ void FreeFileMemory(EntireFile *file)
     file->size = 0;
 }
 
+static unsigned int SafeTruncateU64(unsigned long long int value)
+{
+    ASSERT(value <= 0xFFFFFFFF);
+    unsigned int result = (unsigned int)value;
+    return result;
+}
+
 EntireFile ReadEntireFile(const char *filename, bool null_terminate)
 {
     EntireFile result = {0};
-    
+
     HANDLE file_handle = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ,
                                      0, OPEN_EXISTING, 0, 0);
-    
+
     if(file_handle != INVALID_HANDLE_VALUE)
     {
         LARGE_INTEGER file_size;
@@ -25,7 +35,7 @@ EntireFile ReadEntireFile(const char *filename, bool null_terminate)
             unsigned int size_to_read = SafeTruncateU64(file_size.QuadPart);
             unsigned int total_size = size_to_read;
             if(null_terminate) total_size++;
-            
+
             void *data = VirtualAlloc(0, total_size, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
             if(data)
             {
@@ -54,6 +64,6 @@ EntireFile ReadEntireFile(const char *filename, bool null_terminate)
     {
         fprintf(stderr, "ERROR: Cannot open file %s.\n", filename);
     }
-    
+
     return result;
 }
