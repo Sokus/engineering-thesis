@@ -18,10 +18,14 @@ endif()
 
 configure_file(src/config.h.in config.h)
 
-add_executable(${PROJECT_NAME} 	
-	src/win32_main.cpp)
+file(GLOB WIN32_SRC src/os/win32/win32_*.cpp)
+file(GLOB SDL2_SRC src/os/sdl2/sdl2_*.cpp)
+add_executable(${PROJECT_NAME}
+	src/win32_main.cpp
+	${WIN32_SRC}
+	${SDL2_SRC})
 
-add_subdirectory(ext)
+add_subdirectory(lib)
 
 target_link_libraries(${PROJECT_NAME}
 	SDL2::SDL2
@@ -34,6 +38,7 @@ target_link_libraries(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
 	PRIVATE
 		"${PROJECT_BINARY_DIR}"
+		src
 )
 
 install(TARGETS ${PROJECT_NAME}
