@@ -15,7 +15,7 @@
 
 namespace OS {
 
-SDL2_Context *g_sdl2_ctx = NULL;
+SDL2_Context *g_sdl2_ctx = nullptr;
 
 static void SDL2_SetContext(SDL2_Context *ctx)
 {
@@ -125,6 +125,7 @@ void DestroyContext()
     SDL_DestroyWindow(ctx->window);
     SDL_Quit();
     free(ctx);
+    SDL2_SetContext(nullptr);
 }
 
 void BeginFrame()

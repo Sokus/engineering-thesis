@@ -18,12 +18,18 @@ endif()
 
 configure_file(src/config.h.in config.h)
 
-file(GLOB WIN32_SRC src/os/win32/win32_*.cpp)
+if(WIN32)
+	file(GLOB WIN32_SRC src/os/win32/win32_*.cpp)
+endif()
+
 file(GLOB SDL2_SRC src/os/sdl2/sdl2_*.cpp)
+file(GLOB GFX_SRC src/gfx/opengl3_*.cpp)
 add_executable(${PROJECT_NAME}
 	src/win32_main.cpp
 	${WIN32_SRC}
-	${SDL2_SRC})
+	${SDL2_SRC}
+	${GFX_SRC}
+)
 
 add_subdirectory(lib)
 
