@@ -1,13 +1,15 @@
+#include "base/base.h"
+
 /* Solves a quadratic equation
- *  
+ *
  * a,b,c - coefficients of the equation
  * x1,x2 - pointers used to return the results. May be null.
- * 
+ *
  * If the equation has 1 root, then both x1 and x2 will be set to it.
- * 
+ *
  * If the equation has 2 roots, then x1 will be set to the smaller and x2
  * to the larger root.
- * 
+ *
  * Return value is the number of roots.
  */
 int solve_quadratic(float a, float b, float c, float *x1, float *x2)
@@ -54,7 +56,7 @@ struct Light
         };
     };
 
-    float get_range() const 
+    float get_range() const
     {
         float brightest_component = MAX(MAX(color.r, color.g), color.b);
         float range;
@@ -82,7 +84,7 @@ class LightRenderer : public SpecialisedRenderer
 {
     private:
 
-    struct Vertex 
+    struct Vertex
     {
         glm::vec2 position;
         Light light;
@@ -90,7 +92,7 @@ class LightRenderer : public SpecialisedRenderer
 
     public:
 
-    void init() 
+    void init()
     {
         SpecialisedRenderer::init(sizeof(Vertex));
 
@@ -108,7 +110,7 @@ class LightRenderer : public SpecialisedRenderer
                                                 RESOURCE_PATH "/shaders/omni.fs");
     }
 
-    void render(const glm::mat4 &view_projection, const Light *lights, int count) 
+    void render(const glm::mat4 &view_projection, const Light *lights, int count)
     {
         constexpr int vertices_per_light = 6;
         ensure_capacity(vertices_per_light * count);
@@ -125,13 +127,13 @@ class LightRenderer : public SpecialisedRenderer
         };
 
         int no_vertices_written = 0;
-        for(int i=0; i<count; ++i) 
+        for(int i=0; i<count; ++i)
         {
             Light light = lights[i];
             float range = light.get_range();
 
             // Skip lights with range <= 0
-            if(range <= 0) 
+            if(range <= 0)
                 continue;
 
             for(int j=0; j<vertices_per_light; ++j)

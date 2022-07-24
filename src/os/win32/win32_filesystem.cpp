@@ -13,13 +13,6 @@ void FreeFileMemory(EntireFile *file)
     file->size = 0;
 }
 
-static unsigned int SafeTruncateU64(unsigned long long int value)
-{
-    ASSERT(value <= 0xFFFFFFFF);
-    unsigned int result = (unsigned int)value;
-    return result;
-}
-
 EntireFile ReadEntireFile(const char *filename, bool null_terminate)
 {
     EntireFile result = {0};

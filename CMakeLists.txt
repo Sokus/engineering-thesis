@@ -22,13 +22,15 @@ if(WIN32)
 	file(GLOB WIN32_SRC src/os/win32/win32_*.cpp)
 endif()
 
+file(GLOB BASE_SRC src/base/base_*.cpp)
 file(GLOB SDL2_SRC src/os/sdl2/sdl2_*.cpp)
 file(GLOB GFX_SRC src/gfx/opengl3_*.cpp)
 add_executable(${PROJECT_NAME}
 	src/win32_main.cpp
-	${WIN32_SRC}
+	${BASE_SRC}
 	${SDL2_SRC}
 	${GFX_SRC}
+	${WIN32_SRC}
 )
 
 add_subdirectory(lib)

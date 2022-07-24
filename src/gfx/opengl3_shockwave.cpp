@@ -37,7 +37,7 @@ struct ShockwaveRenderer : public SpecialisedRenderer
                                                 RESOURCE_PATH "/shaders/shockwave.fs");
     }
 
-    void render(const glm::mat4 &view_projection, GLuint src_texture, const Shockwave *shockwaves, int count) 
+    void render(const glm::mat4 &view_projection, GLuint src_texture, const Shockwave *shockwaves, int count)
     {
         constexpr int vertices_per_shockwave = 6;
         ensure_capacity(vertices_per_shockwave * count);
@@ -50,12 +50,12 @@ struct ShockwaveRenderer : public SpecialisedRenderer
         };
 
         int no_vertices_written = 0;
-        for(int i=0; i<count; ++i) 
+        for(int i=0; i<count; ++i)
         {
             Shockwave shockwave = shockwaves[i];
             float bounding_circle_radius = shockwave.radius + 2*shockwave.scale;
 
-            if(bounding_circle_radius <= 0) 
+            if(bounding_circle_radius <= 0)
                 continue;
 
             for(int j=0; j<vertices_per_shockwave; ++j)
