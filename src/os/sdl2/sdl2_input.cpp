@@ -47,10 +47,6 @@ void SDL2_Input::Update(float dt)
     }
 }
 
-// SDL Keycodes:
-// can be represented:    from 0x00 to 0x7F, 0x80 total (128)
-// cannot be represented: 0x40000039 - 0x4000011A, 0xE2 total (226)
-// 128 + 226 = 354
 void SDL2_Input::SetByKeycode(SDL_Keycode keycode, bool value)
 {
     unsigned int index;

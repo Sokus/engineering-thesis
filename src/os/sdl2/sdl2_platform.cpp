@@ -17,20 +17,19 @@ namespace OS {
 
 SDL2_Context *g_sdl2_ctx = nullptr;
 
-static void SDL2_SetContext(SDL2_Context *ctx)
-{
-    // TODO(sokus): Should we do something
-    // with the existing context?
-    g_sdl2_ctx = ctx;
-}
-
+/**
+ * Returns currently set SDL2_Context
+ * Mostly for internal use!
+ */
 SDL2_Context *SDL2_GetContext()
 {
-    // TODO(sokus): Maybe assert that there
-    // actually is a context?
+    ASSERT(g_sdl2_ctx != nullptr);
     return g_sdl2_ctx;
 }
 
+/**
+ * Initializes SDL, creates a window, sets SDL_GL attributes.
+ */
 static void SDL2_InitSDL(SDL2_Context *ctx, const char *window_title, int screen_width, int screen_height)
 {
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
@@ -60,6 +59,10 @@ static void SDL2_InitSDL(SDL2_Context *ctx, const char *window_title, int screen
     ctx->window = window;
 }
 
+/**
+ * Initializes OpenGL for SDL, loads GL functions, sets GL attributes
+ * used throught the program runtime.
+ */
 static void SDL2_InitGL(SDL2_Context *ctx)
 {
     SDL_GLContext gl_context = SDL_GL_CreateContext(ctx->window);
@@ -79,6 +82,9 @@ static void SDL2_InitGL(SDL2_Context *ctx)
     ctx->gl_context = gl_context;
 }
 
+/**
+ * Initializes DearImGui for SDL/OpenGL, sets config flags.
+ */
 static void SDL2_InitImGui(SDL2_Context *ctx)
 {
     IMGUI_CHECKVERSION();
@@ -92,16 +98,25 @@ static void SDL2_InitImGui(SDL2_Context *ctx)
     ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
+/**
+ * Create platform context, create windows, initialize subsystems. It also
+ * sets some default parameters, like window size or target framerates.
+ *
+ * This MUST be called before anything related
+ * to SDL/OpenGL/DearImGui is done.
+ */
 void CreateContext(char* window_title,
                    int screen_width,
                    int screen_height)
 {
     SDL2_Context *ctx = (SDL2_Context *)malloc(sizeof(SDL2_Context));
-    SDL2_SetContext(ctx);
+    g_sdl2_ctx = ctx;
 
     SDL2_InitSDL(ctx, window_title, screen_width, screen_height);
     SDL2_InitGL(ctx);
     SDL2_InitImGui(ctx);
+
+    ctx->input.Init();
 
     ctx->last_performance_counter = SDL_GetPerformanceCounter();
     ctx->is_running = true;
@@ -113,6 +128,9 @@ void CreateContext(char* window_title,
     ctx->dt = 1.0f / target_fps;
 }
 
+/**
+ * Cleanup SDL/OpenGL/DearImGui contexts, called at the end of the program.
+ */
 void DestroyContext()
 {
     SDL2_Context *ctx = SDL2_GetContext();
@@ -125,9 +143,12 @@ void DestroyContext()
     SDL_DestroyWindow(ctx->window);
     SDL_Quit();
     free(ctx);
-    SDL2_SetContext(nullptr);
 }
 
+/**
+ * Poll and process window/io events, update DearImGui, get new
+ * window dimensions if changed, update input state.
+ */
 void BeginFrame()
 {
     SDL2_Context *ctx = SDL2_GetContext();
@@ -136,7 +157,7 @@ void BeginFrame()
     while (SDL_PollEvent(&event))
     {
         ImGui_ImplSDL2_ProcessEvent(&event);
-        ProcessEvent(&event);
+        SDL2_ProcessEvent(&event);
     }
 
     ImGui_ImplOpenGL3_NewFrame();
@@ -153,6 +174,10 @@ void BeginFrame()
     ctx->input.Update(ctx->dt);
 }
 
+/**
+ * Render ImGuiDrawData, swap SDL window backbuffers, check the time spent
+ * on the whole frame and synt to target framerate.
+ */
 void EndFrame()
 {
     SDL2_Context *ctx = SDL2_GetContext();
@@ -174,7 +199,40 @@ void EndFrame()
     ctx->last_performance_counter = SDL_GetPerformanceCounter();
 }
 
-void ProcessEvent(const SDL_Event* event)
+uint64_t GetPerformanceCounter()
+{
+    return SDL_GetPerformanceCounter();
+}
+
+/**
+ * Get seconds elapsed between to performance counter values.
+ */
+float GetSecondsElapsed(uint64_t start_counter, uint64_t end_counter)
+{
+    uint64_t counter_elapsed = end_counter - start_counter;
+    float result = (float)counter_elapsed / (float)SDL_GetPerformanceFrequency();
+    return result;
+}
+
+float DeltaTime()
+{
+    SDL2_Context *ctx = SDL2_GetContext();
+    return ctx->dt;
+}
+
+bool IsRunning()
+{
+    SDL2_Context *ctx = SDL2_GetContext();
+    return ctx->is_running;
+}
+
+void GetWindowDimensions(int *screen_width, int *screen_height)
+{
+    SDL2_Context *ctx = SDL2_GetContext();
+    SDL_GetWindowSize(ctx->window, screen_width, screen_height);
+}
+
+static void SDL2_ProcessEvent(const SDL_Event* event)
 {
     SDL2_Context *ctx = SDL2_GetContext();
 
@@ -229,31 +287,6 @@ void ProcessEvent(const SDL_Event* event)
             }
         } break;
     }
-}
-
-float GetSecondsElapsed(uint64_t start_counter, uint64_t end_counter)
-{
-    uint64_t counter_elapsed = end_counter - start_counter;
-    float result = (float)counter_elapsed / (float)SDL_GetPerformanceFrequency();
-    return result;
-}
-
-float DeltaTime()
-{
-    SDL2_Context *ctx = SDL2_GetContext();
-    return ctx->dt;
-}
-
-bool IsRunning()
-{
-    SDL2_Context *ctx = SDL2_GetContext();
-    return ctx->is_running;
-}
-
-void GetWindowDimensions(int *screen_width, int *screen_height)
-{
-    SDL2_Context *ctx = SDL2_GetContext();
-    SDL_GetWindowSize(ctx->window, screen_width, screen_height);
 }
 
 } // namespace OS
