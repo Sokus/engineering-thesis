@@ -17,14 +17,37 @@ const char *StringifyGLenum(GLenum value)
     #undef STRINGIFY_CASE
 }
 
+GLuint CreateShader(GLenum type, const char *source)
+{
+    int compileStatus, infoLogLength;
+
+    // Attempt to compile shader
+    GLuint shader = glCreateShader(type);
+    glShaderSource(shader, 1, &source, 0);
+    glCompileShader(shader);
+
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+
+    if(compileStatus != GL_TRUE)
+    {
+        // Fetch info log if compilation failed
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        char *infoLog = (char *)malloc(infoLogLength);
+        glGetShaderInfoLog(shader, infoLogLength, &infoLogLength, infoLog);
+        fprintf(stderr, "ERROR: Failed to compile shader (type=%s): %s\n", GLenumToCStr(type), infoLog);
+        free(infoLog);
+    }
+    return shader;
+}
+
 GLuint CreateProgram(const char *vertex_shader_source,
                      const char *fragment_shader_source)
 {
     int success;
     char info_log[512];
 
-    GLuint vertex_shader_handle   = CreateShader(GL_VERTEX_SHADER, vertex_shader_source),
-           fragment_shader_handle = CreateShader(GL_FRAGMENT_SHADER, fragment_shader_source);
+    GLuint vertex_shader_handle = CreateShader(GL_VERTEX_SHADER, vertex_shader_source);
+    GLuint fragment_shader_handle = CreateShader(GL_FRAGMENT_SHADER, fragment_shader_source);
 
     GLuint program_handle = glCreateProgram();
     glAttachShader(program_handle, vertex_shader_handle);

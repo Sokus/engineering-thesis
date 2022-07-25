@@ -3,6 +3,7 @@
 
 const char *StringifyGLenum(GLenum value);
 
+GLuint CreateShader(GLenum type, const char *source);
 GLuint CreateProgram(const char *vertex_shader_source,
                      const char *fragment_shader_source);
 GLuint CreateProgramFromFiles(const char *vertex_shader_path,
