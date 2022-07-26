@@ -1,3 +1,15 @@
+#include <stddef.h>
+
+#include "glad/glad.h"
+#include "glm/glm.hpp"
+#include "glm/exponential.hpp"
+#include "glm/ext/scalar_constants.hpp"
+
+#include "config.h"
+#include "base/base.h"
+#include "gfx/opengl3_lazy_program.h"
+#include "gfx/opengl3_utils.h"
+
 /* Lazily creates an empty VAO
    (we use an empty VAO for postprocessing because
    in this case model is hardcoded into the shader)
@@ -14,7 +26,7 @@ void bind_dummy_vao()
    Might be useful for debugging or when used with blending.
 */
 LazyProgram identity_program(
-    RESOURCE_PATH "/shaders/postprocessing.vs", 
+    RESOURCE_PATH "/shaders/postprocessing.vs",
     RESOURCE_PATH "/shaders/identity.fs"
 );
 
@@ -22,7 +34,7 @@ LazyProgram identity_program(
    over the source texture.
 */
 LazyProgram convolution_1d_program(
-    RESOURCE_PATH "/shaders/postprocessing.vs", 
+    RESOURCE_PATH "/shaders/postprocessing.vs",
     RESOURCE_PATH "/shaders/convolution_1d.fs"
 );
 
@@ -88,7 +100,7 @@ struct Framebuffers
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, buf_texture, 0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }  
+    }
 
     void dispose()
     {
@@ -176,14 +188,14 @@ void ping_pong_blur(
      */
     for(int pass = 0; pass < no_passes; ++pass)
     {
-        for(int subpass = 0; subpass <= 1; ++subpass)  
+        for(int subpass = 0; subpass <= 1; ++subpass)
         {
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, subpass == 0 ? buf_fbo : fbo);
             glClear(GL_COLOR_BUFFER_BIT);
             SetIntUniform(program, "tex", subpass == 0 ? 0 : 1);
             SetVec2Uniform(program, "sampling_step", glm::vec2(subpass*xstep, (1-subpass)*ystep));
             glDrawArrays(GL_TRIANGLES, 0, 6);
-        } 
+        }
     }
     glEnable(GL_BLEND);
 }
