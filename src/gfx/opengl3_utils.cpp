@@ -1,5 +1,13 @@
 #include "opengl3_utils.h"
 
+#include <stdio.h>
+
+#include "glad/glad.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
+#include "os/filesystem.h"
+
 /** Converts a GLenum to a C string.
  *
  *  Returns "???" for unknown (or unhandled) GLenums.
@@ -15,6 +23,19 @@ const char *StringifyGLenum(GLenum value)
         default: return "???";
     }
     #undef STRINGIFY_CASE
+}
+
+glm::mat4 CreateProjectionMatrix(int screen_width, int screen_height, float scale)
+{
+    glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, 1.0f));
+
+    float half_screen_width = (float)screen_width / 2.0f;
+    float half_screen_height = (float)screen_height / 2.0f;
+    glm::mat4 orthographic_projection = glm::ortho(-half_screen_width, half_screen_width,
+                                                -half_screen_height, half_screen_height,
+                                                -1.0f, 1.0f);
+    glm::mat4 result = orthographic_projection * scale_matrix;
+    return result;
 }
 
 GLuint CreateShader(GLenum type, const char *source)
@@ -34,7 +55,7 @@ GLuint CreateShader(GLenum type, const char *source)
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
         char *infoLog = (char *)malloc(infoLogLength);
         glGetShaderInfoLog(shader, infoLogLength, &infoLogLength, infoLog);
-        fprintf(stderr, "ERROR: Failed to compile shader (type=%s): %s\n", GLenumToCStr(type), infoLog);
+        fprintf(stderr, "ERROR: Failed to compile shader (type=%s): %s\n", StringifyGLenum(type), infoLog);
         free(infoLog);
     }
     return shader;

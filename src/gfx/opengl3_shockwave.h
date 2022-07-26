@@ -1,3 +1,11 @@
+#ifndef OPENGL3_SHOCKWAVE_H
+#define OPENGL3_SHOCKWAVE_H
+
+#include "opengl3_specialised_renderer.h"
+
+#include "glad/glad.h"
+#include "glm/glm.hpp"
+
 struct Shockwave
 {
     glm::vec2 center; //where the shockwave started
@@ -20,3 +28,5 @@ struct ShockwaveRenderer : public SpecialisedRenderer
     void render(const glm::mat4 &view_projection, GLuint src_texture,
                 const Shockwave *shockwaves, int count);
 };
+
+#endif // OPENGL3_SHOCKWAVE_H

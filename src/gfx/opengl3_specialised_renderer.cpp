@@ -1,5 +1,9 @@
 #include "opengl3_specialised_renderer.h"
 
+#include "glad/glad.h"
+
+#include "base/base.h"
+
 void SpecialisedRenderer::init(GLsizei _vertex_size)
 {
     vertex_size = _vertex_size;

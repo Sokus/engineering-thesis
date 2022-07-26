@@ -10,9 +10,6 @@
 
 // LIBRARY HEADERS
 #include "glm/glm.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#include "glm/exponential.hpp"
-#include "glm/ext/scalar_constants.hpp"
 
 #include "imgui.h"
 
@@ -24,59 +21,14 @@
 #include "os/input.h"
 #include "os/sdl2/sdl2_platform.h"
 
+#include "gfx/opengl3_utils.h"
 #include "gfx/opengl3_texture.h"
+#include "gfx/opengl3_entity.h"
+#include "gfx/opengl3_shockwave.h"
 
-// SOURCES (TO BE DELETED)
-#include "gfx/opengl3_platform.cpp"
-#include "gfx/opengl3_lights.cpp"
-#include "gfx/opengl3_postprocessing.cpp"
-#include "gfx/opengl3_shockwave.cpp"
+#include "gfx/to_be_deleted/opengl3_lights.cpp"
+#include "gfx/to_be_deleted/opengl3_postprocessing.cpp"
 
-void RenderEntity(EntityProgram *entity_program, Texture *texture, float pos_x, float pos_y, int layer, bool flip)
-{
-    glDisable(GL_DEPTH_TEST);
-
-    float scale_x = (float)texture->tile_width;
-    float scale_y = (float)texture->tile_height;
-    glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(scale_x, scale_y, 1.0f));
-    glm::mat4 model_to_world = glm::translate(scale, glm::vec3(pos_x, pos_y, 0.0f));
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, texture->id);
-    glBindVertexArray(entity_program->vao_handle);
-    glUseProgram(entity_program->program_handle);
-
-    SetMat4Uniform(entity_program->program_handle, "u_model_to_world", model_to_world);
-    SetIntUniform(entity_program->program_handle, "u_layer", layer);
-    SetIntUniform(entity_program->program_handle, "u_textures", 0);
-    SetBoolUniform(entity_program->program_handle, "u_flip", flip);
-
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-    glBindVertexArray(0);
-    glUseProgram(0);
-}
-
-glm::mat4 CreateProjectionMatrix(int screen_width, int screen_height, float scale)
-{
-    glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, 1.0f));
-
-    float half_screen_width = (float)screen_width / 2.0f;
-    float half_screen_height = (float)screen_height / 2.0f;
-    glm::mat4 orthographic_projection = glm::ortho(-half_screen_width, half_screen_width,
-                                                -half_screen_height, half_screen_height,
-                                                -1.0f, 1.0f);
-    glm::mat4 result = orthographic_projection * scale_matrix;
-    return result;
-}
-
-void EntityProgramUpdateView(EntityProgram *entity_program, const glm::mat4 &camera_to_clip)
-{
-    glUseProgram(entity_program->program_handle);
-    SetMat4Uniform(entity_program->program_handle, "u_camera_to_clip", camera_to_clip);
-    glUseProgram(0);
-}
 
 enum class Facing {LEFT, RIGHT};
 
@@ -120,15 +72,11 @@ int main(int, char**)
     Player player;
     glm::vec2 camera_p = glm::vec2(0.0f, 0.0f);
 
-    EntityProgram entity_program;
-    {
-        EntireFile vertex_shader_file = ReadEntireFile(RESOURCE_PATH "/shaders/standard.vs", true);
-        EntireFile fragment_shader_file = ReadEntireFile(RESOURCE_PATH "/shaders/standard.fs", true);
-        entity_program = CreateEntityProgram((const char *)vertex_shader_file.data,
-                                             (const char *)fragment_shader_file.data);
-        FreeFileMemory(&vertex_shader_file);
-        FreeFileMemory(&fragment_shader_file);
-    }
+    Texture texture;
+    texture.Load(RESOURCE_PATH "/character.png", 16, 24, 4);
+
+    EntityRenderer entityRenderer;
+    entityRenderer.init();
 
     LightRenderer lightRenderer;
     lightRenderer.init();
@@ -140,8 +88,6 @@ int main(int, char**)
     Framebuffers framebuffers;
     framebuffers.init(screen_width, screen_height);
 
-    Texture texture;
-    texture.Load(RESOURCE_PATH "/character.png", 16, 24, 4);
 
     while(OS::IsRunning())
     {
@@ -188,11 +134,13 @@ int main(int, char**)
         lightRenderer.render(projection_matrix, &light, 1);
 
         // Render the player
-        EntityProgramUpdateView(&entity_program, projection_matrix);
-        glUseProgram(entity_program.program_handle);
+        entityRenderer.update_view(projection_matrix);
+
+        GLuint TEMPORARY_entity_shader_program = entityRenderer.TEMPORARY_get_shader_program();
+        glUseProgram(TEMPORARY_entity_shader_program);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, framebuffers.light_map);
-        SetIntUniform(entity_program.program_handle, "light_map", 1);
+        SetIntUniform(TEMPORARY_entity_shader_program, "light_map", 1);
 
         int playerTileIdx;
         if(ABS(player.velocity.x) <= 0.001)
@@ -200,8 +148,9 @@ int main(int, char**)
         else
             playerTileIdx = (player.lifetime / 10) % 4 + 8;
 
-        RenderEntity(&entity_program, &texture, player.position.x, player.position.y, playerTileIdx, player.facing == Facing::LEFT);
-        //RenderEntity(&entity_program, &texture, 12.0f, 1.0f, 0, false);
+        entityRenderer.render(player.position.x, player.position.y,
+                              texture, playerTileIdx,
+                              player.facing == Facing::LEFT);
 
         // Extract bright fragments from draw_fbo into bloom_fbo
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.bloom_fbo);

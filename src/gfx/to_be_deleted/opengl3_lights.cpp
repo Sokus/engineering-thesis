@@ -1,4 +1,12 @@
+#include <stddef.h>
+
+#include "glad/glad.h"
+#include "glm/glm.hpp"
+#include "glm/exponential.hpp"
+#include "glm/ext/scalar_constants.hpp"
+
 #include "base/base.h"
+#include "gfx/opengl3_utils.h"
 
 /* Solves a quadratic equation
  *

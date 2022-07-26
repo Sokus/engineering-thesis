@@ -1,6 +1,13 @@
 #include "opengl3_shockwave.h"
-
 #include "opengl3_specialised_renderer.h"
+
+#include <stddef.h>
+
+#include "glad/glad.h"
+#include "glm/glm.hpp"
+
+#include "config.h"
+#include "opengl3_utils.h"
 
 void ShockwaveRenderer::init()
 {

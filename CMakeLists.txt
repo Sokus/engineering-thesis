@@ -25,6 +25,7 @@ endif()
 file(GLOB BASE_SRC src/base/base_*.cpp)
 file(GLOB SDL2_SRC src/os/sdl2/sdl2_*.cpp)
 file(GLOB GFX_SRC src/gfx/opengl3_*.cpp)
+
 add_executable(${PROJECT_NAME}
 	src/win32_main.cpp
 	${BASE_SRC}

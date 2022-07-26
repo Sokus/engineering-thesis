@@ -1,7 +1,11 @@
 #ifndef OPENGL3_UTILS_H
 #define OPENGL3_UTILS_H
 
+#include "glad/glad.h"
+#include "glm/glm.hpp"
+
 const char *StringifyGLenum(GLenum value);
+glm::mat4 CreateProjectionMatrix(int screen_width, int screen_height, float scale);
 
 GLuint CreateShader(GLenum type, const char *source);
 GLuint CreateProgram(const char *vertex_shader_source,

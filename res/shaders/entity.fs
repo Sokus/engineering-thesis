@@ -16,7 +16,7 @@ void main()
     if(flip)
         uv_p.x = uv.x * -1.0f + 1.0f;
     vec3 light = texture(light_map, light_map_uv).rgb;
-    vec4 texel = texture(texture_array, vec3(uv_p, u_layer))
+    vec4 texel = texture(texture_array, vec3(uv_p, layer));
     fragment_color = texel * vec4(light, 1);
     //fragment_color = vec4(0.9f, 0.0f, 1.0f, 1.0f);
 }

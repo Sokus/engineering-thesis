@@ -1,4 +1,14 @@
+#include <stddef.h>
+
+#include "glad/glad.h"
+#include "glm/glm.hpp"
+#include "glm/exponential.hpp"
+#include "glm/ext/scalar_constants.hpp"
+
+#include "config.h"
 #include "base/base.h"
+#include "gfx/opengl3_lazy_program.h"
+#include "gfx/opengl3_utils.h"
 
 /* Lazily creates an empty VAO
    (we use an empty VAO for postprocessing because
