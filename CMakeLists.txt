@@ -27,7 +27,7 @@ file(GLOB SDL2_SRC src/os/sdl2/sdl2_*.cpp)
 file(GLOB GFX_SRC src/gfx/opengl3_*.cpp)
 
 add_executable(${PROJECT_NAME}
-	src/win32_main.cpp
+	src/main.cpp
 	${BASE_SRC}
 	${SDL2_SRC}
 	${GFX_SRC}
