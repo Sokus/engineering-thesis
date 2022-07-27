@@ -1,12 +1,22 @@
 #include "opengl3_utils.h"
 
 #include <stdio.h>
+#include <fstream>
+#include <sstream>
+#include <string>
 
 #include "glad/glad.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
 #include "os/filesystem.h"
+
+std::string ReadText(const char *file_path) {
+    std::ifstream file(file_path);
+    std::stringstream ss;
+    ss << file.rdbuf();
+    return ss.str();
+}
 
 /** Converts a GLenum to a C string.
  *
@@ -92,14 +102,10 @@ GLuint CreateProgram(const char *vertex_shader_source,
 GLuint CreateProgramFromFiles(const char *vertex_shader_path,
                               const char *fragment_shader_path)
 {
-    EntireFile vertex_shader_source = ReadEntireFile(vertex_shader_path, true);
-    EntireFile fragment_shader_source = ReadEntireFile(fragment_shader_path, true);
     GLuint result = CreateProgram(
-        (const char*)vertex_shader_source.data,
-        (const char*)fragment_shader_source.data
+        ReadText(vertex_shader_path).c_str(),
+        ReadText(fragment_shader_path).c_str()
     );
-    FreeFileMemory(&vertex_shader_source);
-    FreeFileMemory(&fragment_shader_source);
     return result;
 }
 
