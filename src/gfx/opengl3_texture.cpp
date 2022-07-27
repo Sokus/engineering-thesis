@@ -11,7 +11,7 @@
 /**
  * Loads an image and stores it as a GL_TEXTURE_2D_ARRAY.
  */
-void Texture::Load(char *path, int tile_width, int tile_height, int force_channels)
+void Texture::Load(const char *path, int tile_width, int tile_height, int force_channels)
 {
     int width, height;
     unsigned char *data = stbi_load(path, &width, &height, 0, force_channels);

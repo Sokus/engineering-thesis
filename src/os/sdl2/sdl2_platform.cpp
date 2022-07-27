@@ -105,7 +105,7 @@ static void SDL2_InitImGui(SDL2_Context *ctx)
  * This MUST be called before anything related
  * to SDL/OpenGL/DearImGui is done.
  */
-void CreateContext(char* window_title,
+void CreateContext(const char* window_title,
                    int screen_width,
                    int screen_height)
 {
