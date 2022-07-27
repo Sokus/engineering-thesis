@@ -25,11 +25,9 @@
 #include "gfx/opengl3_texture.h"
 #include "gfx/opengl3_entity.h"
 #include "gfx/opengl3_shockwave.h"
+#include "gfx/opengl3_lights.h"
+#include "gfx/opengl3_postprocessing.h"
 #include "gfx/opengl3_debug.h"
-
-#include "gfx/to_be_deleted/opengl3_lights.cpp"
-#include "gfx/to_be_deleted/opengl3_postprocessing.cpp"
-
 
 enum class Facing {LEFT, RIGHT};
 
