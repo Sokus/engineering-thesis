@@ -91,7 +91,7 @@ void LightRenderer::init()
                                             RESOURCE_PATH "/shaders/omni.fs");
 }
 
-void LightRenderer::render(const glm::mat4 &view_projection, const Light *lights, int count)
+void LightRenderer::render(const glm::mat4 &view_projection, const Light *lights, int count, float brightness_multiplier)
 {
     constexpr int vertices_per_light = 6;
     ensure_capacity(vertices_per_light * count);
@@ -130,6 +130,7 @@ void LightRenderer::render(const glm::mat4 &view_projection, const Light *lights
     glBindVertexArray(vao);
     glUseProgram(shader_program);
     SetMat4Uniform(shader_program, "view_projection", view_projection);
+    SetFloatUniform(shader_program, "brightness_multiplier", brightness_multiplier);
     glBlendFunc(GL_ONE, GL_ONE);
     glDrawArrays(GL_TRIANGLES, 0, no_vertices_written);
 

@@ -37,7 +37,7 @@ class LightRenderer : public SpecialisedRenderer
     public:
 
     void init();
-    void render(const glm::mat4 &view_projection, const Light *lights, int count);
+    void render(const glm::mat4 &view_projection, const Light *lights, int count, float brightness_multiplier);
 };
 
 #endif
