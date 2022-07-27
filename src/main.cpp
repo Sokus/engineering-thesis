@@ -25,6 +25,7 @@
 #include "gfx/opengl3_texture.h"
 #include "gfx/opengl3_entity.h"
 #include "gfx/opengl3_shockwave.h"
+#include "gfx/opengl3_debug.h"
 
 #include "gfx/to_be_deleted/opengl3_lights.cpp"
 #include "gfx/to_be_deleted/opengl3_postprocessing.cpp"
@@ -67,6 +68,9 @@ const float Player::move_speed = 4.0f;
 int main(int, char**)
 {
     OS::CreateContext("Nie patrz mi sie na tytul", 960, 540);
+    #ifndef NDEBUG
+        EnableThrowOnOpenGLErrors();
+    #endif
 
     int screen_width, screen_height;
     Player player;
