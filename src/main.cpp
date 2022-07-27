@@ -77,7 +77,7 @@ int main(int, char**)
     DrawQueue draw_queue;
 
     OS::GetWindowDimensions(&screen_width, &screen_height);
-    
+
     while(OS::IsRunning())
     {
         OS::BeginFrame();

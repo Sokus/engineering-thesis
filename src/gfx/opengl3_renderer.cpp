@@ -42,23 +42,23 @@ void Renderer::render(const DrawQueue &dq)
     // Render lights into light map
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.light_fbo);
 
-    glClearColor(dq.ambient_light_color.r, dq.ambient_light_color.g, dq.ambient_light_color.b, 1);
+    glClearColor(dq.ambient_light_color.r, dq.ambient_light_color.g, dq.ambient_light_color.b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glBlendEquation(GL_MAX);
-    light_renderer.render(view_projection_matrix, dq.lights.data(), dq.lights.size(), 1);
+    light_renderer.render(view_projection_matrix, dq.lights.data(), (int)dq.lights.size(), 1.0f);
     glBlendEquation(GL_FUNC_ADD);
-    
+
     // Render lights & entities into draw_fbo:
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.draw_fbo);
 
     glClearColor(dq.background_color.r, dq.background_color.g, dq.background_color.b, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    light_renderer.render(view_projection_matrix, dq.lights.data(), dq.lights.size(), 0.15f);
-    entity_renderer.render(view_projection_matrix, dq.entities.data(), dq.entities.size(), framebuffers.light_map);
+    light_renderer.render(view_projection_matrix, dq.lights.data(), (int)dq.lights.size(), 0.15f);
+    entity_renderer.render(view_projection_matrix, dq.entities.data(), (int)dq.entities.size(), framebuffers.light_map);
 
-    
+
     // Extract bright fragments from draw_fbo into bloom_fbo
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.bloom_fbo);
     glClearColor(0,0,0,1);
@@ -83,7 +83,7 @@ void Renderer::render(const DrawQueue &dq)
                     framebuffers.buf_fbo, framebuffers.buf_texture);
 
 
-    
+
     // Apply bloom effect to draw_fbo
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.draw_fbo);
     glUseProgram(identity_program);
@@ -99,10 +99,10 @@ void Renderer::render(const DrawQueue &dq)
 
     // Render shockwaves
     shockwave_renderer.render(
-        view_projection_matrix, 
-        framebuffers.draw_texture, 
-        dq.shockwaves.data(), 
-        dq.shockwaves.size()
+        view_projection_matrix,
+        framebuffers.draw_texture,
+        dq.shockwaves.data(),
+        (int)dq.shockwaves.size()
     );
 
 
