@@ -94,11 +94,7 @@ int main(int, char**)
         draw_queue.SetAmbientLightColor({0.1f, 0.15f, 0.2f});
 
         // Render a light source
-        Light light;
-        light.position = glm::vec2(0,0);
-        light.color = glm::vec3(2, 2, 1.5f);
-        light.set_range(200);
-        draw_queue.AddLight(light);
+        draw_queue.AddLight({0,0}, {2, 2, 1.5f}, 200);
 
         // Render the player
         int playerTileIdx;

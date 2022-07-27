@@ -63,6 +63,15 @@ void DrawQueue::AddLight(const Light &light)
 {
     lights.push_back(light);
 }
+void DrawQueue::AddLight(const glm::vec2 &position, const glm::vec3 color, float range)
+{
+    Light light;
+    light.position = position;
+    light.color = color;
+    light.set_range(range);
+    AddLight(light);
+}
+
 void DrawQueue::AddShockwave(const Shockwave &shockwave)
 {
     shockwaves.push_back(shockwave);

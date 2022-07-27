@@ -34,6 +34,8 @@ class DrawQueue
     const glm::vec3 &GetAmbientLightColor() const;
 
     void AddLight(const Light &light);
+    void AddLight(const glm::vec2 &position, const glm::vec3 color, float range);
+    
     void AddShockwave(const Shockwave &shockwave);
     void AddEntity(glm::vec2 position, const Texture &texture, int layer, bool flip);
 
