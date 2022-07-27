@@ -111,7 +111,7 @@ int main(int, char**)
         const glm::mat4 projection_matrix = CreateProjectionMatrix(screen_width, screen_height, 4.0f);
 
         // Render lights into light map
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.light_map);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.light_fbo);
 
         glm::vec3 ambient_light = glm::vec3(0.1f, 0.15f, 0.2f);
         glClearColor(ambient_light.r, ambient_light.g, ambient_light.b, 1);
