@@ -56,7 +56,7 @@ void EntityRenderer::init()
                                             RESOURCE_PATH "/shaders/entity.fs");
 }
 
-void EntityRenderer::render(float pos_x, float pos_y, const Texture& texture, int layer, bool flip)
+void EntityRenderer::render(const glm::mat4 &view_projection, const Entity *entities, int count, GLuint light_map)
 {
     // TODO: Is this actually neeeded?
     // If it is, find a nicer way to deal with GL_DEPTH_TEST
@@ -64,22 +64,38 @@ void EntityRenderer::render(float pos_x, float pos_y, const Texture& texture, in
     if(depth_test_is_enabled)
         glDisable(GL_DEPTH_TEST);
 
-    float scale_x = (float)texture.tile_width;
-    float scale_y = (float)texture.tile_height;
-    glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(scale_x, scale_y, 1.0f));
-    glm::mat4 model_to_world = glm::translate(scale, glm::vec3(pos_x, pos_y, 0.0f));
-
     glBindVertexArray(vao);
     glUseProgram(shader_program);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, light_map);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, texture.id);
 
-    SetMat4Uniform(shader_program, "model_to_world_projection", model_to_world);
+    SetMat4Uniform(shader_program, "camera_to_clip_projection", view_projection);
     SetIntUniform(shader_program, "texture_array", 0);
-    SetIntUniform(shader_program, "layer", layer);
-    SetBoolUniform(shader_program, "flip", flip);
+    SetIntUniform(shader_program, "light_map", 1);
 
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    GLuint last_texture = 0;
+    for(int i=0; i<count; ++i)
+    {
+        GLuint texture = entities[i].texture->id;
+        if(texture != last_texture)
+        {
+            glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
+            last_texture = texture;
+        }
+
+        SetIntUniform(shader_program, "layer", entities[i].layer);
+        SetBoolUniform(shader_program, "flip", entities[i].flip);
+
+        float scale_x = (float) entities[i].texture->tile_width;
+        float scale_y = (float) entities[i].texture->tile_height;
+        glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(scale_x, scale_y, 1.0f));
+        glm::mat4 model_to_world = glm::translate(scale, glm::vec3(entities[i].position.x, entities[i].position.y, 0.0f));
+        SetMat4Uniform(shader_program, "model_to_world_projection", model_to_world);
+
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
 
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     glBindVertexArray(0);
@@ -87,19 +103,4 @@ void EntityRenderer::render(float pos_x, float pos_y, const Texture& texture, in
 
     if(depth_test_is_enabled)
         glEnable(GL_DEPTH_TEST);
-}
-
-void EntityRenderer::update_view(const glm::mat4 &view_projection)
-{
-    glUseProgram(shader_program);
-    SetMat4Uniform(shader_program, "camera_to_clip_projection", view_projection);
-    glUseProgram(0);
-}
-
-/**
- * This ABSOLUTELY needs to be deleted after cleaning up GFX code.
- */
-GLuint EntityRenderer::TEMPORARY_get_shader_program()
-{
-    return shader_program;
 }

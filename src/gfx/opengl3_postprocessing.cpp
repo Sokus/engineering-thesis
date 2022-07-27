@@ -9,6 +9,7 @@
 #include "base/base.h"
 #include "gfx/opengl3_lazy_program.h"
 #include "gfx/opengl3_utils.h"
+#include "gfx/opengl3_postprocessing.h"
 
 /* Lazily creates an empty VAO
    (we use an empty VAO for postprocessing because
@@ -53,70 +54,49 @@ GLuint alloc_texture(int width, int height, GLenum internal_format)
     return texture_handle;
 }
 
-// All framebuffers (and their textures) used by the application
-struct Framebuffers
+
+void Framebuffers::init(int width, int height)
 {
-    int fbo_width, fbo_height;
+    fbo_width = width;
+    fbo_height = height;
 
-    // Light map
-    GLuint light_fbo;
-    GLuint light_map;
+    glGenFramebuffers(1, &light_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, light_fbo);
+    light_map = alloc_texture(width, height, GL_RGB16F);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, light_map, 0);
 
-    // Main fbo for drawing in-game entities
-    GLuint draw_fbo;
-    GLuint draw_texture;
+    glGenFramebuffers(1, &draw_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, draw_fbo);
+    draw_texture = alloc_texture(width, height, GL_RGBA16F);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, draw_texture, 0);
 
-    // Fbo used for computing the bloom effect
-    GLuint bloom_fbo;
-    GLuint bloom_texture;
+    glGenFramebuffers(1, &bloom_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, bloom_fbo);
+    bloom_texture = alloc_texture(width, height, GL_RGBA16F);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bloom_texture, 0);
 
-    // Buffer fbo (e.g. for ping pong blur)
-    GLuint buf_fbo;
-    GLuint buf_texture;
+    glGenFramebuffers(1, &buf_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, buf_fbo);
+    buf_texture = alloc_texture(width, height, GL_RGBA16F);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, buf_texture, 0);
 
-    void init(int width, int height)
-    {
-        fbo_width = width;
-        fbo_height = height;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
 
-        glGenFramebuffers(1, &light_fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, light_fbo);
-        light_map = alloc_texture(width, height, GL_RGB16F);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, light_map, 0);
+void Framebuffers::dispose()
+{
+    glDeleteFramebuffers(1, &buf_fbo);
+    glDeleteTextures(1, &buf_texture);
 
-        glGenFramebuffers(1, &draw_fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, draw_fbo);
-        draw_texture = alloc_texture(width, height, GL_RGBA16F);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, draw_texture, 0);
+    glDeleteFramebuffers(1, &bloom_fbo);
+    glDeleteTextures(1, &bloom_texture);
 
-        glGenFramebuffers(1, &bloom_fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, bloom_fbo);
-        bloom_texture = alloc_texture(width, height, GL_RGBA16F);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bloom_texture, 0);
+    glDeleteFramebuffers(1, &draw_fbo);
+    glDeleteTextures(1, &draw_texture);
 
-        glGenFramebuffers(1, &buf_fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, buf_fbo);
-        buf_texture = alloc_texture(width, height, GL_RGBA16F);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, buf_texture, 0);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
-
-    void dispose()
-    {
-        glDeleteFramebuffers(1, &buf_fbo);
-        glDeleteTextures(1, &buf_texture);
-
-        glDeleteFramebuffers(1, &bloom_fbo);
-        glDeleteTextures(1, &bloom_texture);
-
-        glDeleteFramebuffers(1, &draw_fbo);
-        glDeleteTextures(1, &draw_texture);
-
-        glDeleteFramebuffers(1, &light_fbo);
-        glDeleteTextures(1, &light_map);
-    }
-};
+    glDeleteFramebuffers(1, &light_fbo);
+    glDeleteTextures(1, &light_map);
+}
 
 // Normalizes a 1d convolution filter kernel so that all elements sum to 1
 void normalize_kernel_1d(float *kernel, int length)

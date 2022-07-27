@@ -14,6 +14,7 @@ if(DISTRIBUTE)
 	set(RESOURCE_PATH "./res")
 else()
 	set(RESOURCE_PATH "${PROJECT_SOURCE_DIR}/res")
+	set(CMAKE_BUILD_TYPE Debug)
 endif()
 
 configure_file(src/config.h.in config.h)

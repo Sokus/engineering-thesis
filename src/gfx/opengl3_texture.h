@@ -17,7 +17,7 @@ struct Texture
     int tile_count_y;
     int tile_count;
 
-    void Load(char *path, int tile_width, int tile_height, int force_channels);
+    void Load(const char *path, int tile_width, int tile_height, int force_channels);
     void Free();
 };
 

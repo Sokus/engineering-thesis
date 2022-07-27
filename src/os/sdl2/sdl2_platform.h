@@ -47,7 +47,7 @@ struct SDL2_Context
 
     SDL2_Input input;
 
-    char *window_title;
+    const char *window_title;
     int screen_width;
     int screen_height;
     bool is_running;
@@ -62,7 +62,7 @@ static void SDL2_InitSDL(SDL2_Context *ctx,
                          int screen_width, int screen_height);
 static void SDL2_InitGL(SDL2_Context *ctx);
 static void SDL2_InitImGui(SDL2_Context *ctx);
-void CreateContext(char *window_title, int screen_width, int screen_height);
+void CreateContext(const char *window_title, int screen_width, int screen_height);
 void DestroyContext();
 void BeginFrame();
 void EndFrame();
