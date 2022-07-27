@@ -48,13 +48,6 @@ class DrawQueue
 
     std::vector<Light> lights;
     std::vector<Shockwave> shockwaves;
-
-    struct Entity {
-        glm::vec2 position; 
-        const Texture *texture;
-        int layer;
-        bool flip;
-    };
     std::vector<Entity> entities;
 
 };

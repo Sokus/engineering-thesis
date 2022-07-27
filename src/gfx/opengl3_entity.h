@@ -8,6 +8,13 @@
 
 #include "opengl3_texture.h"
 
+struct Entity {
+    glm::vec2 position; 
+    const Texture *texture;
+    int layer;
+    bool flip;
+};
+
 struct EntityRenderer : public SpecialisedRenderer
 {
     private:
@@ -19,10 +26,7 @@ struct EntityRenderer : public SpecialisedRenderer
 
     public:
     void init();
-    void render(float pos_x, float pos_y, const Texture& texture, int layer, bool flip);
-    void update_view(const glm::mat4 &view_projection);
-
-    GLuint TEMPORARY_get_shader_program();
+    void render(const glm::mat4 &view_projection, const Entity *entities, int count, GLuint light_map);
 };
 
 #endif // OPENGL3_ENTITY_H

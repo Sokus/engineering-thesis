@@ -47,32 +47,18 @@ void Renderer::render(const DrawQueue &dq)
 
     glBlendEquation(GL_MAX);
     light_renderer.render(view_projection_matrix, dq.lights.data(), dq.lights.size(), 1);
+    glBlendEquation(GL_FUNC_ADD);
     
-
-
-    // Render into draw_fbo:
+    // Render lights & entities into draw_fbo:
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.draw_fbo);
 
     glClearColor(dq.background_color.r, dq.background_color.g, dq.background_color.b, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // - lights:
-    glBlendEquation(GL_FUNC_ADD);
     light_renderer.render(view_projection_matrix, dq.lights.data(), dq.lights.size(), 0.15f);
-
-    // - entities:
-    entity_renderer.update_view(view_projection_matrix);
-    GLuint TEMPORARY_entity_shader_program = entity_renderer.TEMPORARY_get_shader_program();
-    glUseProgram(TEMPORARY_entity_shader_program);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, framebuffers.light_map);
-    SetIntUniform(TEMPORARY_entity_shader_program, "light_map", 1);
-
-    for(const auto &entity : dq.entities)
-        entity_renderer.render(entity.position.x, entity.position.y, *entity.texture, entity.layer, entity.flip);
+    entity_renderer.render(view_projection_matrix, dq.entities.data(), dq.entities.size(), framebuffers.light_map);
 
     
-
     // Extract bright fragments from draw_fbo into bloom_fbo
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.bloom_fbo);
     glClearColor(0,0,0,1);
