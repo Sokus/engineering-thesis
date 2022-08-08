@@ -1,7 +1,7 @@
 #ifndef OPENGL3_LAZY_PROGRAM_H
 #define OPENGL3_LAZY_PROGRAM_H
 
-#include "gfx/opengl3_utils.h"
+#include "opengl3_utils.h"
 
 class LazyProgram
 {

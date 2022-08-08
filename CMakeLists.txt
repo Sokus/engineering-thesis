@@ -11,9 +11,9 @@ option(DISTRIBUTE "Compile for distribution" OFF)
 option(ENABLE_LOG "Enable logging" ON)
 
 if(DISTRIBUTE)
-	set(RESOURCE_PATH "./res")
+	set(RESOURCE_PATH "./resources")
 else()
-	set(RESOURCE_PATH "${PROJECT_SOURCE_DIR}/res")
+	set(RESOURCE_PATH "${PROJECT_SOURCE_DIR}/resources")
 endif()
 
 if(WIN32)
@@ -37,9 +37,9 @@ else()
 endif()
 
 file(GLOB BASE_SRC src/base/base_*.cpp)
-file(GLOB SDL2_SRC src/os/sdl2/sdl2_*.cpp)
-file(GLOB OS_SRC src/os/*.cpp)
-file(GLOB GFX_SRC src/gfx/opengl3_*.cpp)
+file(GLOB SDL2_SRC src/platform/sdl2/sdl2_*.cpp)
+file(GLOB OS_SRC src/platform/*.cpp)
+file(GLOB GFX_SRC src/graphics/opengl3_*.cpp)
 
 add_executable(${PROJECT_NAME}
 	src/main.cpp
@@ -67,5 +67,5 @@ set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install")
 install(TARGETS ${PROJECT_NAME}
 		DESTINATION "${CMAKE_INSTALL_PREFIX}")
 
-install(DIRECTORY res
+install(DIRECTORY resources
 	DESTINATION "${CMAKE_INSTALL_PREFIX}")

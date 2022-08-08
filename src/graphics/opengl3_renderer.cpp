@@ -1,6 +1,6 @@
 #include "opengl3_renderer.h"
 #include "base/base.h"
-#include "os/sdl2/sdl2_platform.h"
+#include "platform/sdl2/sdl2_platform.h"
 
 Renderer::Renderer()
 {

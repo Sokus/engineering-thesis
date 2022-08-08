@@ -8,7 +8,7 @@
 
 #include "base/base.h"
 #include "config.h"
-#include "gfx/opengl3_utils.h"
+#include "opengl3_utils.h"
 
 /* Solves a quadratic equation
  *

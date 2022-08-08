@@ -1,8 +1,8 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include <gfx/opengl3_draw_queue.h>
-#include <gfx/opengl3_postprocessing.h>
+#include "opengl3_draw_queue.h"
+#include "opengl3_postprocessing.h"
 
 class Renderer
 {

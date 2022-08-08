@@ -7,9 +7,9 @@
 
 #include "config.h"
 #include "base/base.h"
-#include "gfx/opengl3_lazy_program.h"
-#include "gfx/opengl3_utils.h"
-#include "gfx/opengl3_postprocessing.h"
+#include "opengl3_lazy_program.h"
+#include "opengl3_utils.h"
+#include "opengl3_postprocessing.h"
 
 /* Lazily creates an empty VAO
    (we use an empty VAO for postprocessing because

@@ -2,11 +2,11 @@
 #define OPENGL3_DRAW_QUEUE
 
 #include <vector>
-#include <glm/glm.hpp>
+#include "glm/glm.hpp"
 
-#include <gfx/opengl3_lights.h>
-#include <gfx/opengl3_shockwave.h>
-#include <gfx/opengl3_entity.h>
+#include "opengl3_lights.h"
+#include "opengl3_shockwave.h"
+#include "opengl3_entity.h"
 
 class DrawQueue
 {
@@ -15,7 +15,7 @@ class DrawQueue
     public:
 
     DrawQueue();
-    
+
     void Clear();
 
     void SetViewportDimensions(const glm::ivec2 &value);
@@ -35,7 +35,7 @@ class DrawQueue
 
     void AddLight(const Light &light);
     void AddLight(const glm::vec2 &position, const glm::vec3 color, float range);
-    
+
     void AddShockwave(const Shockwave &shockwave);
     void AddEntity(glm::vec2 position, const Texture &texture, int layer, bool flip);
 

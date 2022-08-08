@@ -17,13 +17,13 @@
 #include "config.h"
 #include "base/base.h"
 
-#include "os/filesystem.h"
-#include "os/input.h"
-#include "os/sdl2/sdl2_platform.h"
+#include "platform/filesystem.h"
+#include "platform/input.h"
+#include "platform/sdl2/sdl2_platform.h"
 
-#include "gfx/opengl3_renderer.h"
-#include "gfx/opengl3_draw_queue.h"
-#include "gfx/opengl3_debug.h"
+#include "graphics/opengl3_renderer.h"
+#include "graphics/opengl3_draw_queue.h"
+#include "graphics/opengl3_debug.h"
 
 enum class Facing {LEFT, RIGHT};
 

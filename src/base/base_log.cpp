@@ -6,6 +6,8 @@
 #include <stdarg.h> // va_list, va_start(), va_end()
 #include <string.h> // strcpy(), strcat()
 
+#define _CRT_SECURE_NO_WARNINGS
+
 static int g_log_level = LOG_INFO;
 
 void SetLogLevel(int log_level)
