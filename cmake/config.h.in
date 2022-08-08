@@ -1,0 +1,8 @@
+#pragma once
+
+#cmakedefine PLATFORM_WINDOWS
+#cmakedefine PLATFORM_LINUX
+
+#cmakedefine ENABLE_LOG
+
+#cmakedefine RESOURCE_PATH "@RESOURCE_PATH@"

@@ -1,26 +1,39 @@
 cmake_minimum_required (VERSION 3.5)
-project(praca_inzynierska VERSION 0.1.0)
+project(praca_inzynierska)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules/" ${CMAKE_MODULE_PATH})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-# This is Temporary
-set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install")
+add_subdirectory(lib)
 
 option(DISTRIBUTE "Compile for distribution" OFF)
+option(ENABLE_LOG "Enable logging" ON)
 
 if(DISTRIBUTE)
 	set(RESOURCE_PATH "./res")
 else()
 	set(RESOURCE_PATH "${PROJECT_SOURCE_DIR}/res")
-	set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-configure_file(src/config.h.in config.h)
-
 if(WIN32)
-	file(GLOB WIN32_SRC src/os/win32/win32_*.cpp)
+	set(PLATFORM_WINDOWS ON)
+else()
+	set(PLATFORM_WINDOWS OFF)
+endif()
+
+if(UNIX)
+	set(PLATFORM_LINUX ON)
+else()
+	set(PLATFORM_LINUX OFF)
+endif()
+
+configure_file(cmake/config.h.in config.h)
+
+if (MSVC)
+    # target_compile_options(${PROJECT_NAME} PRIVATE /W4 -D _CRT_SECURE_NO_WARNINGS)
+else()
+    # target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
 endif()
 
 file(GLOB BASE_SRC src/base/base_*.cpp)
@@ -34,10 +47,7 @@ add_executable(${PROJECT_NAME}
 	${SDL2_SRC}
 	${OS_SRC}
 	${GFX_SRC}
-	${WIN32_SRC}
 )
-
-add_subdirectory(lib)
 
 target_link_libraries(${PROJECT_NAME}
 	SDL2::SDL2
@@ -53,14 +63,9 @@ target_include_directories(${PROJECT_NAME}
 		src
 )
 
+set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install")
 install(TARGETS ${PROJECT_NAME}
 		DESTINATION "${CMAKE_INSTALL_PREFIX}")
 
 install(DIRECTORY res
 	DESTINATION "${CMAKE_INSTALL_PREFIX}")
-
-if (MSVC)
-    # target_compile_options(${PROJECT_NAME} PRIVATE /W4 -D _CRT_SECURE_NO_WARNINGS)
-else()
-    # target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
-endif()

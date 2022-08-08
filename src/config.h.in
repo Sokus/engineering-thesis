@@ -1,5 +1,0 @@
-#pragma once
-#define PROJECT_VERSION_MAJOR @praca_inzynierska_VERSION_MAJOR@ 
-#define PROJECT_VERSION_MINOR @praca_inzynierska_VERSION_MINOR@ 
-#define PROJECT_VERSION_PATCH @praca_inzynierska_VERSION_PATCH@
-#define RESOURCE_PATH "@RESOURCE_PATH@"

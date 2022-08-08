@@ -9,7 +9,7 @@ REM /O<d/1/2>  Set optimization level.
 REM /Oi        Generates intrinsic functions.
 REM /WX        Treat warnings as errors.
 REM /W<n>      Set output warning level.
-REM /wd<n> 	   Disable the specified warning.   
+REM /wd<n> 	   Disable the specified warning.
 REM /FC        Displays the full path of source code files passed to cl.exe in diagnostic text.
 REM /Z7        Generates C 7.0-compatible debugging information.
 REM /Fe:<path> Specifies a name and a directory for the .exe file or DLL created by the compiler.
@@ -28,20 +28,4 @@ SET DebugFlags=/Od /Z7 /MTd
 REM SET DebugFlags=/O2 /MT
 SET CommonCompilerFlags=/nologo /FC /Oi /GR- /EHa- %WarningFlags% %DebugFlags%
 
-
 SET CommonLinkerFlags=/SUBSYSTEM:CONSOLE /OPT:REF /LIBPATH:.\ext\SDL2\lib\x86 SDL2.lib SDL2main.lib user32.lib gdi32.lib winmm.lib Shell32.lib opengl32.lib
-
-SET GameSources=src\win32_main.cpp
-SET GLADSources=ext\glad\src\glad.c
-SET ImGUISources=ext\imgui\backends\imgui_impl_sdl.cpp ext\imgui\backends\imgui_impl_opengl3.cpp ext\imgui\imgui*.cpp
-SET Sources=%GameSources% %GLADSources% %ImGUISources%
-
-SET GLADInclude=/Iext\glad\include
-SET SDLInclude=/Iext\SDL2\include
-SET ImGUIInclude=/Iext\imgui /Iext\imgui\backends
-SET Includes=/Isrc /Iext %GLADInclude% %SDLInclude% %ImGUIInclude%
-
-if not exist obj mkdir obj
-copy .\ext\SDL2\lib\x86\SDL2.dll .\SDL2.dll  >nul
-
-cl %Sources% %Includes% %CommonCompilerFlags% /Fepraca.exe /Foobj/ /link %CommonLinkerFlags%
