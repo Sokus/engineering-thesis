@@ -25,12 +25,14 @@ endif()
 
 file(GLOB BASE_SRC src/base/base_*.cpp)
 file(GLOB SDL2_SRC src/os/sdl2/sdl2_*.cpp)
+file(GLOB OS_SRC src/os/*.cpp)
 file(GLOB GFX_SRC src/gfx/opengl3_*.cpp)
 
 add_executable(${PROJECT_NAME}
 	src/main.cpp
 	${BASE_SRC}
 	${SDL2_SRC}
+	${OS_SRC}
 	${GFX_SRC}
 	${WIN32_SRC}
 )
@@ -56,3 +58,9 @@ install(TARGETS ${PROJECT_NAME}
 
 install(DIRECTORY res
 	DESTINATION "${CMAKE_INSTALL_PREFIX}")
+
+if (MSVC)
+    # target_compile_options(${PROJECT_NAME} PRIVATE /W4 -D _CRT_SECURE_NO_WARNINGS)
+else()
+    # target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
+endif()

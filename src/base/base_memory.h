@@ -1,14 +1,10 @@
-/* date = July 21st 2022 6:49 pm */
-
 #ifndef BASE_MEMORY_H
 #define BASE_MEMORY_H
 
 #include <stdint.h>
 
-#include "base_common.h"
-
 #define PUSH_STRUCT(arena, type) (type *)MemoryArenaPushSize(arena, sizeof(type))
-#define PUSH_ARRAY(arena, type, count) (type *)MemoryArenaPushSize(arena, (count)*sizeof(type)) 
+#define PUSH_ARRAY(arena, type, count) (type *)MemoryArenaPushSize(arena, (count)*sizeof(type))
 
 // memory arenas
 typedef struct MemoryArena

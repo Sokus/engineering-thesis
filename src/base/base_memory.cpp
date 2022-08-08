@@ -1,4 +1,5 @@
 #include "base_memory.h"
+#include "base_macros.h"
 
 void InitializeArena(MemoryArena *arena, uint8_t *base, size_t size)
 {

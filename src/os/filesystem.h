@@ -1,13 +1,8 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
-typedef struct EntireFile
-{
-    void *data;
-    unsigned int size;
-} EntireFile;
+#include <string>
 
-EntireFile ReadEntireFile(const char *filename, bool null_terminate);
-void FreeFileMemory(EntireFile *file);
+std::string ReadFileText(const char *file_path);
 
 #endif //FILESYSTEM_H
