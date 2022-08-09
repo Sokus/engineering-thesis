@@ -1,6 +1,4 @@
-cmake_minimum_required (VERSION 3.5)
-
-project(ext)
+project(lib)
 
 add_library(glad glad/src/glad.c)
 add_library(glad::glad ALIAS glad)

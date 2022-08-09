@@ -1,6 +1,6 @@
 if (MSVC)
-    # target_compile_options(${PROJECT_NAME} PRIVATE /W4)
     target_compile_definitions(${CLIENT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(${SERVER_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
     # target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
 endif()

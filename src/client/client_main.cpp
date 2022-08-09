@@ -17,7 +17,7 @@
 #include "config.h"
 #include "base/base.h"
 
-#include "platform/filesystem.h"
+#include "filesystem.h"
 #include "platform/input.h"
 #include "platform/platform.h"
 

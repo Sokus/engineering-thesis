@@ -7,7 +7,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-#include "platform/filesystem.h"
+#include "filesystem.h"
 
 /** Converts a GLenum to a C string.
  *

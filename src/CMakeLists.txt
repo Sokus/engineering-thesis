@@ -1,14 +1,19 @@
-file(GLOB BASE_SRC base/base_*.cpp)
-file(GLOB SDL2_SRC platform/sdl2/sdl2_*.cpp)
-file(GLOB OS_SRC platform/*.cpp)
-file(GLOB GFX_SRC graphics/opengl3_*.cpp)
+# Shared
+file(GLOB SHARED_BASE_SRC shared/base/base*.cpp)
+file(GLOB SHARED_SRC shared/*.cpp)
+
+# Client
+file(GLOB CLIENT_SDL2_SRC client/platform/sdl2/sdl2*.cpp)
+file(GLOB CLIENT_PLATFORM_SRC client/platform/*.cpp)
+file(GLOB CLIENT_GRAPHICS_SRC client/graphics/opengl3*.cpp)
 
 add_executable(${CLIENT_NAME}
-	main.cpp
-	${BASE_SRC}
-	${SDL2_SRC}
-	${OS_SRC}
-	${GFX_SRC}
+	client/client_main.cpp
+	${SHARED_SRC}
+    ${SHARED_BASE_SRC}
+	${CLIENT_SDL2_SRC}
+	${CLIENT_PLATFORM_SRC}
+	${CLIENT_GRAPHICS_SRC}
 )
 
 target_link_libraries(${CLIENT_NAME}
@@ -22,5 +27,20 @@ target_link_libraries(${CLIENT_NAME}
 target_include_directories(${CLIENT_NAME}
 	PRIVATE
 		"${PROJECT_BINARY_DIR}"
-        "${PROJECT_SOURCE_DIR}/src"
+        "${PROJECT_SOURCE_DIR}/src/client"
+        "${PROJECT_SOURCE_DIR}/src/shared"
+)
+
+# Server
+add_executable(${SERVER_NAME}
+    server/server_main.cpp
+	${SHARED_SRC}
+    ${SHARED_BASE_SRC}
+)
+
+target_include_directories(${SERVER_NAME}
+    PRIVATE
+        "${PROJECT_BINARY_DIR}"
+        "${PROJECT_SOURCE_DIR}/src/server"
+        "${PROJECT_SOURCE_DIR}/src/shared"
 )
