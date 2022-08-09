@@ -30,12 +30,6 @@ endif()
 
 configure_file(cmake/config.h.in config.h)
 
-if (MSVC)
-    # target_compile_options(${PROJECT_NAME} PRIVATE /W4 -D _CRT_SECURE_NO_WARNINGS)
-else()
-    # target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
-endif()
-
 file(GLOB BASE_SRC src/base/base_*.cpp)
 file(GLOB SDL2_SRC src/platform/sdl2/sdl2_*.cpp)
 file(GLOB OS_SRC src/platform/*.cpp)
@@ -62,6 +56,12 @@ target_include_directories(${PROJECT_NAME}
 		"${PROJECT_BINARY_DIR}"
 		src
 )
+
+if (MSVC)
+    # target_compile_options(${PROJECT_NAME} PRIVATE /W4)
+else()
+    # target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
+endif()
 
 set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install")
 install(TARGETS ${PROJECT_NAME}

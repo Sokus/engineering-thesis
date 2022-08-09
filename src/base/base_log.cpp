@@ -6,7 +6,10 @@
 #include <stdarg.h> // va_list, va_start(), va_end()
 #include <string.h> // strcpy(), strcat()
 
+// Silences strcpy/strcat warning
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+#endif
 
 static int g_log_level = LOG_INFO;
 

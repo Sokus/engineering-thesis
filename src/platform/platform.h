@@ -1,13 +1,18 @@
 #ifndef PI_PLATFORM_H
 #define PI_PLATFORM_H
 
+#include "config.h"
+
 #include <stdint.h>
 
 #include "input.h"
 
-#ifndef SDL_MAIN_HANDLED
-#define SDL_MAIN_HANDLED
+#ifdef PLATFORM_WINDOWS
+    #ifndef SDL_MAIN_HANDLED
+    #define SDL_MAIN_HANDLED
+    #endif
 #endif
+
 #include "SDL.h"
 #include "glad/glad.h"
 #include "SDL_opengl.h"

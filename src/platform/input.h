@@ -1,9 +1,14 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#ifndef SDL_MAIN_HANDLED
-#define SDL_MAIN_HANDLED
+#include "config.h"
+
+#ifdef PLATFORM_WINDOWS
+    #ifndef SDL_MAIN_HANDLED
+    #define SDL_MAIN_HANDLED
+    #endif
 #endif
+
 #include "SDL.h"
 
 namespace OS {
