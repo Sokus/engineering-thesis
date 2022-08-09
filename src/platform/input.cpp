@@ -1,5 +1,5 @@
-#include "../input.h"
-#include "sdl2_platform.h"
+#include "input.h"
+#include "platform.h"
 
 #include "base/base.h"
 
@@ -83,5 +83,6 @@ bool IsKeyPressed(int key_index)
     bool result = IsKeyDown(key_index) && !WasKeyDown(key_index);
     return result;
 }
+
 
 } // namespace

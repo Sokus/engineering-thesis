@@ -1,4 +1,4 @@
-#include "sdl2_platform.h"
+#include "platform.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -16,87 +16,6 @@
 namespace OS {
 
 SDL2_Context *g_sdl2_ctx = nullptr;
-
-/**
- * Returns currently set SDL2_Context
- * Mostly for internal use!
- */
-SDL2_Context *SDL2_GetContext()
-{
-    ASSERT(g_sdl2_ctx != nullptr);
-    return g_sdl2_ctx;
-}
-
-/**
- * Initializes SDL, creates a window, sets SDL_GL attributes.
- */
-static void SDL2_InitSDL(SDL2_Context *ctx, const char *window_title, int screen_width, int screen_height)
-{
-    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
-    {
-        fprintf(stderr, "error: %s\n", SDL_GetError());
-    }
-
-    SDL_WindowFlags window_flags =
-        (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-
-    SDL_Window* window = SDL_CreateWindow(window_title,
-                                          SDL_WINDOWPOS_CENTERED,
-                                          SDL_WINDOWPOS_CENTERED,
-                                          screen_width, screen_height,
-                                          window_flags);
-
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    //SDL_GL_SetSwapInterval(1); // Enable vsync
-
-    ctx->window = window;
-}
-
-/**
- * Initializes OpenGL for SDL, loads GL functions, sets GL attributes
- * used throught the program runtime.
- */
-static void SDL2_InitGL(SDL2_Context *ctx)
-{
-    SDL_GLContext gl_context = SDL_GL_CreateContext(ctx->window);
-    SDL_GL_MakeCurrent(ctx->window, gl_context);
-
-    gladLoadGLLoader(SDL_GL_GetProcAddress);
-
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_SCISSOR_TEST);
-
-    glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
-
-    ctx->gl_context = gl_context;
-}
-
-/**
- * Initializes DearImGui for SDL/OpenGL, sets config flags.
- */
-static void SDL2_InitImGui(SDL2_Context *ctx)
-{
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    ImGui::StyleColorsDark();
-
-    const char *glsl_version = "#version 420";
-    ImGui_ImplSDL2_InitForOpenGL(ctx->window, ctx->gl_context);
-    ImGui_ImplOpenGL3_Init(glsl_version);
-}
 
 /**
  * Create platform context, create windows, initialize subsystems. It also
@@ -230,6 +149,87 @@ void GetWindowDimensions(int *screen_width, int *screen_height)
 {
     SDL2_Context *ctx = SDL2_GetContext();
     SDL_GetWindowSize(ctx->window, screen_width, screen_height);
+}
+
+/**
+ * Returns currently set SDL2_Context
+ * Mostly for internal use!
+ */
+SDL2_Context *SDL2_GetContext()
+{
+    ASSERT(g_sdl2_ctx != nullptr);
+    return g_sdl2_ctx;
+}
+
+/**
+ * Initializes SDL, creates a window, sets SDL_GL attributes.
+ */
+static void SDL2_InitSDL(SDL2_Context *ctx, const char *window_title, int screen_width, int screen_height)
+{
+    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
+    {
+        fprintf(stderr, "error: %s\n", SDL_GetError());
+    }
+
+    SDL_WindowFlags window_flags =
+        (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+
+    SDL_Window* window = SDL_CreateWindow(window_title,
+                                          SDL_WINDOWPOS_CENTERED,
+                                          SDL_WINDOWPOS_CENTERED,
+                                          screen_width, screen_height,
+                                          window_flags);
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    //SDL_GL_SetSwapInterval(1); // Enable vsync
+
+    ctx->window = window;
+}
+
+/**
+ * Initializes OpenGL for SDL, loads GL functions, sets GL attributes
+ * used throught the program runtime.
+ */
+static void SDL2_InitGL(SDL2_Context *ctx)
+{
+    SDL_GLContext gl_context = SDL_GL_CreateContext(ctx->window);
+    SDL_GL_MakeCurrent(ctx->window, gl_context);
+
+    gladLoadGLLoader(SDL_GL_GetProcAddress);
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_SCISSOR_TEST);
+
+    glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
+
+    ctx->gl_context = gl_context;
+}
+
+/**
+ * Initializes DearImGui for SDL/OpenGL, sets config flags.
+ */
+static void SDL2_InitImGui(SDL2_Context *ctx)
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    ImGui::StyleColorsDark();
+
+    const char *glsl_version = "#version 420";
+    ImGui_ImplSDL2_InitForOpenGL(ctx->window, ctx->gl_context);
+    ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
 static void SDL2_ProcessEvent(const SDL_Event* event)

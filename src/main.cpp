@@ -19,7 +19,7 @@
 
 #include "platform/filesystem.h"
 #include "platform/input.h"
-#include "platform/sdl2/sdl2_platform.h"
+#include "platform/platform.h"
 
 #include "graphics/opengl3_renderer.h"
 #include "graphics/opengl3_draw_queue.h"
