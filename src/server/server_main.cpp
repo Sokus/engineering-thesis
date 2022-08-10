@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "base/base.h"
+#include "log.h"
 
 int main(int argc, char *argv[])
 {

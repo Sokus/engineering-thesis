@@ -2,6 +2,7 @@
 #define OPENGL3_LIGHTS_H
 
 #include "glm/glm.hpp"
+
 #include "opengl3_specialised_renderer.h"
 
 struct Light

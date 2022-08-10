@@ -1,6 +1,3 @@
-#include "opengl3_entity.h"
-#include "opengl3_specialised_renderer.h"
-
 #include <stddef.h>
 
 #include "glad/glad.h"
@@ -8,6 +5,8 @@
 #include "glm/gtc/type_ptr.hpp"
 
 #include "config.h"
+#include "opengl3_entity.h"
+#include "opengl3_specialised_renderer.h"
 #include "opengl3_utils.h"
 
 void EntityRenderer::init()

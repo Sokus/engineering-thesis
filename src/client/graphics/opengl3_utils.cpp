@@ -1,4 +1,3 @@
-#include "opengl3_utils.h"
 
 #include <stdio.h>
 #include <string>
@@ -7,6 +6,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#include "opengl3_utils.h"
 #include "filesystem.h"
 
 /** Converts a GLenum to a C string.

@@ -1,26 +1,14 @@
-// RELATED HEADERS
-// ...
-
-// C HEADERS
 #include <stdio.h>
 #include <stdlib.h>
 
-// C++ HEADERS
-// ...
-
-// LIBRARY HEADERS
 #include "glm/glm.hpp"
-
 #include "imgui.h"
 
-// PROJECT HEADERS
 #include "config.h"
-#include "base/base.h"
-
+#include "macros.h" // ABS
 #include "filesystem.h"
-#include "platform/input.h"
-#include "platform/platform.h"
-
+#include "input.h"
+#include "platform.h"
 #include "graphics/opengl3_renderer.h"
 #include "graphics/opengl3_draw_queue.h"
 #include "graphics/opengl3_debug.h"

@@ -1,5 +1,5 @@
-#include "base_types.h"
-#include "base_macros.h"
+#include "utility.h"
+#include "macros.h"
 
 /**
  * Converts 64-bit unsigned int to 32-bit while making sure

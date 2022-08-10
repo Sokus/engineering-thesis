@@ -2,6 +2,7 @@
 #define OPENGL3_DRAW_QUEUE
 
 #include <vector>
+
 #include "glm/glm.hpp"
 
 #include "opengl3_lights.h"

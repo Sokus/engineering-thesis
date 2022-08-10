@@ -2,13 +2,11 @@
 #define BASE_COMMON_H
 
 #include <assert.h> // assert, abort
-#include <stdio.h>  // fprintf
 #include <string.h> // memset, memcpy
 
 #define ARRAY_SIZE(array) (sizeof(array)/sizeof((array)[0]))
 #define ASSERT(expression) assert(expression)
 #define STATEMENT(statement) do { statement } while (0)
-#define INVALID_CODE_PATH(message) PI_STATEMENT(fprintf(stderr, message); abort();)
 
 #define MIN(a, b) (((a)<(b)) ? (a) : (b))
 #define MAX(a, b) (((a)<(b)) ? (b) : (a))

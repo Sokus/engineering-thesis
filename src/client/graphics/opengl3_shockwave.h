@@ -1,10 +1,10 @@
 #ifndef OPENGL3_SHOCKWAVE_H
 #define OPENGL3_SHOCKWAVE_H
 
-#include "opengl3_specialised_renderer.h"
-
 #include "glad/glad.h"
 #include "glm/glm.hpp"
+
+#include "opengl3_specialised_renderer.h"
 
 struct Shockwave
 {

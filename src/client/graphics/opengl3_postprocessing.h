@@ -2,6 +2,7 @@
 #define OPENGL3_POSTPROCESSING_H
 
 #include <glad/glad.h>
+
 #include "opengl3_lazy_program.h"
 
 void bind_dummy_vao();

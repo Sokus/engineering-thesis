@@ -1,13 +1,13 @@
 #include <stddef.h>
 
-#include "opengl3_lights.h"
 #include "glad/glad.h"
 #include "glm/glm.hpp"
 #include "glm/exponential.hpp"
 #include "glm/ext/scalar_constants.hpp"
 
-#include "base/base.h"
+#include "opengl3_lights.h"
 #include "config.h"
+#include "macros.h"
 #include "opengl3_utils.h"
 
 /* Solves a quadratic equation

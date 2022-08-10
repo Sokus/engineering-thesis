@@ -1,8 +1,7 @@
-#include "opengl3_specialised_renderer.h"
-
 #include "glad/glad.h"
 
-#include "base/base.h"
+#include "opengl3_specialised_renderer.h"
+#include "macros.h"
 
 void SpecialisedRenderer::init(GLsizei _vertex_size)
 {

@@ -1,17 +1,15 @@
-#include "platform.h"
-
 #include <stdint.h>
 #include <stdio.h>
 
 #include "SDL.h"
 #include "glad/glad.h"
 #include "SDL_opengl.h"
-
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
 
-#include "base/base.h"
+#include "platform.h"
+#include "macros.h"
 
 namespace OS {
 

@@ -1,9 +1,10 @@
-#include "glad/glad.h"
 #include <stdexcept>
 
+#include "glad/glad.h"
+
 void APIENTRY OpenGLDebugCallback(
-    GLenum source, 
-    GLenum type, 
+    GLenum source,
+    GLenum type,
     GLuint id,
     GLenum severity,
     GLsizei length,

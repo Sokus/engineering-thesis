@@ -1,13 +1,11 @@
-#include "opengl3_texture.h"
-
 #include <stdio.h> // fprintf
 #include <stdlib.h> // malloc, free
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h" // stbi_load, stbi_free
 
-#include "base/base.h" // ASSERT
-
+#include "opengl3_texture.h"
+#include "macros.h"
 /**
  * Loads an image and stores it as a GL_TEXTURE_2D_ARRAY.
  */

@@ -1,5 +1,5 @@
-#ifndef BASE_LOG_H
-#define BASE_LOG_H
+#ifndef PI_LOG_H
+#define PI_LOG_H
 
 #define MAX_LOG_MESSAGE_LENGTH 128
 
@@ -17,4 +17,4 @@ enum LogLevel
 void SetLogLevel(int log_level);
 void Log(int log_level, const char *text, ...);
 
-#endif // BASE_LOG_H
+#endif // PI_LOG_H

@@ -1,7 +1,6 @@
 #include "input.h"
+#include "macros.h"
 #include "platform.h"
-
-#include "base/base.h"
 
 namespace OS {
 

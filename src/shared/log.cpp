@@ -1,4 +1,4 @@
-#include "base_log.h"
+#include "log.h"
 #include "config.h"
 
 #include <stdlib.h> // exit()
