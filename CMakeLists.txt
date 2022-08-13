@@ -10,14 +10,16 @@ option(DISTRIBUTE "Compile for distribution" OFF)
 option(ENABLE_LOG "Enable logging" ON)
 set(CLIENT_NAME "client")
 set(SERVER_NAME "server")
-include(Configure)
 
-add_subdirectory(lib)
-add_subdirectory(src)
+include(Configure)
 include(CompileFlags)
 
-install(TARGETS ${CLIENT_NAME} ${SERVER_NAME}
-		DESTINATION "${CMAKE_INSTALL_PREFIX}")
+add_subdirectory(lib)
+add_subdirectory(src/shared)
+add_subdirectory(src/client)
+add_subdirectory(src/server)
+
+add_subdirectory(examples)
 
 install(DIRECTORY resources
 	DESTINATION "${CMAKE_INSTALL_PREFIX}")

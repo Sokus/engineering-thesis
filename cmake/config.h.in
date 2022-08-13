@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PI_CONFIG_H
+#define PI_CONFIG_H
 
 #cmakedefine PLATFORM_WINDOWS
 #cmakedefine PLATFORM_LINUX
@@ -6,3 +7,5 @@
 #cmakedefine ENABLE_LOG
 
 #cmakedefine RESOURCE_PATH "@RESOURCE_PATH@"
+
+#endif // PI_CONFIG_H
