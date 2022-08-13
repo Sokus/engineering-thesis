@@ -14,7 +14,8 @@ target_include_directories(shared
 )
 
 if(PLATFORM_WINDOWS)
-	target_link_libraries(shared
-		Ws2_32.lib
+    target_link_libraries(shared
+        Ws2_32.lib # sockets
+        Dnsapi.lib # DNS
 	)
 endif()

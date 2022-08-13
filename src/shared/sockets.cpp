@@ -9,7 +9,7 @@
     #include <fcntl.h>
     #include <unistd.h> // close
     #include <errno.h> // errno
-    #include <string.h> // strerr   or
+    #include <string.h> // strerr
 #endif
 
 #include "sockets.h"
@@ -68,7 +68,7 @@ bool Socket::SetBlockingMode(bool should_block)
     bool success = false;
 #if defined(PLATFORM_WINDOWS)
     u_long mode = should_block ? 0 : 1;
-    success = (ioctlsocket(handle, FIOBIO, &mode) == 0);
+    success = (ioctlsocket(handle, FIONBIO, &mode) == 0);
 #elif defined(PLATFORM_LINUX)
     int flags = fcntl(handle, F_GETFL, 0);
     if(flags != -1)
