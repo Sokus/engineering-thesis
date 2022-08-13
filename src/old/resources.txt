@@ -44,3 +44,13 @@ BOOL ReleaseSemaphore((HANDLE)semaphore, (LONG)release_count, (LPLONG)out_previo
 Sources:
 --------
 https://docs.microsoft.com/en-us/windows/win32/api/
+
+
+NETWORKING
+==========
+
+#include <netinet/in.h>   // sockaddr_in
+#include <arpa/inet.h>    // inet_addr
+#include <fcntl.h>        // set file/socket handle to non-blocking
+#include <unistd.h>       // write(), close()
+#include <errno.h>        // socket error handling

@@ -3,44 +3,6 @@
 #ifndef PI_HELPERS_H
 #define PI_HELPERS_H
 
-#include <stdio.h> // fprintf
-#include <string.h> // memset, memcpy
-#include <stdint.h> // uint8_t
-
-// KEYWORDS
-// ========
-
-#define global static
-#define internal static
-#define local_persist static
-
-// HELPER MACROS
-// =============
-
-#define STATEMENT(statement) do { statement } while (0)
-
-#define RAISE_SEGMENTATION_FAULT() (*((char*)-1) = 'x')
-#define ASSERT_BREAK(message) \
-STATEMENT(fprintf(stderr, "%s:%d: %s\n", __FILE__, __LINE__, message); \
-RAISE_SEGMENTATION_FAULT();)
-#define ASSERT(expression) \
-STATEMENT( if(!(expression)) { ASSERT_BREAK(#expression); })
-#define INVALID_CODE_PATH ASSERT_BREAK("")
-
-#define ARRAY_COUNT(array) ( sizeof(array)/sizeof((array)[0]) )
-
-#define MIN(a, b) (((a)<(b)) ? (a) : (b))
-#define MAX(a, b) (((a)<(b)) ? (b) : (a))
-#define CLAMP(a, x, b) (((x)<(a))?(a):\
-((x)>(b))?(b):(x))
-#define ABS(a) ((a) >= 0) ? (a) : -(a)
-#define SIGN(x) (((x) > 0) - ((x) < 0))
-
-#define SWAP(type, a, b) STATEMENT(type swap=a; a=b; b=swap;)
-
-#define MEMORY_COPY(destination, source, size) memcpy(destination, source, size)
-#define MEMORY_SET(destination, value, size) memset(destination, value, size)
-
 // MEMORY ARENAS
 // =============
 
@@ -52,7 +14,7 @@ typedef struct MemoryArena
 } MemoryArena;
 
 #define ARENA_PUSH_STRUCT(arena, type) (type *)MemoryArenaPushSize(arena, sizeof(type))
-#define ARENA_PUSH_ARRAY(arena, type, count) (type *)MemoryArenaPushSize(arena, (count)*sizeof(type)) 
+#define ARENA_PUSH_ARRAY(arena, type, count) (type *)MemoryArenaPushSize(arena, (count)*sizeof(type))
 #define ARENA_POP_STRUCT(arena, type) MemoryArenaPopSize(arena, sizeof(type))
 #define ARENA_POP_ARRAY(arena, type, count) MemoryArenaPopSize(arena, (count)*sizeof(type))
 
@@ -174,7 +136,7 @@ RingBufferArea RingBufferPop(RingBuffer *rbuf, size_t amount)
 {
     ASSERT(rbuf != 0);
     RingBufferArea area = {};
-    
+
     if(amount <= rbuf->used)
     {
         size_t contiguous_space = rbuf->size - rbuf->read;
@@ -191,11 +153,11 @@ RingBufferArea RingBufferPop(RingBuffer *rbuf, size_t amount)
             area.second_part = rbuf->base;
             area.second_part_size = overhead;
         }
-        
+
         rbuf->read = (rbuf->read + amount) % rbuf->size;
         rbuf->used -= amount;
     }
-    
+
     return area;
 }
 
@@ -203,7 +165,7 @@ RingBufferArea RingBufferPush(RingBuffer *rbuf, size_t amount)
 {
     ASSERT(rbuf != 0);
     RingBufferArea area = {};
-    
+
     if(amount <= rbuf->size - rbuf->used)
     {
         size_t contiguous_space = rbuf->size - rbuf->write;
@@ -220,22 +182,22 @@ RingBufferArea RingBufferPush(RingBuffer *rbuf, size_t amount)
             area.second_part = rbuf->base;
             area.second_part_size = overhead;
         }
-        
+
         rbuf->write = (rbuf->write + amount) % rbuf->size;
         rbuf->used += amount;
     }
-    
+
     return area;
 }
 
 void RingBufferWrite(RingBuffer *rbuf, void *data, size_t data_size)
 {
     RingBufferArea area = RingBufferPush(rbuf, data_size);
-    
+
     if(area.first_part != 0)
     {
         MEMORY_COPY(area.first_part, data, area.first_part_size);
-        
+
         if(area.second_part != 0)
         {
             MEMORY_COPY(area.second_part,
@@ -251,7 +213,7 @@ void RingBufferRead(RingBuffer *rbuf, void *data, size_t data_size)
     if(area.first_part != 0)
     {
         MEMORY_COPY(data, area.first_part, area.first_part_size);
-        
+
         if(area.second_part != 0)
         {
             MEMORY_COPY((uint8_t *)data + area.first_part_size,
@@ -287,7 +249,7 @@ struct StreamBuffer
 };
 
 #define STREAM_PUSH_STRUCT(sbuf, type) (type *)StreamBufferPush(sbuf, sizeof(type))
-#define STREAM_PUSH_ARRAY(sbuf, type, count) (type *)StreamBufferPush(sbuf, (count)*sizeof(type)) 
+#define STREAM_PUSH_ARRAY(sbuf, type, count) (type *)StreamBufferPush(sbuf, (count)*sizeof(type))
 #define STREAM_POP_STRUCT(sbuf, type) StreamBufferPop(sbuf, sizeof(type))
 #define STREAM_POP_ARRAY(sbuf, type, count) StreamBufferPop(sbuf, (count)*sizeof(type))
 
@@ -366,14 +328,14 @@ void *StreamBufferPush(StreamBuffer *sbuf, size_t data_size)
 {
     ASSERT(sbuf != 0);
     void *result = 0;
-    
+
     if(sbuf->head + data_size <= sbuf->size)
     {
         result = (uint8_t *)sbuf->base + sbuf->head;
         sbuf->head += data_size;
         sbuf->used = MAX(sbuf->used, sbuf->head);
     }
-    
+
     return result;
 }
 
@@ -381,13 +343,13 @@ void *StreamBufferPop(StreamBuffer *sbuf, size_t data_size)
 {
     ASSERT(sbuf != 0);
     void *result = 0;
-    
+
     if(sbuf->head + data_size <= sbuf->used)
     {
         result = (uint8_t *)sbuf->base + sbuf->head;
         sbuf->head += data_size;
     }
-    
+
     return result;
 }
 
@@ -395,9 +357,9 @@ bool StreamBufferWrite(StreamBuffer *sbuf, void *data, size_t data_size)
 {
     ASSERT(sbuf != 0);
     bool success = false;
-    
+
     void *destination = StreamBufferPush(sbuf, data_size);
-    
+
     if(destination != 0)
     {
         MEMORY_COPY(destination, data, data_size);
@@ -410,43 +372,15 @@ bool StreamBufferRead(StreamBuffer *sbuf, void *data, size_t data_size)
 {
     ASSERT(sbuf != 0);
     bool success = false;
-    
+
     void *source = StreamBufferPop(sbuf, data_size);
-    
+
     if(source != 0)
     {
         MEMORY_COPY(data, source, data_size);
         success = true;
     }
     return success;
-}
-
-// STRING
-// ======
-
-void ConcatenateStrings(char *str_a, size_t str_a_size,
-                        char *str_b, size_t str_b_size,
-                        char *dest, size_t dest_size)
-{
-    size_t dest_size_clamped = MAX(0, dest_size);
-    size_t str_a_size_clamped = MIN(str_a_size, dest_size_clamped);
-    size_t size_remaining = dest_size_clamped - str_a_size_clamped;
-    size_t str_b_size_clamped = MIN(str_b_size, size_remaining);
-    
-    MEMORY_COPY(dest, str_a, str_a_size_clamped);
-    MEMORY_COPY(dest+str_a_size_clamped, str_b, str_b_size_clamped);
-    
-    *(dest+str_a_size_clamped+str_b_size_clamped) = 0;
-}
-
-unsigned int StringLength(char *str)
-{
-    unsigned int result = 0;
-    while(*str++)
-    {
-        ++result;
-    }
-    return result;
 }
 
 #endif //PI_HELPERS_H
