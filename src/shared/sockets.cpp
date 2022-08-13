@@ -1,12 +1,15 @@
 #include "config.h"
 
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS)
     #include <winsock2.h>
     #include <WS2tcpip.h>
-#elif PLATFORM_LINUX
+#elif defined(PLATFORM_LINUX)
     #include <sys/socket.h>
     #include <netinet/in.h>
     #include <fcntl.h>
+    #include <unistd.h> // close
+    #include <errno.h> // errno
+    #include <string.h> // strerr   or
 #endif
 
 #include "sockets.h"
@@ -17,7 +20,7 @@ namespace net {
 
 bool InitializeSockets()
 {
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS)
     WSADATA wsaData;
     return WSAStartup(MAKEWORD(2,2), &wsaData) == NO_ERROR;
 #else
@@ -27,7 +30,7 @@ bool InitializeSockets()
 
 void ShutdownSockets()
 {
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS)
     WSACleanup();
 #endif
 }
@@ -37,8 +40,8 @@ int Socket::CreateHandle()
     int handle = (int)socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if(handle <= 0)
     {
-        handle = 0;
         Log(LOG_ERROR, "Could not create socket handle");
+        return 0;
     }
     return handle;
 }
@@ -63,36 +66,36 @@ bool Socket::Bind(unsigned short port)
 bool Socket::SetBlockingMode(bool should_block)
 {
     bool success = false;
-#ifdef PLATFORM_WINDOWS
-    u_long arg = !should_block;
-    // TODO: See WSAGetLastError to get more detailed error codes
-    success = ioctlsocket(handle, FIONBIO, &arg) == 0;
-#elif PLATFORM_LINUX
-    success = fcntl(handle, F_SETFL, O_NONBLOCK, !should_block) != -1);
+#if defined(PLATFORM_WINDOWS)
+    u_long mode = should_block ? 0 : 1;
+    success = (ioctlsocket(handle, FIOBIO, &mode) == 0);
+#elif defined(PLATFORM_LINUX)
+    int flags = fcntl(handle, F_GETFL, 0);
+    if(flags != -1)
+    {
+        flags = should_block ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
+        success = (fcntl(handle, F_SETFL, flags) == 0);
+    }
 #endif
     if(!success)
-        Log(LOG_ERROR, "Could not set socket blocking mode");
-
+        Log(LOG_WARNING, "Could not set socket blocking mode");
     return success;
 }
 
 Socket::Socket()
 {
-    Log(LOG_DEBUG, "Creating socket");
     handle = CreateHandle();
     SetBlockingMode(false);
 }
 
 Socket::Socket(bool should_block)
 {
-    Log(LOG_DEBUG, "Creating socket");
     handle = CreateHandle();
     SetBlockingMode(should_block);
 }
 
 Socket::Socket(unsigned short port)
 {
-    Log(LOG_DEBUG, "Creating socket");
     handle = CreateHandle();
     SetBlockingMode(false);
     Bind(port);
@@ -100,18 +103,16 @@ Socket::Socket(unsigned short port)
 
 Socket::Socket(unsigned short port, bool should_block)
 {
-    Log(LOG_DEBUG, "Creating socket");
-    this->handle = CreateHandle();
+    handle = CreateHandle();
     SetBlockingMode(should_block);
     Bind(port);
 }
 
 Socket::~Socket()
 {
-    Log(LOG_DEBUG, "Destroying socket");
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS)
     closesocket(handle);
-#elif PLATFORM_LINUX
+#elif defined(PLATFORM_LINUX)
     close(handle);
 #endif
 }
@@ -128,7 +129,7 @@ bool Socket::Send(const Address& destination, const void *data, int size)
 
     if(bytes_sent != size)
     {
-        Log(LOG_WARNING, "Could not send packet");
+        Log(LOG_ERROR, "Could not send packet");
         return false;
     }
 
@@ -141,15 +142,19 @@ int Socket::Receive(Address *sender, void *data, int size)
     socklen_t from_length = sizeof(from);
 
     struct sockaddr *from_ptr = (struct sockaddr *)&from;
-    int bytes_recieved = (int)recvfrom(handle, (char *)data, (size_t)size, 0, from_ptr, &from_length);
-
-    if(bytes_recieved == -1 && errno != EWOULDBLOCK)
-        Log(LOG_ERROR, "Socket::Receive: %s", strerror(errno));
+    int bytes_received = (int)recvfrom(handle, (char *)data, (size_t)size, 0, from_ptr, &from_length);
 
     if(sender != nullptr)
         *sender = Address(ntohl(from.sin_addr.s_addr), ntohs(from.sin_port));
 
-    return bytes_recieved;
+    if(bytes_received == -1)
+    {
+        if(errno != EWOULDBLOCK)
+            Log(LOG_ERROR, "Error while receiving data: ", strerror(errno));
+        bytes_received = 0;
+    }
+
+    return bytes_received;
 }
 
 } // namespace net
