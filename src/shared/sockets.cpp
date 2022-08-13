@@ -1,12 +1,15 @@
 #include "config.h"
 
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS)
     #include <winsock2.h>
     #include <WS2tcpip.h>
-#elif PLATFORM_LINUX
+#elif defined(PLATFORM_LINUX)
     #include <sys/socket.h>
     #include <netinet/in.h>
     #include <fcntl.h>
+    #include <unistd.h> // close
+    #include <errno.h> // errno
+    #include <string.h> // strerr   or
 #endif
 
 #include "sockets.h"
@@ -17,7 +20,7 @@ namespace net {
 
 bool InitializeSockets()
 {
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS)
     WSADATA wsaData;
     return WSAStartup(MAKEWORD(2,2), &wsaData) == NO_ERROR;
 #else
@@ -27,7 +30,7 @@ bool InitializeSockets()
 
 void ShutdownSockets()
 {
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS)
     WSACleanup();
 #endif
 }
@@ -63,12 +66,12 @@ bool Socket::Bind(unsigned short port)
 bool Socket::SetBlockingMode(bool should_block)
 {
     bool success = false;
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS)
     u_long arg = !should_block;
     // TODO: See WSAGetLastError to get more detailed error codes
     success = ioctlsocket(handle, FIONBIO, &arg) == 0;
-#elif PLATFORM_LINUX
-    success = fcntl(handle, F_SETFL, O_NONBLOCK, !should_block) != -1);
+#elif defined(PLATFORM_LINUX)
+    success = fcntl(handle, F_SETFL, O_NONBLOCK, !should_block) != -1;
 #endif
     if(!success)
         Log(LOG_ERROR, "Could not set socket blocking mode");
@@ -109,9 +112,9 @@ Socket::Socket(unsigned short port, bool should_block)
 Socket::~Socket()
 {
     Log(LOG_DEBUG, "Destroying socket");
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS)
     closesocket(handle);
-#elif PLATFORM_LINUX
+#elif defined(PLATFORM_LINUX)
     close(handle);
 #endif
 }
