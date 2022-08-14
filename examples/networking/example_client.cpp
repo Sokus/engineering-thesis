@@ -1,21 +1,21 @@
 #include "address.h"
 #include "sockets.h"
 #include "log.h"
+#include "dns.h"
 
 int main(int argc, char *argv[])
 {
     Log(LOG_INFO, "Client starting");
     net::InitializeSockets();
 
-    net::Socket s = net::Socket();
+    const char *hostname = "google.com";
+    net::Address address;
+    address.SetAddress(net::QueryDNS(hostname));
 
-    net::Address server_address = net::Address(127, 0, 0, 1, 25565);
-
-    for(int i = 1; i < 6; ++i)
+    if(address.GetAddress() != 0)
     {
-        int data = i;
-        Log(LOG_INFO, "Sending %d", data);
-        s.Send(server_address, &data, sizeof(data));
+        Log(LOG_INFO, "%s can be found on %d.%d.%d.%d",
+            hostname, address.GetA(), address.GetB(), address.GetC(), address.GetD());
     }
 
     Log(LOG_INFO, "Client shutting down");

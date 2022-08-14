@@ -26,6 +26,8 @@ public:
 
     unsigned short GetPort() const;
 
+    void SetAddress(unsigned int address);
+    void SetPort(unsigned short port);
 };
 
 bool AddressCompare(Address a, Address b);

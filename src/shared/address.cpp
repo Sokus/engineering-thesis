@@ -29,6 +29,16 @@ unsigned char Address::GetC() const { return (address >> 8 & 0xFF); }
 unsigned char Address::GetD() const { return (address & 0xFF); }
 unsigned short Address::GetPort() const { return port; }
 
+void Address::SetAddress(unsigned int address)
+{
+    this->address = address;
+}
+
+void Address::SetPort(unsigned short port)
+{
+    this->port = port;
+}
+
 bool AddressCompare(Address a, Address b)
 {
     bool result = (a.GetAddress() == b.GetAddress() &&
