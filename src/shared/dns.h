@@ -5,7 +5,7 @@
 
 namespace net {
 
-bool QueryDNS(const char *address_to_query, Address *out_address);
+unsigned int QueryDNS(const char *hostname);
 
 } // namespace net
 
