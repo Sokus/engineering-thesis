@@ -36,12 +36,12 @@ unsigned int QueryDNS(const char *hostname)
         return 0;
     }
 #elif defined(PLATFORM_LINUX)
-    struct addrinfo* addr;
-    int status = getaddrinfo(hostname, NULL, NULL, &addr);
+    struct addrinfo* addrinfo;
+    int status = getaddrinfo(hostname, 0, 0, &addrinfo);
     if(status == 0)
     {
-        struct sockaddr_in* internet_addr = (struct sockaddr_in*)addr->ai_addr;
-        unsigned int address = ntohl(internet_addr->sin_addr);
+        struct sockaddr_in* sockaddr = (struct sockaddr_in*)addrinfo->ai_addr;
+        unsigned int address = ntohl(sockaddr->sin_addr.s_addr);
         return address;
     }
     else
