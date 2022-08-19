@@ -1,9 +1,11 @@
 project(shared)
 
 file(GLOB SHARED_SRC *.cpp)
+file(GLOB SHARED_NETWORKING_SRC networking/*.cpp)
 
 add_library(shared STATIC
     ${SHARED_SRC}
+    ${SHARED_NETWORKING_SRC}
 )
 
 target_include_directories(shared

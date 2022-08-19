@@ -3,12 +3,9 @@
 
 #include "config.h"
 
-#ifdef PLATFORM_WINDOWS
-    #ifndef SDL_MAIN_HANDLED
+#if defined(PLATFORM_WINDOWS) & !defined(SDL_MAIN_HANDLED)
     #define SDL_MAIN_HANDLED
-    #endif
 #endif
-
 #include "SDL.h"
 
 namespace OS {
