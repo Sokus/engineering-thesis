@@ -1,5 +1,6 @@
 #include <stdio.h> // fprintf
 #include <stdlib.h> // malloc, free
+#include <string.h> // memcpy
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h" // stbi_load, stbi_free
@@ -68,7 +69,7 @@ void Texture::Load(const char *path, int tile_width, int tile_height, int force_
                     unsigned char *src = tile_corner_ptr + tile_pixel_y * row_stride;
                     int inverse_tile_pixeL_y = (tile_height - tile_pixel_y - 1);
                     unsigned char *dst = tile_buffer + inverse_tile_pixeL_y * tile_w_stride;
-                    MEMORY_COPY(dst, src, (unsigned int)(tile_w_stride));
+                    memcpy(dst, src, (unsigned int)(tile_w_stride));
                 }
 
                 int layer_idx = tile_y_idx * tiles_x + tile_x_idx;

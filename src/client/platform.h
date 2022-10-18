@@ -22,8 +22,6 @@ struct SDL2_Context
     SDL_GLContext gl_context;
     Uint64 last_performance_counter;
 
-    SDL2_Input input;
-
     const char *window_title;
     int screen_width;
     int screen_height;

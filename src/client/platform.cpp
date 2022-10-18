@@ -33,8 +33,6 @@ void CreateContext(const char* window_title,
     SDL2_InitGL(ctx);
     SDL2_InitImGui(ctx);
 
-    ctx->input.Init();
-
     ctx->last_performance_counter = SDL_GetPerformanceCounter();
     ctx->is_running = true;
     ctx->window_title = window_title;
@@ -70,6 +68,8 @@ void BeginFrame()
 {
     SDL2_Context *ctx = SDL2_GetContext();
 
+    Input::BeginFrame();
+
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
@@ -86,9 +86,6 @@ void BeginFrame()
                       &ctx->screen_height);
 
     glViewport(0, 0, ctx->screen_width, ctx->screen_height);
-
-
-    ctx->input.Update(ctx->dt);
 }
 
 /**
@@ -263,7 +260,7 @@ static void SDL2_ProcessEvent(const SDL_Event* event)
 
             if(event->key.repeat == 0)
             {
-                ctx->input.SetByKeycode(kc, is_down);
+                Input::SetByKeycode(kc, is_down);
             }
 
             if(event->type == SDL_KEYDOWN)

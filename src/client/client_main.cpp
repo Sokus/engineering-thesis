@@ -38,8 +38,8 @@ struct Player
     {
         glm::vec2 move_dir = glm::vec2(0.0f, 0.0f);
         // Left/right movement
-        if(OS::IsKeyDown(OS::Keybind::Left)) move_dir.x -= 1.0f;
-        if(OS::IsKeyDown(OS::Keybind::Right)) move_dir.x += 1.0f;
+        if(Input::KeyDown(Input::Keybind::Left)) move_dir.x -=1.0f;
+        if(Input::KeyDown(Input::Keybind::Right)) move_dir.x += 1.0f;
 
         velocity.x = move_speed * move_dir.x;
     }
