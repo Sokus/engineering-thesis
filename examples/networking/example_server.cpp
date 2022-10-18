@@ -1,5 +1,5 @@
-#include "address.h"
-#include "sockets.h"
+#include "networking/address.h"
+#include "networking/sockets.h"
 #include "log.h"
 
 int main(int argc, char *argv[])

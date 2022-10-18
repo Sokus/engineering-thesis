@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "sockets.h"
-#include "address.h"
+#include "networking/sockets.h"
+#include "networking/address.h"
 #include "log.h"
 
 int main(int argc, char *argv[])

@@ -1,12 +1,14 @@
 #ifndef BASE_COMMON_H
 #define BASE_COMMON_H
 
-#include <assert.h> // assert, abort
+#include <assert.h> // assert
+#include <stdlib.h> // abort
 #include <string.h> // memset, memcpy
 
 #define ARRAY_SIZE(array) (sizeof(array)/sizeof((array)[0]))
 #define ASSERT(expression) assert(expression)
 #define STATEMENT(statement) do { statement } while (0)
+#define ABORT() abort()
 
 #define MIN(a, b) (((a)<(b)) ? (a) : (b))
 #define MAX(a, b) (((a)<(b)) ? (b) : (a))
