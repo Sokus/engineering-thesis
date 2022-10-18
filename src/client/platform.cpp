@@ -10,10 +10,11 @@
 
 #include "platform.h"
 #include "macros.h"
+#include "graphics/opengl3_debug.h"
 
 namespace OS {
 
-SDL2_Context *g_sdl2_ctx = nullptr;
+Context ctx = {};
 
 /**
  * Create platform context, create windows, initialize subsystems. It also
@@ -26,21 +27,18 @@ void CreateContext(const char* window_title,
                    int screen_width,
                    int screen_height)
 {
-    SDL2_Context *ctx = (SDL2_Context *)malloc(sizeof(SDL2_Context));
-    g_sdl2_ctx = ctx;
+    InitSDL(window_title, screen_width, screen_height);
+    InitGL();
+    InitImGui();
 
-    SDL2_InitSDL(ctx, window_title, screen_width, screen_height);
-    SDL2_InitGL(ctx);
-    SDL2_InitImGui(ctx);
-
-    ctx->last_performance_counter = SDL_GetPerformanceCounter();
-    ctx->is_running = true;
-    ctx->window_title = window_title;
-    ctx->screen_width = screen_width;
-    ctx->screen_height = screen_height;
+    ctx.last_performance_counter = SDL_GetPerformanceCounter();
+    ctx.is_running = true;
+    ctx.window_title = window_title;
+    ctx.screen_width = screen_width;
+    ctx.screen_height = screen_height;
     float target_fps = 60.0f;
-    ctx->target_fps = target_fps;
-    ctx->dt = 1.0f / target_fps;
+    ctx.target_fps = target_fps;
+    ctx.dt = 1.0f / target_fps;
 }
 
 /**
@@ -48,16 +46,13 @@ void CreateContext(const char* window_title,
  */
 void DestroyContext()
 {
-    SDL2_Context *ctx = SDL2_GetContext();
-
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 
-    SDL_GL_DeleteContext(ctx->gl_context);
-    SDL_DestroyWindow(ctx->window);
+    SDL_GL_DeleteContext(ctx.gl_context);
+    SDL_DestroyWindow(ctx.window);
     SDL_Quit();
-    free(ctx);
 }
 
 /**
@@ -66,26 +61,22 @@ void DestroyContext()
  */
 void BeginFrame()
 {
-    SDL2_Context *ctx = SDL2_GetContext();
-
     Input::BeginFrame();
 
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
         ImGui_ImplSDL2_ProcessEvent(&event);
-        SDL2_ProcessEvent(&event);
+        ProcessEvent(&event);
     }
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
-    SDL_GetWindowSize(ctx->window,
-                      &ctx->screen_width,
-                      &ctx->screen_height);
+    SDL_GetWindowSize(ctx.window, &ctx.screen_width, &ctx.screen_height);
 
-    glViewport(0, 0, ctx->screen_width, ctx->screen_height);
+    glViewport(0, 0, ctx.screen_width, ctx.screen_height);
 }
 
 /**
@@ -94,14 +85,12 @@ void BeginFrame()
  */
 void EndFrame()
 {
-    SDL2_Context *ctx = SDL2_GetContext();
-
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    SDL_GL_SwapWindow(ctx->window);
+    SDL_GL_SwapWindow(ctx.window);
 
     Uint64 performance_counter = SDL_GetPerformanceCounter();
-    float work_in_seconds = GetSecondsElapsed(ctx->last_performance_counter,
+    float work_in_seconds = GetSecondsElapsed(ctx.last_performance_counter,
                                               performance_counter);
     float dt = DeltaTime();
     if(work_in_seconds < dt)
@@ -110,7 +99,7 @@ void EndFrame()
         unsigned int ms_to_sleep = (unsigned int)(sec_to_sleep * 1000.0f) + 1;
         SDL_Delay(ms_to_sleep);
     }
-    ctx->last_performance_counter = SDL_GetPerformanceCounter();
+    ctx.last_performance_counter = SDL_GetPerformanceCounter();
 }
 
 uint64_t GetPerformanceCounter()
@@ -130,36 +119,24 @@ float GetSecondsElapsed(uint64_t start_counter, uint64_t end_counter)
 
 float DeltaTime()
 {
-    SDL2_Context *ctx = SDL2_GetContext();
-    return ctx->dt;
+    return ctx.dt;
 }
 
 bool IsRunning()
 {
-    SDL2_Context *ctx = SDL2_GetContext();
-    return ctx->is_running;
+    return ctx.is_running;
 }
 
 void GetWindowDimensions(int *screen_width, int *screen_height)
 {
-    SDL2_Context *ctx = SDL2_GetContext();
-    SDL_GetWindowSize(ctx->window, screen_width, screen_height);
-}
-
-/**
- * Returns currently set SDL2_Context
- * Mostly for internal use!
- */
-SDL2_Context *SDL2_GetContext()
-{
-    ASSERT(g_sdl2_ctx != nullptr);
-    return g_sdl2_ctx;
+    *screen_width = ctx.screen_width;
+    *screen_height = ctx.screen_height;
 }
 
 /**
  * Initializes SDL, creates a window, sets SDL_GL attributes.
  */
-static void SDL2_InitSDL(SDL2_Context *ctx, const char *window_title, int screen_width, int screen_height)
+static void InitSDL(const char *window_title, int screen_width, int screen_height)
 {
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
@@ -169,7 +146,7 @@ static void SDL2_InitSDL(SDL2_Context *ctx, const char *window_title, int screen
     SDL_WindowFlags window_flags =
         (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 
-    SDL_Window* window = SDL_CreateWindow(window_title,
+    ctx.window = SDL_CreateWindow(window_title,
                                           SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED,
                                           screen_width, screen_height,
@@ -184,20 +161,22 @@ static void SDL2_InitSDL(SDL2_Context *ctx, const char *window_title, int screen
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     //SDL_GL_SetSwapInterval(1); // Enable vsync
-
-    ctx->window = window;
 }
 
 /**
  * Initializes OpenGL for SDL, loads GL functions, sets GL attributes
  * used throught the program runtime.
  */
-static void SDL2_InitGL(SDL2_Context *ctx)
+static void InitGL()
 {
-    SDL_GLContext gl_context = SDL_GL_CreateContext(ctx->window);
-    SDL_GL_MakeCurrent(ctx->window, gl_context);
+    ctx.gl_context = SDL_GL_CreateContext(ctx.window);
+    SDL_GL_MakeCurrent(ctx.window, ctx.gl_context);
 
     gladLoadGLLoader(SDL_GL_GetProcAddress);
+
+    #ifndef NDEBUG
+        EnableThrowOnOpenGLErrors();
+    #endif
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -207,14 +186,12 @@ static void SDL2_InitGL(SDL2_Context *ctx)
     glDisable(GL_SCISSOR_TEST);
 
     glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
-
-    ctx->gl_context = gl_context;
 }
 
 /**
  * Initializes DearImGui for SDL/OpenGL, sets config flags.
  */
-static void SDL2_InitImGui(SDL2_Context *ctx)
+static void InitImGui()
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -222,28 +199,26 @@ static void SDL2_InitImGui(SDL2_Context *ctx)
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     ImGui::StyleColorsDark();
 
-    const char *glsl_version = "#version 420";
-    ImGui_ImplSDL2_InitForOpenGL(ctx->window, ctx->gl_context);
+    const char *glsl_version = "#version 430";
+    ImGui_ImplSDL2_InitForOpenGL(ctx.window, ctx.gl_context);
     ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
-static void SDL2_ProcessEvent(const SDL_Event* event)
+static void ProcessEvent(const SDL_Event* event)
 {
-    SDL2_Context *ctx = SDL2_GetContext();
-
     switch(event->type)
     {
         case SDL_QUIT:
         {
-            ctx->is_running = false;
+            ctx.is_running = false;
         } break;
 
         case SDL_WINDOWEVENT:
         {
             if(event->window.event == SDL_WINDOWEVENT_CLOSE &&
-               event->window.windowID == SDL_GetWindowID(ctx->window))
+               event->window.windowID == SDL_GetWindowID(ctx.window))
             {
-                ctx->is_running = false;
+                ctx.is_running = false;
             }
         } break;
 
@@ -268,16 +243,16 @@ static void SDL2_ProcessEvent(const SDL_Event* event)
                 if((alt_is_down && kc == SDLK_RETURN)
                    || (kc == SDLK_F11))
                 {
-                    ctx->is_fullscreen = !ctx->is_fullscreen;
+                    ctx.is_fullscreen = !ctx.is_fullscreen;
                     SDL_WindowFlags flags = (SDL_WindowFlags)0;
-                    if(ctx->is_fullscreen)
+                    if(ctx.is_fullscreen)
                         flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
-                    SDL_SetWindowFullscreen(ctx->window, flags);
+                    SDL_SetWindowFullscreen(ctx.window, flags);
                 }
 
                 if(alt_is_down && kc == SDLK_F4)
                 {
-                    ctx->is_running = false;
+                    ctx.is_running = false;
                 }
             }
         } break;

@@ -11,7 +11,6 @@
 #include "platform.h"
 #include "graphics/opengl3_renderer.h"
 #include "graphics/opengl3_draw_queue.h"
-#include "graphics/opengl3_debug.h"
 
 enum class Facing {LEFT, RIGHT};
 
@@ -21,10 +20,10 @@ struct Player
 
     glm::vec2 position = glm::vec2(0.0f, 0.0f);
     glm::vec2 velocity = glm::vec2(0.0f, 0.0f);
-    int lifetime = 0;
+    unsigned int lifetime = 0;
     Facing facing = Facing::RIGHT;
 
-    void update()
+    void Update()
     {
         position += velocity * OS::DeltaTime();
 
@@ -34,7 +33,7 @@ struct Player
         ++lifetime;
     }
 
-    void control()
+    void Control()
     {
         glm::vec2 move_dir = glm::vec2(0.0f, 0.0f);
         // Left/right movement
@@ -50,9 +49,6 @@ const float Player::move_speed = 4.0f;
 int main(int, char**)
 {
     OS::CreateContext("Nie patrz mi sie na tytul", 960, 540);
-    #ifndef NDEBUG
-        EnableThrowOnOpenGLErrors();
-    #endif
 
     int screen_width, screen_height;
     Player player;
@@ -71,8 +67,8 @@ int main(int, char**)
         OS::BeginFrame();
         OS::GetWindowDimensions(&screen_width, &screen_height);
 
-        player.control();
-        player.update();
+        player.Control();
+        player.Update();
 
         draw_queue.Clear();
         draw_queue.SetViewportDimensions({screen_width, screen_height});
@@ -85,22 +81,21 @@ int main(int, char**)
         draw_queue.AddLight({0,0}, {2, 2, 1.5f}, 200);
 
         // Render the player
-        int playerTileIdx;
+        int player_tile_idx;
         if(ABS(player.velocity.x) <= 0.001)
-            playerTileIdx = (player.lifetime / 10) % 4;
+            player_tile_idx = (player.lifetime / 10) % 4;
         else
-            playerTileIdx = (player.lifetime / 10) % 4 + 8;
-        draw_queue.AddEntity(player.position, texture, playerTileIdx, player.facing == Facing::LEFT);
+            player_tile_idx = (player.lifetime / 10) % 4 + 8;
+        draw_queue.AddEntity(player.position, texture, player_tile_idx, player.facing == Facing::LEFT);
 
         // Render a shockwave
         Shockwave shockwave;
-        float progress =  (SDL_GetTicks() % 500) / 500.0f;
+        float progress = (SDL_GetTicks() % 500) / 500.0f;
         shockwave.center = glm::vec2(50, 25);
         shockwave.radius = progress * 100;
         shockwave.scale = 20;
         shockwave.strength = 20;
         draw_queue.AddShockwave(shockwave);
-
 
         renderer.render(draw_queue);
         OS::EndFrame();

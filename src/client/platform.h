@@ -15,8 +15,7 @@
 
 namespace OS {
 
-// Holds all data required for running SDL_GL context
-struct SDL2_Context
+struct Context
 {
     SDL_Window *window;
     SDL_GLContext gl_context;
@@ -31,13 +30,10 @@ struct SDL2_Context
     float dt;
 };
 
-SDL2_Context *SDL2_GetContext();
-static void SDL2_InitSDL(SDL2_Context *ctx,
-                         const char *window_title,
-                         int screen_width, int screen_height);
-static void SDL2_InitGL(SDL2_Context *ctx);
-static void SDL2_InitImGui(SDL2_Context *ctx);
-static void SDL2_ProcessEvent(const SDL_Event* event);
+static void InitSDL(const char *window_title, int screen_width, int screen_height);
+static void InitGL();
+static void InitImGui();
+static void ProcessEvent(const SDL_Event *event);
 
 void CreateContext(const char *window_title, int screen_width, int screen_height);
 void DestroyContext();
