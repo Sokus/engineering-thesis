@@ -1,6 +1,6 @@
 #include "address.h"
 
-namespace net {
+namespace Net {
 
 Address::Address()
 {
@@ -46,4 +46,4 @@ bool AddressCompare(Address a, Address b)
     return result;
 }
 
-} // namespace net
+} // namespace Net

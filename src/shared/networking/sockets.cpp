@@ -16,7 +16,7 @@
 #include "address.h"
 #include "log.h"
 
-namespace net {
+namespace Net {
 
 bool InitializeSockets()
 {
@@ -157,4 +157,4 @@ int Socket::Receive(Address *sender, void *data, int size)
     return bytes_received;
 }
 
-} // namespace net
+} // namespace Net

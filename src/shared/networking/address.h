@@ -1,7 +1,7 @@
 #ifndef PI_ADDRESS_H
 #define PI_ADDRESS_H
 
-namespace net {
+namespace Net {
 
 class Address
 {
@@ -32,6 +32,6 @@ public:
 
 bool AddressCompare(Address a, Address b);
 
-} // namespace net
+} // namespace Net
 
 #endif // PI_ADDRESS_H

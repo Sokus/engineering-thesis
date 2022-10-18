@@ -5,7 +5,7 @@
 
 #include "address.h"
 
-namespace net {
+namespace Net {
 
 class Socket
 {
@@ -29,6 +29,6 @@ public:
 bool InitializeSockets();
 void ShutdownSockets();
 
-} // namespace net
+} // namespace Net
 
 #endif // PI_SOCKETS_H

@@ -3,10 +3,10 @@
 
 #include "address.h"
 
-namespace net {
+namespace Net {
 
 unsigned int QueryDNS(const char *hostname);
 
-} // namespace net
+} // namespace Net
 
 #endif // PI_DNS_H

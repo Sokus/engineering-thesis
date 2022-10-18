@@ -5,9 +5,9 @@
 int main(int argc, char *argv[])
 {
     Log(LOG_INFO, "Server starting");
-    net::InitializeSockets();
+    Net::InitializeSockets();
 
     Log(LOG_INFO, "Server shutting down");
-    net::ShutdownSockets();
+    Net::ShutdownSockets();
     return 0;
 }

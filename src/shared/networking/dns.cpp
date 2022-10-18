@@ -14,7 +14,7 @@
 #include "dns.h"
 #include "log.h"
 
-namespace net {
+namespace Net {
 
 unsigned int QueryDNS(const char *hostname)
 {
@@ -53,4 +53,4 @@ unsigned int QueryDNS(const char *hostname)
     return 0;
 }
 
-} // namespace net
+} // namespace Net
