@@ -1,47 +1,53 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "serialize.h"
-#include "bitpacker.h"
+#include "networking/address.h"
+#include "networking/sockets.h"
+#include "serialization/serialize.h"
+#include "serialization/bitpacker.h"
 #include "log.h"
 
-typedef struct vec2i
+const char *StringifyBool(bool value)
 {
-    int x, y;
-} vec2i;
+    switch(value)
+    {
+        case false: return "false";
+        case true:  return "true";
+    }
+
+    return "???";
+}
 
 int main(int argc, char *argv[])
 {
+    Log(LOG_INFO, "Client starting");
+    Net::InitializeSockets();
+
+    Net::Socket socket = Net::Socket();
+
     bool ob1 = true;
     bool ob2 = false;
     bool ob3 = true;
-    vec2i ov = { -1, 1 };
 
     char buffer[128];
     BitPacker bw = BitWriter(buffer, sizeof(buffer));
     SERIALIZE_BOOL(&bw, &ob1);
     SERIALIZE_BOOL(&bw, &ob2);
     SERIALIZE_BOOL(&bw, &ob3);
-    SerializeInteger(&bw, &ov.x, -1, 1);
-    SerializeInteger(&bw, &ov.y, -1, 1);
-    Log(LOG_INFO, "bits used: %d", BitsWritten(&bw));
     Flush(&bw);
 
-    bool ib1 = false;
-    bool ib2 = false;
-    bool ib3 = false;
-    vec2i iv = {0};
-    BitPacker br = BitReader(buffer, sizeof(buffer));
-    SERIALIZE_BOOL(&br, &ib1);
-    SERIALIZE_BOOL(&br, &ib2);
-    SERIALIZE_BOOL(&br, &ib3);
-    SerializeInteger(&br, &iv.x, -1, 1);
-    SerializeInteger(&br, &iv.y, -1, 1);
-    Log(LOG_INFO, "\n"
-        "  bool(1): %d\n"
-        "  bool(2): %d\n"
-        "  bool(3): %d\n"
-        "  vec2i: %d %d", ib1, ib2, ib3, iv.x, iv.y);
+    Log(LOG_INFO,
+        "Sending three booleans: %s %s %s",
+        StringifyBool(ob1),
+        StringifyBool(ob2),
+        StringifyBool(ob3)
+    );
+
+    Net::Address server = Net::Address(127, 0, 0, 1, 25565);
+    socket.Send(server, buffer, BytesWritten(&bw));
+
+    Log(LOG_INFO, "Client shutting down");
+    Net::ShutdownSockets();
 
     return 0;
 }
