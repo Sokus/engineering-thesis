@@ -38,6 +38,11 @@ bool RingBuffer::WouldOverflow(size_t bytes)
     return bytes_written + bytes > size;
 }
 
+size_t RingBuffer::BytesWritten()
+{
+    return bytes_written;
+}
+
 void RingBuffer::Write(void *data, size_t bytes)
 {
     ASSERT(bytes_written + bytes <= size);

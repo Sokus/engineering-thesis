@@ -22,7 +22,7 @@ public:
     Socket(unsigned short port);
     Socket(unsigned short port, bool should_block);
     ~Socket();
-    bool Send(const Address& destination, const void *data, int size);
+    bool Send(const Address& destination, const void *data, int size) const;
     int Receive(Address *sender, void *data, int size);
 };
 

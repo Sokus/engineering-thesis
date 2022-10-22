@@ -28,6 +28,9 @@ bool SerializeInteger(BitPacker *bit_packer, int32_t *value, int32_t min, int32_
     } while (0)
 
 #define SERIALIZE_INT32(bit_packer_ptr, value_ptr) SERIALIZE_BITS((bit_packer_ptr), int32_t, (value_ptr), 32)
+#define SERIALIZE_INT16(bit_packer_ptr, value_ptr) SERIALIZE_BITS((bit_packer_ptr), int16_t, (value_ptr), 16)
+#define SERIALIZE_UINT32(bit_packer_ptr, value_ptr) SERIALIZE_BITS((bit_packer_ptr), uint32_t, (value_ptr), 32)
+#define SERIALIZE_UINT16(bit_packer_ptr, value_ptr) SERIALIZE_BITS((bit_packer_ptr), uint16_t, (value_ptr), 16)
 #define SERIALIZE_BOOL(bit_packer_ptr, value_ptr) SERIALIZE_BITS((bit_packer_ptr), bool, (value_ptr), 1)
 
 #define SERIALIZE_INT(bit_packer_ptr, value_ptr, min, max)\

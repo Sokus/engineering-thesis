@@ -117,7 +117,7 @@ Socket::~Socket()
 #endif
 }
 
-bool Socket::Send(const Address& destination, const void *data, int size)
+bool Socket::Send(const Address& destination, const void *data, int size) const
 {
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
@@ -144,15 +144,11 @@ int Socket::Receive(Address *sender, void *data, int size)
     struct sockaddr *from_ptr = (struct sockaddr *)&from;
     int bytes_received = (int)recvfrom(handle, (char *)data, (size_t)size, 0, from_ptr, &from_length);
 
+    if(bytes_received < 0)
+        bytes_received = 0;
+
     if(sender != nullptr)
         *sender = Address(ntohl(from.sin_addr.s_addr), ntohs(from.sin_port));
-
-    if(bytes_received == -1)
-    {
-        if(errno != EWOULDBLOCK)
-            Log(LOG_ERROR, "Error while receiving data: ", strerror(errno));
-        bytes_received = 0;
-    }
 
     return bytes_received;
 }

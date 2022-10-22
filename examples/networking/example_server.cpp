@@ -1,47 +1,57 @@
-#include "networking/address.h"
-#include "networking/sockets.h"
-#include "serialization/serialize.h"
-#include "serialization/bitpacker.h"
+#include "networking/networking.h"
+#include "serialization/serialization.h"
 #include "log.h"
+#include "Windows.h"
 
-const char *StringifyBool(bool value)
-{
-    switch(value)
-    {
-        case false: return "false";
-        case true:  return "true";
-    }
-
-    return "???";
-}
+#include <stddef.h>
+#include <stdio.h>
 
 int main(int argc, char *argv[])
 {
-    Log(LOG_INFO, "Server starting");
     Net::InitializeSockets();
 
-    Net::Socket socket = Net::Socket(25565, true);
-    Log(LOG_INFO, "Waiting for a packet");
-    unsigned char data[4096];
-    Net::Address sender;
-    int data_size = socket.Receive(&sender, data, 4096);
+    Net::Socket socket = Net::Socket(48620, false);
+    Net::Channel channel = Net::Channel();
 
-    bool ib1;
-    bool ib2;
-    bool ib3;
-    BitPacker br = BitReader(data, sizeof(data));
-    SERIALIZE_BOOL(&br, &ib1);
-    SERIALIZE_BOOL(&br, &ib2);
-    SERIALIZE_BOOL(&br, &ib3);
+    bool got_anything = false;
 
-    Log(LOG_INFO,
-        "Booleans received: %s %s %s",
-        StringifyBool(ib1),
-        StringifyBool(ib2),
-        StringifyBool(ib3)
-    );
+    int counter = 0;
 
-    Log(LOG_INFO, "Server shutting down");
+    while(true)
+    {
+        uint8_t in_buf[2048];
+        Net::Address sender;
+        int bytes_received;
+        while(bytes_received = socket.Receive(&sender, in_buf, sizeof(in_buf)))
+        {
+            if(got_anything == false)
+            {
+                static Net::Address sender_static = sender;
+                channel.Bind(&socket, &sender_static);
+                got_anything = true;
+            }
+
+            channel.Receive(in_buf, bytes_received);
+        }
+
+        Sleep(2000);
+
+        int data_size;
+        void *data;
+        while(data = channel.GetData(&data_size))
+        {
+            printf("Got %u bytes of data: %i\n", data_size, *((int*)data));
+        }
+
+        if(got_anything)
+        {
+            channel.Send(&counter, sizeof(counter));
+        }
+
+        printf("Counter: %d\n", counter++);
+    }
+
     Net::ShutdownSockets();
+
     return 0;
 }

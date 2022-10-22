@@ -1,52 +1,47 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "networking/address.h"
-#include "networking/sockets.h"
-#include "serialization/serialize.h"
-#include "serialization/bitpacker.h"
+#include "networking/networking.h"
+#include "serialization/serialization.h"
 #include "log.h"
+#include "Windows.h"
 
-const char *StringifyBool(bool value)
-{
-    switch(value)
-    {
-        case false: return "false";
-        case true:  return "true";
-    }
-
-    return "???";
-}
 
 int main(int argc, char *argv[])
 {
-    Log(LOG_INFO, "Client starting");
     Net::InitializeSockets();
 
-    Net::Socket socket = Net::Socket();
+    Net::Socket socket = Net::Socket(48700, false);
+    Net::Address server = Net::Address(127, 0, 0, 1, 48620);
+    Net::Channel channel = Net::Channel();
+    channel.Bind(&socket, &server);
 
-    bool ob1 = true;
-    bool ob2 = false;
-    bool ob3 = true;
+    int counter = 0;
 
-    char buffer[128];
-    BitPacker bw = BitWriter(buffer, sizeof(buffer));
-    SERIALIZE_BOOL(&bw, &ob1);
-    SERIALIZE_BOOL(&bw, &ob2);
-    SERIALIZE_BOOL(&bw, &ob3);
-    Flush(&bw);
+    while(true)
+    {
+        uint8_t in_buf[2048];
+        Net::Address sender;
+        int bytes_received;
+        while(bytes_received = socket.Receive(&sender, in_buf, sizeof(in_buf)))
+        {
+            channel.Receive(in_buf, bytes_received);
+        }
 
-    Log(LOG_INFO,
-        "Sending three booleans: %s %s %s",
-        StringifyBool(ob1),
-        StringifyBool(ob2),
-        StringifyBool(ob3)
-    );
+        Sleep(1000);
 
-    Net::Address server = Net::Address(127, 0, 0, 1, 25565);
-    socket.Send(server, buffer, BytesWritten(&bw));
+        int data_size;
+        void *data;
+        while(data = channel.GetData(&data_size))
+        {
+            printf("Got %u bytes of data: %i\n", data_size, *((int*)data));
+        }
 
-    Log(LOG_INFO, "Client shutting down");
+        channel.Send(&counter, sizeof(counter));
+
+        printf("Counter: %d\n", counter++);
+    }
+
     Net::ShutdownSockets();
 
     return 0;
