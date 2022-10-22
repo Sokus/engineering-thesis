@@ -20,7 +20,7 @@ uint32_t Channel::GetAckBits(uint16_t ack)
 
     for(int offset = 0; offset < 32; offset++)
     {
-        int index = (ack - offset - 1) % buffer_size;
+        int index = (ack + buffer_size - offset - 1) % buffer_size;
         if(received_packets[index])
             ack_bits |= (1 << offset);
     }
