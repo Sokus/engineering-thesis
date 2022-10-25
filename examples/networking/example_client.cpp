@@ -12,34 +12,32 @@ int main(int argc, char *argv[])
     Net::InitializeSockets();
 
     Net::Socket socket = Net::Socket(48700, false);
-    Net::Address server = Net::Address(127, 0, 0, 1, 48620);
-    Net::Channel channel = Net::Channel();
-    channel.Bind(&socket, &server);
+    Net::Address address = Net::Address(127, 0, 0, 1, 48620);
 
-    int counter = 0;
+    Net::Channel channel = Net::Channel();
+    channel.Bind(&socket, &address);
 
     while(true)
     {
-        uint8_t in_buf[2048];
-        Net::Address sender;
+        uint8_t buffer[4096];
         int bytes_received;
-        while(bytes_received = socket.Receive(&sender, in_buf, sizeof(in_buf)))
+        while(bytes_received = socket.Receive(nullptr, buffer, 4096))
         {
-            channel.Receive(in_buf, bytes_received);
+            printf("Packet received.\n");
+            channel.ReceivePacket(buffer, bytes_received);
         }
 
-        Sleep(1000);
-
-        int data_size;
-        void *data;
-        while(data = channel.GetData(&data_size))
+        while(channel.ReceiveMessage(buffer, &bytes_received))
         {
-            printf("Got %u bytes of data: %i\n", data_size, *((int*)data));
+            printf("Message received.\n");
         }
 
-        channel.Send(&counter, sizeof(counter));
+        printf("Sending message.\n");
+        channel.SendMessageCh(buffer, 1, false);
 
-        printf("Counter: %d\n", counter++);
+        channel.Update(1.0f/60.0f);
+        channel.SendPackets();
+        Sleep(16);
     }
 
     Net::ShutdownSockets();

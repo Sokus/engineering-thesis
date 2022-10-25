@@ -11,44 +11,48 @@ int main(int argc, char *argv[])
     Net::InitializeSockets();
 
     Net::Socket socket = Net::Socket(48620, false);
+
     Net::Channel channel = Net::Channel();
 
-    bool got_anything = false;
-
-    int counter = 0;
+    Net::Address address;
+    Net::Address address2;
+    bool received_anything = false;
 
     while(true)
     {
-        uint8_t in_buf[2048];
-        Net::Address sender;
+        uint8_t buffer[4096];
         int bytes_received;
-        while(bytes_received = socket.Receive(&sender, in_buf, sizeof(in_buf)))
+        while(bytes_received = socket.Receive(&address, buffer, 4096))
         {
-            if(got_anything == false)
+            if(received_anything == false)
             {
-                static Net::Address sender_static = sender;
-                channel.Bind(&socket, &sender_static);
-                got_anything = true;
+                address2 = address;
+                channel.Bind(&socket, &address2);
+                received_anything = true;
             }
 
-            channel.Receive(in_buf, bytes_received);
+            printf("Packet received from: %d.%d.%d.%d:%d.\n",
+                   address.GetA(),
+                   address.GetB(),
+                   address.GetC(),
+                   address.GetD(),
+                   address.GetPort());
+            channel.ReceivePacket(buffer, bytes_received);
         }
 
-        Sleep(2000);
-
-        int data_size;
-        void *data;
-        while(data = channel.GetData(&data_size))
+        while(channel.ReceiveMessage(buffer, &bytes_received))
         {
-            printf("Got %u bytes of data: %i\n", data_size, *((int*)data));
+            printf("Message received.\n");
         }
 
-        if(got_anything)
+        if(received_anything)
         {
-            channel.Send(&counter, sizeof(counter));
+            printf("Sending message.\n");
+            channel.SendMessageCh(buffer, 1, false);
         }
-
-        printf("Counter: %d\n", counter++);
+        channel.Update(2.0f/60.0f);
+        channel.SendPackets();
+        Sleep(33);
     }
 
     Net::ShutdownSockets();
