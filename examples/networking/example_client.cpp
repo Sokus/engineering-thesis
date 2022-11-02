@@ -4,7 +4,8 @@
 #include "networking/networking.h"
 #include "serialization/serialization.h"
 #include "log.h"
-#include "Windows.h"
+
+#include <unistd.h>
 
 
 int main(int argc, char *argv[])
@@ -23,21 +24,19 @@ int main(int argc, char *argv[])
         int bytes_received;
         while(bytes_received = socket.Receive(nullptr, buffer, 4096))
         {
-            printf("Packet received.\n");
             channel.ReceivePacket(buffer, bytes_received);
         }
 
         while(channel.ReceiveMessage(buffer, &bytes_received))
         {
-            printf("Message received.\n");
         }
 
-        printf("Sending message.\n");
-        channel.SendMessageCh(buffer, 1, false);
+        channel.SendMessageCh(buffer, 1, true);
 
-        channel.Update(1.0f/60.0f);
+        channel.Update(1000.0f);
         channel.SendPackets();
-        Sleep(16);
+        sleep(1);
+        printf("\n");
     }
 
     Net::ShutdownSockets();

@@ -41,6 +41,8 @@ uint32_t Channel::GetAckBits(uint16_t ack)
 
 void Channel::ReceiveSequence(uint16_t sequence)
 {
+    printf("Received sequence: %u\n", sequence);
+
     if(SequenceGreaterThan(sequence, remote.sequence))
     {
         for(uint16_t missing_sequence = remote.sequence + 1;
@@ -64,6 +66,8 @@ void Channel::AckPacket(uint16_t sequence)
 
     if(ps != nullptr && ps->acked == false)
     {
+        printf("Acked %u\n", sequence);
+
         for(int ordered_message_idx = 0;
             ordered_message_idx < ps->ordered_message_count;
             ++ordered_message_idx)
@@ -159,7 +163,7 @@ void Channel::SendPackets()
                 ph->ordered_message_count++;
                 message_count++;
 
-                msg_stat->send_cooldown = 0.1f; // send every 100ms
+                msg_stat->send_cooldown = 6000.0f;
             }
         }
     }
@@ -193,6 +197,8 @@ void Channel::SendPackets()
 
     if(message_count > 0)
     {
+        printf("Sending sequence: %u\n", local.sequence);
+
         ph->sequence = local.sequence;
         ph->ack = remote.sequence;
         ph->ack_bits = GetAckBits(remote.sequence);
@@ -232,8 +238,11 @@ void Channel::ReceivePacket(void *data, int size)
 
         if(data_used + message_size > size) break;
 
-        if(SequenceGreaterThan(message_id, remote.ordered_messages.read_id))
+        if(SequenceGreaterThan(message_id, remote.ordered_messages.read_id) ||
+           message_id == remote.ordered_messages.read_id)
         {
+            printf("Received ordered message: %u\n", message_id);
+
             const int index = remote.ordered_messages.write_id % MESSAGE_BUFFER_SIZE;
             Message *msg = remote.ordered_messages.elements + index;
             msg->id = message_id;
@@ -241,7 +250,8 @@ void Channel::ReceivePacket(void *data, int size)
             msg->data = malloc(message_size);
             memcpy(msg->data, (uint8_t *)data + data_used, message_size);
 
-            if(SequenceGreaterThan(message_id, remote.ordered_messages.write_id))
+            if(SequenceGreaterThan(message_id, remote.ordered_messages.write_id) ||
+               message_id == remote.ordered_messages.write_id)
             {
                 uint16_t id = remote.ordered_messages.write_id;
                 while(id != message_id)

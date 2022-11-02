@@ -9,7 +9,7 @@
 BitPacker BitWriter(void *buffer, int bytes)
 {
     ASSERT(bytes % 4 == 0);
-    BitPacker result = {0};
+    BitPacker result = {};
     result.mode = BIT_WRITER;
     result.buffer = (uint32_t *)buffer;
     result.word_capacity = bytes / 4;
@@ -64,7 +64,7 @@ void Flush(BitPacker *bit_writer)
 BitPacker BitReader(void *buffer, int bytes)
 {
     ASSERT(bytes % 4 == 0);
-    BitPacker result = {0};
+    BitPacker result = {};
     result.mode = BIT_READER;
     result.buffer = (uint32_t *)buffer;
     result.word_count = bytes / 4;

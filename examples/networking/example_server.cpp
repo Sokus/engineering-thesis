@@ -1,7 +1,8 @@
 #include "networking/networking.h"
 #include "serialization/serialization.h"
 #include "log.h"
-#include "Windows.h"
+
+#include <unistd.h>
 
 #include <stddef.h>
 #include <stdio.h>
@@ -31,28 +32,21 @@ int main(int argc, char *argv[])
                 received_anything = true;
             }
 
-            printf("Packet received from: %d.%d.%d.%d:%d.\n",
-                   address.GetA(),
-                   address.GetB(),
-                   address.GetC(),
-                   address.GetD(),
-                   address.GetPort());
             channel.ReceivePacket(buffer, bytes_received);
         }
 
         while(channel.ReceiveMessage(buffer, &bytes_received))
         {
-            printf("Message received.\n");
         }
 
         if(received_anything)
         {
-            printf("Sending message.\n");
-            channel.SendMessageCh(buffer, 1, false);
+            channel.SendMessageCh(buffer, 1, true);
         }
-        channel.Update(2.0f/60.0f);
+        channel.Update(3000.0f);
         channel.SendPackets();
-        Sleep(33);
+        sleep(3);
+        printf("\n");
     }
 
     Net::ShutdownSockets();
