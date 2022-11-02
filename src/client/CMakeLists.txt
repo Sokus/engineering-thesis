@@ -6,15 +6,12 @@ file(GLOB CLIENT_GRAPHICS_SRC graphics/*.cpp)
 add_executable(client
 	client_main.cpp
 	${CLIENT_SRC}
-	${CLIENT_GRAPHICS_SRC}
+	#${CLIENT_GRAPHICS_SRC}
 )
 
 target_link_libraries(client
-	SDL2::SDL2
-	glad::glad
 	glm::glm
-	imgui::imgui
-	stb::image
+	raylib
     shared
 )
 
