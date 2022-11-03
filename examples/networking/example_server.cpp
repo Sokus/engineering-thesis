@@ -2,10 +2,17 @@
 #include "serialization/serialization.h"
 #include "log.h"
 
-#include <unistd.h>
+#include "config.h"
+
+#if defined(PLATFORM_LINUX)
+    #include <unistd.h>
+#elif defined(PLATFORM_WINDOWS)
+    #include <Windows.h>
+#endif
 
 #include <stddef.h>
 #include <stdio.h>
+
 
 int main(int argc, char *argv[])
 {
@@ -39,14 +46,22 @@ int main(int argc, char *argv[])
         {
         }
 
+
+        #if defined(PLATFORM_LINUX)
+            sleep(3);
+        #elif defined(PLATFORM_WINDOWS)
+            Sleep(3000);
+        #endif
+
+        printf("\n");
+
         if(received_anything)
         {
             channel.SendMessageCh(buffer, 1, true);
         }
         channel.Update(3000.0f);
         channel.SendPackets();
-        sleep(3);
-        printf("\n");
+
     }
 
     Net::ShutdownSockets();
