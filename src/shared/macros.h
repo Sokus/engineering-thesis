@@ -14,6 +14,7 @@
 //#define CLAMP(a, x, b) (((x)<(a))?(a):\
 //                        ((x)>(b))?(b):(x))
 #define ABS(a) (((a) >= 0) ? (a) : -(a))
+#define ABSF(a) (((a) >= 0.0f) ? (a) : (-a))
 #define SIGN(x) (((x) > 0) - ((x) < 0))
 
 #endif //BASE_COMMON_H
