@@ -5,6 +5,11 @@
 #include <string.h> // memcpy
 #include <stdint.h> // uint8_t
 
+RingBuffer::RingBuffer()
+{
+    memset(this, 0x00, sizeof(RingBuffer));
+}
+
 RingBuffer::RingBuffer(void *buffer, size_t size)
 : buffer(buffer), size(size)
 {
@@ -61,9 +66,22 @@ void RingBuffer::Write(void *data, size_t bytes)
     bytes_written += bytes;
 }
 
-void RingBuffer::Write(int value)
+size_t RingBuffer::WriteOffset()
 {
-    Write(&value, sizeof(value));
+    return write_offset;
+}
+
+void RingBuffer::RewindWrite(size_t position)
+{
+    size_t bytes_to_rewind;
+    if(position <= write_offset)
+        bytes_to_rewind = write_offset - position;
+    else
+        bytes_to_rewind = write_offset + (size - position);
+
+    ASSERT(bytes_to_rewind <= bytes_written);
+    write_offset = position;
+    bytes_written -= bytes_to_rewind;
 }
 
 void RingBuffer::Read(void *data, size_t bytes)
@@ -84,7 +102,21 @@ void RingBuffer::Read(void *data, size_t bytes)
     bytes_written -= bytes;
 }
 
-void RingBuffer::Read(int& value)
+size_t RingBuffer::ReadOffset()
 {
-    Read(&value, sizeof(value));
+    return read_offset;
 }
+
+void RingBuffer::RewindRead(size_t position)
+{
+    size_t bytes_to_rewind;
+    if(position <= read_offset)
+        bytes_to_rewind = read_offset - position;
+    else
+        bytes_to_rewind = read_offset + (size - position);
+
+    ASSERT(bytes_written + bytes_to_rewind <= size);
+    read_offset = position;
+    bytes_written += bytes_to_rewind;
+}
+

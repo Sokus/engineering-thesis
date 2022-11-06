@@ -10,7 +10,16 @@ namespace Game {
 enum EntityType
 {
     NONE,
-    PLAYER
+    PLAYER,
+    ENEMY,
+};
+
+enum PlayerVariant
+{
+    PLAYER_RED,
+    PLAYER_GREEN,
+    PLAYER_BLUE,
+    PLAYER_WHITE,
 };
 
 struct Entity
@@ -24,6 +33,7 @@ struct Entity
     int facing;
 
     float move_speed;
+    int variant;
 
     // CLIENT STATE
 
@@ -51,8 +61,6 @@ public:
     Entity *GetNewEntity();
     Entity *CreatePlayer(float pos_x, float pos_y);
 };
-
-void LoadTextures();
 
 } // namespace Game
 

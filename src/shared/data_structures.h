@@ -14,6 +14,7 @@ private:
 
     bool free_on_destroy;
 public:
+    RingBuffer();
     RingBuffer(void *buffer, size_t size);
     RingBuffer(size_t size);
     ~RingBuffer();
@@ -23,10 +24,15 @@ public:
     size_t BytesWritten();
 
     void Write(void *data, size_t bytes);
-    void Write(int value);
+    size_t WriteOffset();
+    void RewindWrite(size_t position);
 
     void Read(void *data, size_t bytes);
-    void Read(int& value);
+    size_t ReadOffset();
+    void RewindRead(size_t position);
+
+
+
 };
 
 #endif // DATA_STRUCTURES_H
