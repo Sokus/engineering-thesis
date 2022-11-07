@@ -7,7 +7,7 @@
 
 RingBuffer::RingBuffer()
 {
-    memset(this, 0x00, sizeof(RingBuffer));
+    free_on_destroy = false;
 }
 
 RingBuffer::RingBuffer(void *buffer, size_t size)
@@ -29,6 +29,19 @@ RingBuffer::~RingBuffer()
 {
     if(free_on_destroy)
         free(buffer);
+}
+
+void RingBuffer::Init(void *buffer, size_t size)
+{
+    if(free_on_destroy)
+    {
+        free(this->buffer);
+        free_on_destroy = false;
+    }
+
+    this->buffer = buffer;
+    this->size = size;
+    Clear();
 }
 
 void RingBuffer::Clear()
@@ -120,3 +133,81 @@ void RingBuffer::RewindRead(size_t position)
     bytes_written += bytes_to_rewind;
 }
 
+Arena::Arena()
+{
+    free_on_destroy = false;
+}
+
+Arena::Arena(void *buffer, size_t size)
+: buffer(buffer), size(size)
+{
+    this->free_on_destroy = false;
+    Clear();
+}
+
+Arena::Arena(size_t size)
+: size(size)
+{
+    buffer = malloc(size);
+    free_on_destroy = true;
+    Clear();
+}
+
+Arena::~Arena()
+{
+    if(free_on_destroy)
+        free(buffer);
+}
+
+void Arena::Init(void *buffer, size_t size)
+{
+    if(free_on_destroy)
+    {
+        free(this->buffer);
+        free_on_destroy = false;
+    }
+
+    this->buffer = buffer;
+    this->size = size;
+    Clear();
+}
+
+void Arena::Clear()
+{
+    offset = 0;
+}
+
+bool Arena::WouldOverflow(size_t bytes)
+{
+    return offset + bytes > size;
+}
+
+void *Arena::Push(size_t size)
+{
+    void *result = 0;
+    bool can_fit = WouldOverflow(size);
+    ASSERT(can_fit);
+    if(can_fit)
+    {
+        result = (uint8_t *)buffer + offset;
+        offset += size;
+    }
+    return result;
+}
+
+void Arena::Pop(size_t size)
+{
+    ASSERT(offset >= size);
+    offset -= size;
+}
+
+size_t Arena::Offset()
+{
+    return offset;
+}
+
+void Arena::Rewind(size_t offset)
+{
+    ASSERT(offset >= 0 && offset <= size);
+    this->offset = offset;
+}

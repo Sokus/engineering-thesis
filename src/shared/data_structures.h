@@ -19,6 +19,7 @@ public:
     RingBuffer(size_t size);
     ~RingBuffer();
 
+    void Init(void *buffer, size_t size);
     void Clear();
     bool WouldOverflow(size_t bytes);
     size_t BytesWritten();
@@ -30,9 +31,31 @@ public:
     void Read(void *data, size_t bytes);
     size_t ReadOffset();
     void RewindRead(size_t position);
+};
 
+class Arena
+{
+private:
+    void *buffer;
+    size_t size;
+    size_t offset;
 
+    bool free_on_destroy;
+public:
+    Arena();
+    Arena(void *buffer, size_t size);
+    Arena(size_t size);
+    ~Arena();
 
+    void Init(void *buffer, size_t size);
+    void Clear();
+    bool WouldOverflow(size_t bytes);
+
+    void *Push(size_t size);
+    void Pop(size_t size);
+
+    size_t Offset();
+    void Rewind(size_t offset);
 };
 
 #endif // DATA_STRUCTURES_H
