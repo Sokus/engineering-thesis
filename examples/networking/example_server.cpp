@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
             printf("Message received: %u\n", *(uint32_t *)buffer);
         }
 
-        Time::SleepMs(15);
+        Time::SleepMs(300);
 
         if(received_anything)
         {
