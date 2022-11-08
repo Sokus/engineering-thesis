@@ -31,7 +31,7 @@ void Setup()
     #else
         struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);
-        state.start = (uint64_t)ts.tv_sec*1000000000 + (uint64_t)tv.tv_nsec;
+        state.start = (uint64_t)ts.tv_sec*1000000000 + (uint64_t)ts.tv_nsec;
         state.sleep_granular = true;
     #endif
 }
@@ -56,7 +56,7 @@ uint64_t Now()
     #else
         struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);
-        now = ((uint64_t)ts.tv_sec*1000000000 + (uint64_t)ts.tv_nsec) - _stm.start;
+        now = ((uint64_t)ts.tv_sec*1000000000 + (uint64_t)ts.tv_nsec) - state.start;
     #endif
     return now;
 }

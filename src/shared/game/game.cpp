@@ -5,6 +5,8 @@
 
 #include "glm/glm.hpp"
 
+#include <string.h>
+
 namespace Game {
 
 void Entity::Update(float dt)
