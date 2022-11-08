@@ -11,9 +11,8 @@ namespace Net {
 
 Channel::Channel()
 {
-    out.standard_messages = RingBuffer(1024);
-    in.read_offset = 0;
-    in.write_offset = 0;
+    out.standard_messages.Init(1024);
+    in.messages.Init(1024);
 }
 
 void Channel::Bind(Socket *socket, Address *address)
@@ -24,8 +23,6 @@ void Channel::Bind(Socket *socket, Address *address)
 
 void Channel::NextFrame()
 {
-    in.write_offset = 0;
-    in.read_offset = 0;
 }
 
 void Channel::SendPackets()
@@ -61,9 +58,15 @@ void Channel::SendPackets()
 
 void Channel::ReceivePacket(void *data, int size)
 {
-    ASSERT(in.write_offset + size <= ARRAY_SIZE(in.messages_stack_buf));
-    memcpy(in.messages_stack_buf + in.write_offset, data, size);
-    in.write_offset += size;
+    Arena packet_arena = Arena(data, size);
+
+    while(packet_arena.BytesUsed() < size)
+    {
+        uint16_t *message_size = (uint16_t *)packet_arena.Push(sizeof(uint16_t));
+        void *in_data = packet_arena.Push(*message_size);
+        in.messages.Write(message_size, sizeof(uint16_t));
+        in.messages.Write(in_data, *message_size);
+    }
 }
 
 bool Channel::SendMessageEx(void *data, int size, bool reliable)
@@ -77,21 +80,16 @@ bool Channel::SendMessageEx(void *data, int size, bool reliable)
 
 bool Channel::ReceiveMessage(void *data, int *size)
 {
-    if(in.write_offset - in.read_offset > 0)
+    if(in.messages.BytesWritten() > 0)
     {
         uint16_t message_size;
-        ASSERT(in.read_offset + sizeof(message_size) < in.write_offset);
-        memcpy(&message_size, in.messages_stack_buf + in.read_offset, sizeof(message_size));
-        in.read_offset += sizeof(message_size);
-        ASSERT(in.read_offset + message_size <= in.write_offset);
-        memcpy(data, in.messages_stack_buf + in.read_offset, message_size);
-        in.read_offset += message_size;
+        in.messages.Read(&message_size, sizeof(uint16_t));
+        in.messages.Read(data, message_size);
+        *size = message_size;
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 inline bool SequenceGreaterThan(uint16_t s1, uint16_t s2)

@@ -6,23 +6,18 @@
 #include <stdint.h> // uint8_t
 
 RingBuffer::RingBuffer()
-{
-    free_on_destroy = false;
-}
+: free_on_destroy(false) { }
 
 RingBuffer::RingBuffer(void *buffer, size_t size)
-: buffer(buffer), size(size)
+: free_on_destroy(false)
 {
-    this->free_on_destroy = false;
-    Clear();
+    Init(buffer, size);
 }
 
 RingBuffer::RingBuffer(size_t size)
-: size(size)
+: free_on_destroy(false)
 {
-    buffer = malloc(size);
-    free_on_destroy = true;
-    Clear();
+    Init(size);
 }
 
 RingBuffer::~RingBuffer()
@@ -40,6 +35,19 @@ void RingBuffer::Init(void *buffer, size_t size)
     }
 
     this->buffer = buffer;
+    this->size = size;
+    Clear();
+}
+
+void RingBuffer::Init(size_t size)
+{
+    if(free_on_destroy)
+    {
+        free(this->buffer);
+        free_on_destroy = false;
+    }
+
+    this->buffer = malloc(size);
     this->size = size;
     Clear();
 }
@@ -134,23 +142,19 @@ void RingBuffer::RewindRead(size_t position)
 }
 
 Arena::Arena()
-{
-    free_on_destroy = false;
-}
+: free_on_destroy(false)
+{ }
 
 Arena::Arena(void *buffer, size_t size)
-: buffer(buffer), size(size)
+: free_on_destroy(false)
 {
-    this->free_on_destroy = false;
-    Clear();
+    Init(buffer, size);
 }
 
 Arena::Arena(size_t size)
-: size(size)
+: free_on_destroy(false)
 {
-    buffer = malloc(size);
-    free_on_destroy = true;
-    Clear();
+    Init(buffer, size);
 }
 
 Arena::~Arena()
@@ -168,6 +172,19 @@ void Arena::Init(void *buffer, size_t size)
     }
 
     this->buffer = buffer;
+    this->size = size;
+    Clear();
+}
+
+void Arena::Init(size_t size)
+{
+    if(free_on_destroy)
+    {
+        free(this->buffer);
+        free_on_destroy = false;
+    }
+
+    this->buffer = malloc(size);
     this->size = size;
     Clear();
 }

@@ -28,7 +28,6 @@ int main(int argc, char *argv[])
         Net::Address sender;
         while(bytes_received = socket.Receive(&sender, buffer, 4096))
         {
-            printf("Bytes received: %d\n", bytes_received);
             if(received_anything == false)
             {
                 client = sender;

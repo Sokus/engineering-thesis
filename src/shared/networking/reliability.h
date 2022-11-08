@@ -24,9 +24,7 @@ private:
     } out;
 
     struct In {
-        uint8_t messages_stack_buf[1024];
-        int write_offset;
-        int read_offset;
+        RingBuffer messages;
     } in;
 
     Socket *socket = nullptr;

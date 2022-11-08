@@ -13,6 +13,7 @@ private:
     size_t bytes_written;
 
     bool free_on_destroy;
+
 public:
     RingBuffer();
     RingBuffer(void *buffer, size_t size);
@@ -20,6 +21,7 @@ public:
     ~RingBuffer();
 
     void Init(void *buffer, size_t size);
+    void Init(size_t size);
     void Clear();
     bool WouldOverflow(size_t bytes);
     size_t BytesWritten();
@@ -48,6 +50,7 @@ public:
     ~Arena();
 
     void Init(void *buffer, size_t size);
+    void Init(size_t size);
     void Clear();
     bool WouldOverflow(size_t bytes);
 
