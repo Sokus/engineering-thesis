@@ -3,7 +3,7 @@
 
 #include "networking.h"
 
-#include "data_structures.h"
+#include "data_structures/data_structures.h"
 
 #include <stdint.h>
 
