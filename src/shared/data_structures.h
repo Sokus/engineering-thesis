@@ -38,7 +38,7 @@ class Arena
 private:
     void *buffer;
     size_t size;
-    size_t offset;
+    size_t used;
 
     bool free_on_destroy;
 public:
@@ -54,7 +54,7 @@ public:
     void *Push(size_t size);
     void Pop(size_t size);
 
-    size_t Offset();
+    size_t BytesUsed();
     void Rewind(size_t offset);
 };
 

@@ -20,8 +20,7 @@ class Channel
 {
 private:
     struct Out {
-        uint8_t standard_messages_stack_buf[1024];
-        int standard_messages_stack_used;
+        RingBuffer standard_messages;
     } out;
 
     struct In {

@@ -11,7 +11,7 @@ namespace Net {
 
 Channel::Channel()
 {
-    out.standard_messages_stack_used = 0;
+    out.standard_messages = RingBuffer(1024);
     in.read_offset = 0;
     in.write_offset = 0;
 }
@@ -30,14 +30,32 @@ void Channel::NextFrame()
 
 void Channel::SendPackets()
 {
-    if(out.standard_messages_stack_used > 0)
+    uint8_t payload_buf[MAX_PACKET_SIZE];
+    Arena payload_arena = Arena(payload_buf, sizeof(payload_buf));
+
+    while(out.standard_messages.BytesWritten() > 0)
     {
-        uint8_t payload_data[MAX_PACKET_SIZE];
-        int payload_size = 0;
-        memcpy(payload_data, out.standard_messages_stack_buf, out.standard_messages_stack_used);
-        payload_size += out.standard_messages_stack_used;
-        socket->Send(*address, payload_data, payload_size);
-        out.standard_messages_stack_used = 0;
+        size_t read_offset = out.standard_messages.ReadOffset();
+        uint16_t message_size;
+        out.standard_messages.Read(&message_size, sizeof(message_size));
+        if(!payload_arena.WouldOverflow(sizeof(message_size) + message_size))
+        {
+            uint16_t *message_size_ptr = (uint16_t *)payload_arena.Push(sizeof(message_size));
+            memcpy(message_size_ptr, &message_size, sizeof(message_size));
+            void *message_ptr = payload_arena.Push(message_size);
+            out.standard_messages.Read(message_ptr, message_size);
+        }
+        else
+        {
+            socket->Send(*address, payload_buf, (int)payload_arena.BytesUsed());
+            payload_arena.Clear();
+            out.standard_messages.RewindRead(read_offset);
+        }
+    }
+
+    if(payload_arena.BytesUsed() > 0)
+    {
+        socket->Send(*address, payload_buf, (int)payload_arena.BytesUsed());
     }
 }
 
@@ -51,14 +69,9 @@ void Channel::ReceivePacket(void *data, int size)
 bool Channel::SendMessageEx(void *data, int size, bool reliable)
 {
     uint16_t message_size = size;
-    int size_required = message_size + sizeof(message_size);
-    ASSERT(out.standard_messages_stack_used + size_required <= ARRAY_SIZE(out.standard_messages_stack_buf));
-    memcpy(out.standard_messages_stack_buf + out.standard_messages_stack_used,
-           &message_size, sizeof(message_size));
-    out.standard_messages_stack_used += sizeof(message_size);
-    memcpy(out.standard_messages_stack_buf + out.standard_messages_stack_used,
-           data, message_size);
-    out.standard_messages_stack_used += message_size;
+    ASSERT(!out.standard_messages.WouldOverflow(sizeof(message_size) + message_size));
+    out.standard_messages.Write(&message_size, sizeof(message_size));
+    out.standard_messages.Write(data, message_size);
     return true;
 }
 

@@ -7,7 +7,6 @@
 
 namespace Game {
 
-
 void Entity::Update(float dt)
 {
     position += velocity * dt;

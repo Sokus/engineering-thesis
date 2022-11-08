@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
         Net::Address sender;
         while(bytes_received = socket.Receive(&sender, buffer, 4096))
         {
+            printf("Bytes received: %d\n", bytes_received);
             if(received_anything == false)
             {
                 client = sender;
@@ -43,11 +44,11 @@ int main(int argc, char *argv[])
             printf("Message received: %u\n", *(uint32_t *)buffer);
         }
 
-        Time::SleepMs(300);
+        Time::SleepMs(30);
 
         if(received_anything)
         {
-            int16_t data = -13;
+            uint32_t data = 2;
             channel.SendMessageEx(&data, sizeof(data), false);
         }
         channel.SendPackets();
