@@ -15,6 +15,14 @@ Channel::Channel()
     in.messages.Init(1024);
 }
 
+void Channel::Clear()
+{
+    socket = nullptr;
+    address = nullptr;
+    out.standard_messages.Clear();
+    in.messages.Clear();
+}
+
 void Channel::Bind(Socket *socket, Address *address)
 {
     this->socket = socket;

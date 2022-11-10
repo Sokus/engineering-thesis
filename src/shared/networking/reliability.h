@@ -33,6 +33,7 @@ private:
 public:
     Channel();
 
+    void Clear();
     void Bind(Socket *socket, Address *address);
     void NextFrame();
     void SendPackets();

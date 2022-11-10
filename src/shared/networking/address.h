@@ -28,6 +28,8 @@ public:
 
     void SetAddress(unsigned int address);
     void SetPort(unsigned short port);
+
+    const char *ToString();
 };
 
 bool AddressCompare(Address a, Address b);
