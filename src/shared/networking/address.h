@@ -3,13 +3,11 @@
 
 namespace Net {
 
-class Address
+struct Address
 {
-private:
     unsigned int address;
     unsigned short port;
 
-public:
     Address();
     Address(unsigned char a,
             unsigned char b,
