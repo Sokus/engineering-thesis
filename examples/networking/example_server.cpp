@@ -26,10 +26,11 @@ int main(int argc, char *argv[])
 
     while(true)
     {
-        uint8_t buffer[4096];
-        int bytes_received;
+        uint8_t in_buffer[2048];
+        uint8_t out_buffer[1024];
         Net::Address sender;
-        while(bytes_received = socket.Receive(&sender, buffer, 4096))
+        int bytes_received;
+        while(bytes_received = socket.Receive(&sender, in_buffer, sizeof(in_buffer)))
         {
             ClientId client_id = CLIENT_INVALID;
             ClientId free_id = CLIENT_INVALID;
@@ -62,7 +63,7 @@ int main(int argc, char *argv[])
             {
                 if(clients[client_id].state == CONNECTED)
                 {
-                    clients[client_id].channel.ReceivePacket(buffer, bytes_received);
+                    clients[client_id].channel.ReceivePacket(in_buffer, bytes_received);
                 }
             }
             else if(free_id != CLIENT_INVALID)
@@ -73,13 +74,16 @@ int main(int argc, char *argv[])
                 new_client->address = sender;
                 new_client->channel.Bind(&socket, &new_client->address);
                 new_client->state = CONNECTING;
-                new_client->channel.ReceivePacket(buffer, bytes_received);
+                new_client->channel.ReceivePacket(in_buffer, bytes_received);
             }
             else
             {
-                Arena msg_arena = Arena(buffer, sizeof(buffer));
-                MessageType *msg_type = (MessageType *)msg_arena.Push(sizeof(MessageType));
-                // server full
+                printf("connection for %s refused, server full\n", sender.ToString());
+                BitPacker bit_packer = BitWriter(out_buffer, sizeof(out_buffer));
+                MessageType message_type = JOIN_REFUSE;
+                SerializeInteger(&bit_packer, (int32_t *)&message_type, 0, MESSAGE_TYPE_MAX);
+                Flush(&bit_packer);
+                socket.Send(sender, out_buffer, BytesWritten(&bit_packer));
             }
         }
 
@@ -89,32 +93,37 @@ int main(int argc, char *argv[])
         {
             Client *client = clients + client_idx;
 
-            while(client->channel.ReceiveMessage(buffer, &bytes_received))
+            while(client->channel.ReceiveMessage(in_buffer, &bytes_received))
             {
-                Arena msg_arena = Arena(buffer, bytes_received);
-                MessageType *msg_type = (MessageType *)msg_arena.Push(sizeof(MessageType));
+                BitPacker bit_reader = BitReader(in_buffer, sizeof(in_buffer));
+                MessageType msg_type;
+                SerializeInteger(&bit_reader, (int32_t *)&msg_type, 0, MESSAGE_TYPE_MAX);
 
                 if(client->state == CONNECTING)
                 {
-                    if(*msg_type == CONNECT)
+                    if(msg_type == JOIN_ATTEMPT)
                     {
                         printf("%s connected\n", client->address.ToString());
-                        MessageType response = APPROVE;
-                        client->channel.SendMessageEx(&response, sizeof(response), true);
+                        BitPacker bit_writer = BitWriter(out_buffer, sizeof(out_buffer));
+                        MessageType response = JOIN_APPROVE;
+                        SerializeInteger(&bit_writer, (int32_t *)&response, 0, MESSAGE_TYPE_MAX);
+                        Flush(&bit_writer);
+                        client->channel.SendMessageEx(out_buffer, BytesWritten(&bit_writer), true);
                         client->state = CONNECTED;
                     }
                 }
                 else if(client->state == CONNECTED)
                 {
-                    if(*msg_type == DISCONNECT)
+                    if(msg_type == DISCONNECT)
                     {
                         printf("%s disconnected\n", client->address.ToString());
                         client->state = DISCONNECTED;
                     }
-                    else if(*msg_type == VALUE)
+                    else if(msg_type == VALUE)
                     {
-                        MessageValue *msg_value = (MessageValue *)msg_arena.Push(sizeof(MessageValue));
-                        printf("value %u received from %s\n", msg_value->value, client->address.ToString());
+                        MessageValue msg_value;
+                        SerializeMessageValue(&bit_reader, &msg_value);
+                        printf("value %u received from %s\n", msg_value.value, client->address.ToString());
                     }
                 }
             }

@@ -1,10 +1,12 @@
 #ifndef NETTEMP_H
 #define NETTEMP_H
 
+#include "serialization/serialization.h"
+
 enum ClientId
 {
     CLIENT_INVALID = -1,
-    CLIENT_COUNT   = 4
+    CLIENT_COUNT   = 1
 };
 
 enum ConnectionState
@@ -17,16 +19,24 @@ enum ConnectionState
 enum MessageType
 {
     INVALID,
-    CONNECT,
-    APPROVE,
-    REFUSE,
+    JOIN_ATTEMPT,
+    JOIN_APPROVE,
+    JOIN_REFUSE,
     DISCONNECT,
     VALUE,
+
+    MESSAGE_TYPE_MAX,
 };
 
 struct MessageValue
 {
-    uint32_t value;
+    int32_t value;
 };
+
+
+bool SerializeMessageValue(BitPacker *bit_packer, MessageValue *value)
+{
+    SERIALIZE_INT32(bit_packer, &value->value);
+}
 
 #endif // NETTEMP_H
