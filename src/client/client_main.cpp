@@ -51,6 +51,7 @@ int main(int, char**)
 {
     InitWindow(960, 540, "PI");
     SetTargetFPS(60);
+    SetExitKey(KEY_END);
 
     Game::Input input;
     Game::World world;
@@ -74,10 +75,11 @@ int main(int, char**)
         {
             const int font_size = 40;
             float spacing = 2.0f;
-            Vector2 button_padding = { 40.0f, 10.0f };
-            const float button_spacing = 15.0f;
+            Vector2 button_padding = { 10.0f, 10.0f };
+            Vector2 button_spacing = { 10.0f, 10.0f };
             Color button_color_default = LIGHTGRAY;
             Color button_color_hover = WHITE;
+            Color button_color_active_lines = RED;
             Color text_color = BLACK;
 
             const char *start_text = "Start";
@@ -86,41 +88,69 @@ int main(int, char**)
             const char *exit_text = "Exit";
             Vector2 exit_text_size = MeasureTextEx(font, exit_text, font_size, spacing);
 
-            Vector2 max_text_size;
-            max_text_size.x = MAX(start_text_size.x, exit_text_size.x);
-            max_text_size.y = start_text_size.y;
+            Vector2 ip_field_size = MeasureTextEx(font, "xxx.xxx.xxx.xxx", font_size, spacing);
+            Vector2 port_field_size = MeasureTextEx(font, "xxxxx", font_size, spacing);
+            const char *join_text = "Join";
+            Vector2 join_text_size = MeasureTextEx(font, join_text, font_size, spacing);
+            float join_widget_width = ip_field_size.x + port_field_size.x + join_text_size.x + 2.0f*button_spacing.x + 4.0f*button_padding.x;
 
-            float rectangle_width = max_text_size.x + 2.0f*button_padding.x;
-            float rectangle_height = max_text_size.y + 2.0f*button_padding.y;
+            float max_button_width = MAX(MAX(start_text_size.x, exit_text_size.x), join_widget_width);
+            float max_button_height = start_text_size.y;
+
+            float rectangle_width = max_button_width + 2.0f*button_padding.x;
+            float rectangle_height = max_button_height + 2.0f*button_padding.y;
 
             Vector2 menu_position = {
                 (float)GetScreenWidth()/2.0f - rectangle_width/2.0f,
                 100.0f
             };
-            float menu_vert_offset = 0.0f;
+            Vector2 menu_offset = { 0.0f, 0.0f };
 
             Rectangle start_button = {
-                menu_position.x,
-                menu_position.y + menu_vert_offset,
+                menu_position.x + menu_offset.x,
+                menu_position.y + menu_offset.y,
                 rectangle_width,
                 rectangle_height
             };
-            menu_vert_offset += rectangle_height + button_spacing;
+            menu_offset.y += rectangle_height + button_spacing.y;
 
+            Rectangle ip_field = {
+                menu_position.x + menu_offset.x,
+                menu_position.y + menu_offset.y,
+                ip_field_size.x + 2.0f*button_padding.x,
+                ip_field_size.y + 2.0f*button_padding.y
+            };
+            menu_offset.x += ip_field.width + button_spacing.x;
+
+            Rectangle port_field = {
+                menu_position.x + menu_offset.x,
+                menu_position.y + menu_offset.y,
+                port_field_size.x + 2.0f*button_padding.x,
+                port_field_size.y + 2.0f*button_padding.y
+            };
+            menu_offset.x += port_field.width + button_spacing.x;
+
+            Rectangle join_button = {
+                menu_position.x + menu_offset.x,
+                menu_position.y + menu_offset.y,
+                join_text_size.x + 2.0f*button_padding.x,
+                join_text_size.y + 2.0f*button_padding.y
+            };
+            menu_offset.x = 0.0f;
+            menu_offset.y += join_button.height + button_spacing.y;
 
             Rectangle exit_button = {
-                menu_position.x,
-                menu_position.y + menu_vert_offset,
+                menu_position.x + menu_offset.x,
+                menu_position.y + menu_offset.y,
                 rectangle_width,
                 rectangle_height
             };
-            menu_vert_offset += rectangle_height + button_spacing;
+            menu_offset.y += rectangle_height + button_spacing.y;
 
-            Color start_button_color;
-            Color exit_button_color;
 
             Vector2 mouse_position = GetMousePosition();
 
+            Color start_button_color;
             if(CheckCollisionPointRec(mouse_position, start_button))
             {
                 start_button_color = button_color_hover;
@@ -132,6 +162,42 @@ int main(int, char**)
                 start_button_color = button_color_default;
             }
 
+            Color ip_field_color;
+            static bool ip_field_active = false;
+            if(CheckCollisionPointRec(mouse_position, ip_field))
+            {
+                ip_field_color = button_color_hover;
+                if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+                    ip_field_active = true;
+            }
+            else
+            {
+                ip_field_color = button_color_default;
+                if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+                    ip_field_active = false;
+            }
+
+            Color port_field_color;
+            if(CheckCollisionPointRec(mouse_position, port_field))
+            {
+                port_field_color = button_color_hover;
+            }
+            else
+            {
+                port_field_color = button_color_default;
+            }
+
+            Color join_button_color;
+            if(CheckCollisionPointRec(mouse_position, join_button))
+            {
+                join_button_color = button_color_hover;
+            }
+            else
+            {
+                join_button_color = button_color_default;
+            }
+
+            Color exit_button_color;
             if(CheckCollisionPointRec(mouse_position, exit_button))
             {
                 exit_button_color = button_color_hover;
@@ -148,15 +214,40 @@ int main(int, char**)
 
                 DrawRectangleRec(start_button, start_button_color);
                 Vector2 start_text_pos = {
-                    start_button.x + button_padding.x + (max_text_size.x - start_text_size.x)/2.0f,
-                    start_button.y + button_padding.y + (max_text_size.y - start_text_size.y)/2.0f,
+                    start_button.x + button_padding.x + (max_button_width - start_text_size.x)/2.0f,
+                    start_button.y + button_padding.y + (max_button_height - start_text_size.y)/2.0f,
                 };
                 DrawTextEx(font, start_text, start_text_pos, font_size, spacing, text_color);
 
+                DrawRectangleRec(ip_field, ip_field_color);
+                if(ip_field_active)
+                {
+                    DrawRectangleLinesEx(ip_field, 2.0f, button_color_active_lines);
+                }
+                Vector2 ip_field_text_pos = {
+                    ip_field.x + button_padding.x,
+                    ip_field.y + button_padding.y,
+                };
+                DrawTextEx(font, "xxx.xxx.xxx.xxx", ip_field_text_pos, font_size, spacing, text_color);
+
+                DrawRectangleRec(port_field, port_field_color);
+                Vector2 port_field_text_pos = {
+                    port_field.x + button_padding.x,
+                    port_field.y + button_padding.y,
+                };
+                DrawTextEx(font, "xxxxx", port_field_text_pos, font_size, spacing, text_color);
+
+                DrawRectangleRec(join_button, join_button_color);
+                Vector2 join_text_pos = {
+                    join_button.x + button_padding.x,
+                    join_button.y + button_padding.y,
+                };
+                DrawTextEx(font, join_text, join_text_pos, font_size, spacing, text_color);
+
                 DrawRectangleRec(exit_button, exit_button_color);
                 Vector2 exit_text_pos = {
-                    exit_button.x + button_padding.x + (max_text_size.x - exit_text_size.x)/2.0f,
-                    exit_button.y + button_padding.y + (max_text_size.y - exit_text_size.y)/2.0f,
+                    exit_button.x + button_padding.x + (max_button_width - exit_text_size.x)/2.0f,
+                    exit_button.y + button_padding.y + (max_button_height - exit_text_size.y)/2.0f,
                 };
                 DrawTextEx(font, exit_text, exit_text_pos, font_size, spacing, text_color);
 
@@ -164,6 +255,9 @@ int main(int, char**)
         }
         else if(active_window == GAME)
         {
+            if(IsKeyPressed(KEY_ESCAPE))
+                active_window = MAIN_MENU;
+
             input.Update();
             player->Control(&input);
             world.Update(GetFrameTime());

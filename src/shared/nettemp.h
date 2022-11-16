@@ -6,7 +6,7 @@
 enum ClientId
 {
     CLIENT_INVALID = -1,
-    CLIENT_COUNT   = 1
+    CLIENT_COUNT   = 4
 };
 
 enum ConnectionState
