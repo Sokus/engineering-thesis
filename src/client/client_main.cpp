@@ -81,6 +81,7 @@ int main(int, char**)
             Color button_color_hover = WHITE;
             Color button_color_active_lines = RED;
             Color text_color = BLACK;
+            Color light_text_color = GRAY;
 
             const char *start_text = "Start";
             Vector2 start_text_size = MeasureTextEx(font, start_text, font_size, spacing);
@@ -178,6 +179,7 @@ int main(int, char**)
             }
 
             const int max_ip_chars = 15;
+            const char *ip_default = "localhost";
             static char ip_chars[max_ip_chars + 1] = "\0";
             static int ip_char_count = 0;
             if(ip_field_active)
@@ -220,6 +222,7 @@ int main(int, char**)
 
             const int max_port_chars = 5;
             static char port_chars[max_port_chars + 1] = "\0";
+            const char *port_default = "25565";
             static int port_char_count = 0;
             if(port_field_active)
             {
@@ -285,7 +288,9 @@ int main(int, char**)
                     ip_field.x + button_padding.x,
                     ip_field.y + button_padding.y,
                 };
-                DrawTextEx(font, ip_chars, ip_field_text_pos, font_size, spacing, text_color);
+                const char *ip_displayed_text = ip_char_count ? ip_chars : ip_default;
+                Color ip_text_color = ip_char_count ? text_color : light_text_color;
+                DrawTextEx(font, ip_displayed_text, ip_field_text_pos, font_size, spacing, ip_text_color);
 
                 DrawRectangleRec(port_field, port_field_color);
                 if(port_field_active)
@@ -296,7 +301,9 @@ int main(int, char**)
                     port_field.x + button_padding.x,
                     port_field.y + button_padding.y,
                 };
-                DrawTextEx(font, port_chars, port_field_text_pos, font_size, spacing, text_color);
+                const char *port_displayed_text = port_char_count ? port_chars : port_default;
+                Color port_text_color = port_char_count ? text_color : light_text_color;
+                DrawTextEx(font, port_displayed_text, port_field_text_pos, font_size, spacing, port_text_color);
 
                 DrawRectangleRec(join_button, join_button_color);
                 Vector2 join_text_pos = {
