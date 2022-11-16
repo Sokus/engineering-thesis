@@ -177,14 +177,71 @@ int main(int, char**)
                     ip_field_active = false;
             }
 
+            const int max_ip_chars = 15;
+            static char ip_chars[max_ip_chars + 1] = "\0";
+            static int ip_char_count = 0;
+            if(ip_field_active)
+            {
+                int key = GetCharPressed();
+                while(key > 0)
+                {
+                    if((key >= 32) && (key <= 125) && (ip_char_count < max_ip_chars))
+                    {
+                        ip_chars[ip_char_count] = (char)key;
+                        ip_chars[ip_char_count + 1] = '\0';
+                        ip_char_count++;
+                    }
+
+                    key = GetCharPressed();
+                }
+
+                if(IsKeyPressed(KEY_BACKSPACE))
+                {
+                    ip_char_count--;
+                    if(ip_char_count < 0) ip_char_count = 0;
+                    ip_chars[ip_char_count] = '\0';
+                }
+            }
+
             Color port_field_color;
+            static bool port_field_active = false;
             if(CheckCollisionPointRec(mouse_position, port_field))
             {
                 port_field_color = button_color_hover;
+                if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+                    port_field_active = true;
             }
             else
             {
                 port_field_color = button_color_default;
+                if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+                    port_field_active = false;
+            }
+
+            const int max_port_chars = 5;
+            static char port_chars[max_port_chars + 1] = "\0";
+            static int port_char_count = 0;
+            if(port_field_active)
+            {
+                int key = GetCharPressed();
+                while(key > 0)
+                {
+                    if((key >= 32) && (key <= 125) && (port_char_count < max_port_chars))
+                    {
+                        port_chars[port_char_count] = (char)key;
+                        port_chars[port_char_count + 1] = '\0';
+                        port_char_count++;
+                    }
+
+                    key = GetCharPressed();
+                }
+
+                if(IsKeyPressed(KEY_BACKSPACE))
+                {
+                    port_char_count--;
+                    if(port_char_count < 0) port_char_count = 0;
+                    port_chars[port_char_count] = '\0';
+                }
             }
 
             Color join_button_color;
@@ -228,14 +285,18 @@ int main(int, char**)
                     ip_field.x + button_padding.x,
                     ip_field.y + button_padding.y,
                 };
-                DrawTextEx(font, "xxx.xxx.xxx.xxx", ip_field_text_pos, font_size, spacing, text_color);
+                DrawTextEx(font, ip_chars, ip_field_text_pos, font_size, spacing, text_color);
 
                 DrawRectangleRec(port_field, port_field_color);
+                if(port_field_active)
+                {
+                    DrawRectangleLinesEx(port_field, 2.0f, button_color_active_lines);
+                }
                 Vector2 port_field_text_pos = {
                     port_field.x + button_padding.x,
                     port_field.y + button_padding.y,
                 };
-                DrawTextEx(font, "xxxxx", port_field_text_pos, font_size, spacing, text_color);
+                DrawTextEx(font, port_chars, port_field_text_pos, font_size, spacing, text_color);
 
                 DrawRectangleRec(join_button, join_button_color);
                 Vector2 join_text_pos = {
