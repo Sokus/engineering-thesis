@@ -1,11 +1,11 @@
 project(client)
 
-file(GLOB CLIENT_SRC *.cpp)
-file(GLOB CLIENT_GRAPHICS_SRC graphics/*.cpp)
+# file(GLOB CLIENT_SRC *.cpp)
+# file(GLOB CLIENT_GRAPHICS_SRC graphics/*.cpp)
 
 add_executable(client
 	client_main.cpp
-	${CLIENT_SRC}
+	#${CLIENT_SRC}
 	#${CLIENT_GRAPHICS_SRC}
 )
 

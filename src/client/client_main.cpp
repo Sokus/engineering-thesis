@@ -77,7 +77,7 @@ int main(int, char**)
 
         if(active_window == MAIN_MENU)
         {
-            const int font_size = 40;
+            const float font_size = 40;
 
             Style style = {};
             style.fill_default = LIGHTGRAY;
@@ -91,11 +91,10 @@ int main(int, char**)
             Button start_button = Button(&style, &font, "Start", font_size);
             Button exit_button = Button(&style, &font, "Exit", font_size);
             Button join_button = Button(&style, &font, "Join", font_size);
+            static TextField ip_field = TextField(&style, &font, 15, "localhost", font_size);
+            static TextField port_field = TextField(&style, &font, 5, "25565", font_size);
 
-            Vector2 ip_field_size = MeasureTextEx(font, "xxx.xxx.xxx.xxx", font_size, 0.0f);
-            Vector2 port_field_size = MeasureTextEx(font, "xxxxx", font_size, 0.0f);
-
-            float join_widget_width = ip_field_size.x + port_field_size.x + join_button.label_size.x + 2.0f*style.spacing.x + 4.0f*style.padding.x;
+            float join_widget_width = ip_field.text_size.x + port_field.text_size.x + join_button.label_size.x + 2.0f*style.spacing.x + 4.0f*style.padding.x;
 
             float max_button_width = MAX(MAX(start_button.label_size.x, exit_button.label_size.x), join_widget_width);
             float max_button_height = start_button.label_size.y;
@@ -103,10 +102,7 @@ int main(int, char**)
             float rectangle_width = max_button_width + 2.0f*style.padding.x;
             float rectangle_height = max_button_height + 2.0f*style.padding.y;
 
-            Vector2 menu_position = {
-                (float)GetScreenWidth()/2.0f - rectangle_width/2.0f,
-                100.0f
-            };
+            Vector2 menu_position = { (float)GetScreenWidth()/2.0f - rectangle_width/2.0f, 100.0f };
             Vector2 menu_offset = { 0.0f, 0.0f };
 
             start_button.rect = Rectangle{
@@ -117,21 +113,21 @@ int main(int, char**)
             };
             menu_offset.y += start_button.rect.height + style.spacing.y;
 
-            Rectangle ip_field = {
+            ip_field.rect = Rectangle{
                 menu_position.x + menu_offset.x,
                 menu_position.y + menu_offset.y,
-                ip_field_size.x + 2.0f*style.padding.x,
-                ip_field_size.y + 2.0f*style.padding.y
+                ip_field.text_size.x + 2.0f*style.padding.x,
+                ip_field.text_size.y + 2.0f*style.padding.y
             };
-            menu_offset.x += ip_field.width + style.spacing.x;
+            menu_offset.x += ip_field.rect.width + style.spacing.x;
 
-            Rectangle port_field = {
+            port_field.rect = Rectangle{
                 menu_position.x + menu_offset.x,
                 menu_position.y + menu_offset.y,
-                port_field_size.x + 2.0f*style.padding.x,
-                port_field_size.y + 2.0f*style.padding.y
+                port_field.text_size.x + 2.0f*style.padding.x,
+                port_field.text_size.y + 2.0f*style.padding.y
             };
-            menu_offset.x += port_field.width + style.spacing.x;
+            menu_offset.x += port_field.rect.width + style.spacing.x;
 
             join_button.rect = Rectangle{
                 menu_position.x + menu_offset.x,
@@ -150,95 +146,11 @@ int main(int, char**)
             };
             menu_offset.y += exit_button.rect.height + style.spacing.y;
 
-
-            Vector2 mouse_position = GetMousePosition();
-
             if(start_button.IsReleased())
                 active_window = GAME;
 
-            Color ip_field_color;
-            static bool ip_field_active = false;
-            if(CheckCollisionPointRec(mouse_position, ip_field))
-            {
-                ip_field_color = style.fill_active;
-                if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-                    ip_field_active = true;
-            }
-            else
-            {
-                ip_field_color = style.fill_default;
-                if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-                    ip_field_active = false;
-            }
-
-            const int max_ip_chars = 15;
-            const char *ip_default = "localhost";
-            static char ip_chars[max_ip_chars + 1] = "\0";
-            static int ip_char_count = 0;
-            if(ip_field_active)
-            {
-                int key = GetCharPressed();
-                while(key > 0)
-                {
-                    if((key >= 32) && (key <= 125) && (ip_char_count < max_ip_chars))
-                    {
-                        ip_chars[ip_char_count] = (char)key;
-                        ip_chars[ip_char_count + 1] = '\0';
-                        ip_char_count++;
-                    }
-
-                    key = GetCharPressed();
-                }
-
-                if(IsKeyPressed(KEY_BACKSPACE))
-                {
-                    ip_char_count--;
-                    if(ip_char_count < 0) ip_char_count = 0;
-                    ip_chars[ip_char_count] = '\0';
-                }
-            }
-
-            Color port_field_color;
-            static bool port_field_active = false;
-            if(CheckCollisionPointRec(mouse_position, port_field))
-            {
-                port_field_color = style.fill_active;
-                if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-                    port_field_active = true;
-            }
-            else
-            {
-                port_field_color = style.fill_default;
-                if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-                    port_field_active = false;
-            }
-
-            const int max_port_chars = 5;
-            static char port_chars[max_port_chars + 1] = "\0";
-            const char *port_default = "25565";
-            static int port_char_count = 0;
-            if(port_field_active)
-            {
-                int key = GetCharPressed();
-                while(key > 0)
-                {
-                    if((key >= 32) && (key <= 125) && (port_char_count < max_port_chars))
-                    {
-                        port_chars[port_char_count] = (char)key;
-                        port_chars[port_char_count + 1] = '\0';
-                        port_char_count++;
-                    }
-
-                    key = GetCharPressed();
-                }
-
-                if(IsKeyPressed(KEY_BACKSPACE))
-                {
-                    port_char_count--;
-                    if(port_char_count < 0) port_char_count = 0;
-                    port_chars[port_char_count] = '\0';
-                }
-            }
+            ip_field.Update();
+            port_field.Update();
 
             if(join_button.IsReleased())
             {
@@ -255,31 +167,8 @@ int main(int, char**)
                 join_button.Draw();
                 exit_button.Draw();
 
-                DrawRectangleRec(ip_field, ip_field_color);
-                if(ip_field_active)
-                {
-                    DrawRectangleLinesEx(ip_field, 2.0f, style.outline_active);
-                }
-                Vector2 ip_field_text_pos = {
-                    ip_field.x + style.padding.x,
-                    ip_field.y + style.padding.y,
-                };
-                const char *ip_displayed_text = ip_char_count ? ip_chars : ip_default;
-                Color ip_text_color = ip_char_count ? style.text_default : style.text_suggestion;
-                DrawTextEx(font, ip_displayed_text, ip_field_text_pos, font_size, 0.0f, ip_text_color);
-
-                DrawRectangleRec(port_field, port_field_color);
-                if(port_field_active)
-                {
-                    DrawRectangleLinesEx(port_field, 2.0f, style.outline_active);
-                }
-                Vector2 port_field_text_pos = {
-                    port_field.x + style.padding.x,
-                    port_field.y + style.padding.y,
-                };
-                const char *port_displayed_text = port_char_count ? port_chars : port_default;
-                Color port_text_color = port_char_count ? style.text_default : style.text_suggestion;
-                DrawTextEx(font, port_displayed_text, port_field_text_pos, font_size, 0.0f, port_text_color);
+                ip_field.Draw();
+                port_field.Draw();
 
 
             EndDrawing();
