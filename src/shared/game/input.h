@@ -11,7 +11,8 @@ struct Input
         LEFT  = 1,
         DOWN  = 2,
         RIGHT = 3,
-        COUNT = 4
+        SHIFT = 4,
+        COUNT = 5
     };
 
     bool move[Direction::COUNT];
@@ -21,5 +22,4 @@ struct Input
 };
 
 } // namespace Game
-
-#endif // INPUT_H
+#endif

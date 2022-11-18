@@ -10,6 +10,7 @@ void Input::Update()
     move[LEFT] = IsKeyDown(KEY_A);
     move[DOWN] = IsKeyDown(KEY_S);
     move[RIGHT] = IsKeyDown(KEY_D);
+    move[SHIFT] = IsKeyDown(KEY_LEFT_SHIFT);
 
     jump = IsKeyDown(KEY_SPACE);
 }
