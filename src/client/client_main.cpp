@@ -68,7 +68,6 @@ int main(int, char**)
     SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
 
     bool exit_window = false;
-
     while(!exit_window)
     {
         if(WindowShouldClose()) exit_window = true;
@@ -86,63 +85,27 @@ int main(int, char**)
             style.padding = { 10.0f, 10.0f };
             style.spacing = { 10.0f, 10.0f };
 
+            static UI::Layout layout;
+            layout.position = Vector2{ GetScreenWidth()/2.0f, 100.0f };
+            layout.origin = Vector2{ 0.5f, 0.0f };
+            layout.Clear();
+
             UI::Button start_button = UI::Button(&style, &font, "Start", font_size);
             UI::Button exit_button = UI::Button(&style, &font, "Exit", font_size);
             UI::Button join_button = UI::Button(&style, &font, "Join", font_size);
             static UI::TextField ip_field = UI::TextField(&style, &font, 15, "localhost", font_size);
             static UI::TextField port_field = UI::TextField(&style, &font, 5, "25565", font_size);
 
-            float join_widget_width = ip_field.text_size.x + port_field.text_size.x + join_button.label_size.x + 2.0f*style.spacing.x + 4.0f*style.padding.x;
+            layout.AddElement(&start_button.base);
+            layout.EndRow();
+            layout.AddElement(&ip_field.base);
+            layout.AddElement(&port_field.base);
+            layout.AddElement(&join_button.base);
+            layout.EndRow();
+            layout.AddElement(&exit_button.base);
+            layout.EndRow();
 
-            float max_button_width = MAX(MAX(start_button.label_size.x, exit_button.label_size.x), join_widget_width);
-            float max_button_height = start_button.label_size.y;
-
-            float rectangle_width = max_button_width + 2.0f*style.padding.x;
-            float rectangle_height = max_button_height + 2.0f*style.padding.y;
-
-            Vector2 menu_position = { (float)GetScreenWidth()/2.0f - rectangle_width/2.0f, 100.0f };
-            Vector2 menu_offset = { 0.0f, 0.0f };
-
-            start_button.base.rect = Rectangle{
-                menu_position.x + menu_offset.x,
-                menu_position.y + menu_offset.y,
-                rectangle_width,
-                rectangle_height
-            };
-            menu_offset.y += start_button.base.rect.height + style.spacing.y;
-
-            ip_field.base.rect = Rectangle{
-                menu_position.x + menu_offset.x,
-                menu_position.y + menu_offset.y,
-                ip_field.text_size.x + 2.0f*style.padding.x,
-                ip_field.text_size.y + 2.0f*style.padding.y
-            };
-            menu_offset.x += ip_field.base.rect.width + style.spacing.x;
-
-            port_field.base.rect = Rectangle{
-                menu_position.x + menu_offset.x,
-                menu_position.y + menu_offset.y,
-                port_field.text_size.x + 2.0f*style.padding.x,
-                port_field.text_size.y + 2.0f*style.padding.y
-            };
-            menu_offset.x += port_field.base.rect.width + style.spacing.x;
-
-            join_button.base.rect = Rectangle{
-                menu_position.x + menu_offset.x,
-                menu_position.y + menu_offset.y,
-                join_button.label_size.x + 2.0f*style.padding.x,
-                join_button.label_size.y + 2.0f*style.padding.y
-            };
-            menu_offset.x = 0.0f;
-            menu_offset.y += join_button.base.rect.height + style.spacing.y;
-
-            exit_button.base.rect = Rectangle{
-                menu_position.x + menu_offset.x,
-                menu_position.y + menu_offset.y,
-                rectangle_width,
-                rectangle_height
-            };
-            menu_offset.y += exit_button.base.rect.height + style.spacing.y;
+            layout.EndColumn();
 
             if(start_button.IsReleased())
                 active_window = GAME;
@@ -167,8 +130,6 @@ int main(int, char**)
 
                 ip_field.Draw();
                 port_field.Draw();
-
-
             EndDrawing();
         }
         else if(active_window == GAME)

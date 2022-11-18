@@ -23,6 +23,35 @@ struct Base
     Rectangle rect;
 };
 
+struct LayoutRow
+{
+    int start;
+    int count;
+    Vector2 min_size;
+};
+
+class Layout
+{
+public:
+    Vector2 position;
+    Vector2 origin;
+
+    static const int max_element_count = 64;
+    Base *elements[max_element_count];
+    int element_count;
+    static const int max_row_count = 32;
+    LayoutRow rows[max_row_count];
+    int row_count;
+    Vector2 min_size;
+    Vector2 element_offset;
+
+public:
+    void Clear();
+    void AddElement(Base *base);
+    void EndRow();
+    void EndColumn();
+};
+
 class Button
 {
 private:

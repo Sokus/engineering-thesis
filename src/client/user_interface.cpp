@@ -4,6 +4,72 @@
 
 namespace UI {
 
+void Layout::Clear()
+{
+    element_count = 0;
+    row_count = 0;
+    memset(rows, 0, sizeof(rows));
+    min_size = Vector2{ 0.0f, 0.0f };
+    element_offset = Vector2{ 0.0f, 0.0f };
+}
+
+void Layout::AddElement(Base *base)
+{
+    if(element_count >= max_element_count) return;
+    if(row_count >= max_row_count) return;
+
+    elements[element_count] = base;
+    float width = base->min_size.x + 2.0f*base->style->spacing.x;
+    float height = base->min_size.y + 2.0f*base->style->spacing.y;
+    rows[row_count].min_size.x += width;
+    if(height > rows[row_count].min_size.y)
+        rows[row_count].min_size.y = height;
+    rows[row_count].count++;
+    element_count++;
+}
+
+void Layout::EndRow()
+{
+    if(row_count < max_row_count)
+    {
+        if(rows[row_count].min_size.x > min_size.x)
+            min_size.x = rows[row_count].min_size.x;
+        min_size.y += rows[row_count].min_size.y;
+
+        row_count++;
+        rows[row_count].start = element_count;
+        rows[row_count].count = 0;
+        rows[row_count].min_size = Vector2{ 0.0f, 0.0f };
+    }
+}
+
+void Layout::EndColumn()
+{
+    for(int row_idx = 0; row_idx < row_count; row_idx++)
+    {
+        element_offset.x = 0.0f;
+        LayoutRow *row = rows + row_idx;
+        float free_width = min_size.x - row->min_size.x;
+        for(int element_idx = row->start;
+            element_idx < row->start + row->count;
+            element_idx++)
+        {
+            Base *element = elements[element_idx];
+            float element_width = element->min_size.x + 2.0f*element->style->spacing.x;
+            float width_ratio = element_width / row->min_size.x;
+            float added_width = width_ratio * free_width;
+            float origin_position_x = position.x - origin.x * min_size.x;
+            float origin_position_y = position.y - origin.y * min_size.y;
+            element->rect.x = origin_position_x + element_offset.x + element->style->spacing.x;
+            element->rect.width = element->min_size.x + added_width;
+            element_offset.x += element_width + added_width;
+            element->rect.y = origin_position_y + element_offset.y + element->style->spacing.y;
+            element->rect.height = row->min_size.y - 2.0f*element->style->spacing.y;
+        }
+        element_offset.y += row->min_size.y;
+    }
+}
+
 Button::Button(Style *style, Font *font, char *label, float font_size)
 : font(font), label(label), font_size(font_size)
 {
@@ -42,8 +108,6 @@ void Button::Draw()
     };
     DrawTextEx(*font, label, label_position, font_size, 0.0f, base.style->text_default);
 }
-
-
 
 TextField::TextField(Style *style, Font *font,
                      int max_character_count, char *default_value,
