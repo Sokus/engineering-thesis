@@ -7,11 +7,9 @@
 #include "macros.h" // ABS
 #include "game/game.h"
 #include "game/input.h"
+#include "user_interface.h"
 
 #include "raylib.h"
-
-// TODO: split this
-#include "ui_elements.cpp"
 
 Texture2D character;
 
@@ -79,7 +77,7 @@ int main(int, char**)
         {
             const float font_size = 40;
 
-            Style style = {};
+            UI::Style style = {};
             style.fill_default = LIGHTGRAY;
             style.fill_active = WHITE;
             style.text_default = DARKGRAY;
@@ -88,11 +86,11 @@ int main(int, char**)
             style.padding = { 10.0f, 10.0f };
             style.spacing = { 10.0f, 10.0f };
 
-            Button start_button = Button(&style, &font, "Start", font_size);
-            Button exit_button = Button(&style, &font, "Exit", font_size);
-            Button join_button = Button(&style, &font, "Join", font_size);
-            static TextField ip_field = TextField(&style, &font, 15, "localhost", font_size);
-            static TextField port_field = TextField(&style, &font, 5, "25565", font_size);
+            UI::Button start_button = UI::Button(&style, &font, "Start", font_size);
+            UI::Button exit_button = UI::Button(&style, &font, "Exit", font_size);
+            UI::Button join_button = UI::Button(&style, &font, "Join", font_size);
+            static UI::TextField ip_field = UI::TextField(&style, &font, 15, "localhost", font_size);
+            static UI::TextField port_field = UI::TextField(&style, &font, 5, "25565", font_size);
 
             float join_widget_width = ip_field.text_size.x + port_field.text_size.x + join_button.label_size.x + 2.0f*style.spacing.x + 4.0f*style.padding.x;
 
@@ -105,46 +103,46 @@ int main(int, char**)
             Vector2 menu_position = { (float)GetScreenWidth()/2.0f - rectangle_width/2.0f, 100.0f };
             Vector2 menu_offset = { 0.0f, 0.0f };
 
-            start_button.rect = Rectangle{
+            start_button.base.rect = Rectangle{
                 menu_position.x + menu_offset.x,
                 menu_position.y + menu_offset.y,
                 rectangle_width,
                 rectangle_height
             };
-            menu_offset.y += start_button.rect.height + style.spacing.y;
+            menu_offset.y += start_button.base.rect.height + style.spacing.y;
 
-            ip_field.rect = Rectangle{
+            ip_field.base.rect = Rectangle{
                 menu_position.x + menu_offset.x,
                 menu_position.y + menu_offset.y,
                 ip_field.text_size.x + 2.0f*style.padding.x,
                 ip_field.text_size.y + 2.0f*style.padding.y
             };
-            menu_offset.x += ip_field.rect.width + style.spacing.x;
+            menu_offset.x += ip_field.base.rect.width + style.spacing.x;
 
-            port_field.rect = Rectangle{
+            port_field.base.rect = Rectangle{
                 menu_position.x + menu_offset.x,
                 menu_position.y + menu_offset.y,
                 port_field.text_size.x + 2.0f*style.padding.x,
                 port_field.text_size.y + 2.0f*style.padding.y
             };
-            menu_offset.x += port_field.rect.width + style.spacing.x;
+            menu_offset.x += port_field.base.rect.width + style.spacing.x;
 
-            join_button.rect = Rectangle{
+            join_button.base.rect = Rectangle{
                 menu_position.x + menu_offset.x,
                 menu_position.y + menu_offset.y,
                 join_button.label_size.x + 2.0f*style.padding.x,
                 join_button.label_size.y + 2.0f*style.padding.y
             };
             menu_offset.x = 0.0f;
-            menu_offset.y += join_button.rect.height + style.spacing.y;
+            menu_offset.y += join_button.base.rect.height + style.spacing.y;
 
-            exit_button.rect = Rectangle{
+            exit_button.base.rect = Rectangle{
                 menu_position.x + menu_offset.x,
                 menu_position.y + menu_offset.y,
                 rectangle_width,
                 rectangle_height
             };
-            menu_offset.y += exit_button.rect.height + style.spacing.y;
+            menu_offset.y += exit_button.base.rect.height + style.spacing.y;
 
             if(start_button.IsReleased())
                 active_window = GAME;
