@@ -22,13 +22,15 @@ target_include_directories(shared
 )
 
 target_link_libraries(shared
-    glm::glm
     raylib
+    glm::glm
 )
 
 if(PLATFORM_WINDOWS)
     target_link_libraries(shared
-        Ws2_32.lib # sockets
-        Dnsapi.lib # DNS
+        Shlwapi.lib # PathRemoveFileSpec
+        Winmm.lib   # time
+        Ws2_32.lib  # sockets
+        Dnsapi.lib  # DNS
 	)
 endif()

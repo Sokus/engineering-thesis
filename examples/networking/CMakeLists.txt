@@ -28,6 +28,7 @@ target_include_directories(example_server
 
 target_link_libraries(example_server
     shared
+    parg
 )
 
 install(TARGETS example_server DESTINATION "${CMAKE_INSTALL_PREFIX}")
