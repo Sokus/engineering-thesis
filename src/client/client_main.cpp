@@ -11,7 +11,7 @@
 int main(int, char**)
 {
     InitWindow(960, 540, "PI");
-    SetTargetFPS(60);
+    SetTargetFPS(60); //TODO parametrize deltaTime
 
     Game::Input input;
     Game::World world;
@@ -33,8 +33,9 @@ int main(int, char**)
         input.Update();
         player->Control(&input);
         player->onGround = 0;
-        world.CalculateCollisions(*player,GetFrameTime());
-        world.Update(GetFrameTime());
+        float deltaTime = GetFrameTime() > 0.02f ? 0.02f : GetFrameTime(); //will broke if < 60 FPS
+        world.CalculateCollisions(*player,deltaTime);
+        world.Update(deltaTime);
 
         BeginDrawing();
             ClearBackground(Color{25, 30, 40});
