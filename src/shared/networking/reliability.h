@@ -3,7 +3,7 @@
 
 #include "networking.h"
 
-#include "data_structures.h"
+#include "data_structures/data_structures.h"
 
 #include <stdint.h>
 
@@ -13,22 +13,33 @@ struct PacketHeader
 {
 };
 
+#define RELIABLE_MESSAGE_SEND_INTERVAL 100 // send interval in ms
+#define MAX_PACKET_SIZE 1200
+
 class Channel
 {
 private:
+    struct Out {
+        RingBuffer standard_messages;
+    } out;
+
+    struct In {
+        RingBuffer messages;
+    } in;
+
     Socket *socket = nullptr;
-    Address *address = nullptr;
+    Address *address =  nullptr;
 
 public:
     Channel();
 
+    void Clear();
     void Bind(Socket *socket, Address *address);
-    void Update(float dt);
+    void NextFrame();
     void SendPackets();
     void ReceivePacket(void *data, int size);
 
-    void SendMessageCh(void *data, int size, bool ordered);
-
+    bool SendMessageEx(void *data, int size, bool reliable);
     bool ReceiveMessage(void *data, int *size);
 };
 

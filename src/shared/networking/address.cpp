@@ -1,5 +1,7 @@
 #include "address.h"
 
+#include <stdio.h> // snprintf
+
 namespace Net {
 
 Address::Address()
@@ -29,14 +31,14 @@ unsigned char Address::GetC() const { return (address >> 8 & 0xFF); }
 unsigned char Address::GetD() const { return (address & 0xFF); }
 unsigned short Address::GetPort() const { return port; }
 
-void Address::SetAddress(unsigned int address)
+const char *Address::ToString()
 {
-    this->address = address;
-}
-
-void Address::SetPort(unsigned short port)
-{
-    this->port = port;
+    const int buffer_size = 22;
+    static char buffer[buffer_size];
+    snprintf(buffer, buffer_size,
+             "%u.%u.%u.%u:%u",
+             GetA(), GetB(), GetC(), GetD(), GetPort());
+    return buffer;
 }
 
 bool AddressCompare(Address a, Address b)

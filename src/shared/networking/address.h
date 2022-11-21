@@ -3,13 +3,11 @@
 
 namespace Net {
 
-class Address
+struct Address
 {
-private:
     unsigned int address;
     unsigned short port;
 
-public:
     Address();
     Address(unsigned char a,
             unsigned char b,
@@ -28,6 +26,8 @@ public:
 
     void SetAddress(unsigned int address);
     void SetPort(unsigned short port);
+
+    const char *ToString();
 };
 
 bool AddressCompare(Address a, Address b);

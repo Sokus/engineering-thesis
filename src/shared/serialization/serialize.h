@@ -25,6 +25,7 @@ bool SerializeInteger(BitPacker *bit_packer, int32_t *value, int32_t min, int32_
             ReadBits((bit_packer_ptr), &_u, (bits));\
             *value_ptr = (type)_u;\
         }\
+        return true;\
     } while (0)
 
 #define SERIALIZE_INT32(bit_packer_ptr, value_ptr) SERIALIZE_BITS((bit_packer_ptr), int32_t, (value_ptr), 32)

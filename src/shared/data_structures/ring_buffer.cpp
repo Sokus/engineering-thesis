@@ -1,29 +1,55 @@
-#include "data_structures.h"
+#include "ring_buffer.h"
 #include "macros.h"
 
 #include <stdlib.h> // malloc/free
 #include <string.h> // memcpy
 #include <stdint.h> // uint8_t
 
+RingBuffer::RingBuffer()
+: free_on_destroy(false) { }
+
 RingBuffer::RingBuffer(void *buffer, size_t size)
-: buffer(buffer), size(size)
+: free_on_destroy(false)
 {
-    this->free_on_destroy = false;
-    Clear();
+    Init(buffer, size);
 }
 
 RingBuffer::RingBuffer(size_t size)
-: size(size)
+: free_on_destroy(false)
 {
-    buffer = malloc(size);
-    free_on_destroy = true;
-    Clear();
+    Init(size);
 }
 
 RingBuffer::~RingBuffer()
 {
     if(free_on_destroy)
         free(buffer);
+}
+
+void RingBuffer::Init(void *buffer, size_t size)
+{
+    if(free_on_destroy)
+    {
+        free(this->buffer);
+        free_on_destroy = false;
+    }
+
+    this->buffer = buffer;
+    this->size = size;
+    Clear();
+}
+
+void RingBuffer::Init(size_t size)
+{
+    if(free_on_destroy)
+    {
+        free(this->buffer);
+        free_on_destroy = false;
+    }
+
+    this->buffer = malloc(size);
+    this->size = size;
+    Clear();
 }
 
 void RingBuffer::Clear()
@@ -61,9 +87,22 @@ void RingBuffer::Write(void *data, size_t bytes)
     bytes_written += bytes;
 }
 
-void RingBuffer::Write(int value)
+size_t RingBuffer::WriteOffset()
 {
-    Write(&value, sizeof(value));
+    return write_offset;
+}
+
+void RingBuffer::RewindWrite(size_t position)
+{
+    size_t bytes_to_rewind;
+    if(position <= write_offset)
+        bytes_to_rewind = write_offset - position;
+    else
+        bytes_to_rewind = write_offset + (size - position);
+
+    ASSERT(bytes_to_rewind <= bytes_written);
+    write_offset = position;
+    bytes_written -= bytes_to_rewind;
 }
 
 void RingBuffer::Read(void *data, size_t bytes)
@@ -84,7 +123,20 @@ void RingBuffer::Read(void *data, size_t bytes)
     bytes_written -= bytes;
 }
 
-void RingBuffer::Read(int& value)
+size_t RingBuffer::ReadOffset()
 {
-    Read(&value, sizeof(value));
+    return read_offset;
+}
+
+void RingBuffer::RewindRead(size_t position)
+{
+    size_t bytes_to_rewind;
+    if(position <= read_offset)
+        bytes_to_rewind = read_offset - position;
+    else
+        bytes_to_rewind = read_offset + (size - position);
+
+    ASSERT(bytes_written + bytes_to_rewind <= size);
+    read_offset = position;
+    bytes_written += bytes_to_rewind;
 }
