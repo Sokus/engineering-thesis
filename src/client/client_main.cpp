@@ -19,13 +19,21 @@ int main(int, char**)
     Game::LoadTextures();
 
     Game::Entity *player = world.CreatePlayer(100.0f, 100.0f);
-    world.CreateTile(250.0f,150.0f);
+    world.CreateTile(100.0f,250.0f);
+    world.CreateTile(164.0f, 250.0f);
+    world.CreateTile(228.0f, 250.0f);
+    world.CreateTile(292.0f, 250.0f);
+    world.CreateTile(292.0f, 314.0f);
+    world.CreateTile(356.0f, 314.0f);
+    world.CreateTile(420.0f, 314.0f);
+    world.CreateInteractive(356.0f, 250.0f);
 
     while(!WindowShouldClose())
     {
         input.Update();
         player->Control(&input);
-        world.CalculateCollisions(*player);
+        player->onGround = 0;
+        world.CalculateCollisions(*player,GetFrameTime());
         world.Update(GetFrameTime());
 
         BeginDrawing();

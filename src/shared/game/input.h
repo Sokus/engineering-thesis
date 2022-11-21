@@ -12,7 +12,8 @@ struct Input
         DOWN  = 2,
         RIGHT = 3,
         SHIFT = 4,
-        COUNT = 5
+        INTERACT = 5,
+        COUNT = 6
     };
 
     bool move[Direction::COUNT];

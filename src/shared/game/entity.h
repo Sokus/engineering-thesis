@@ -4,11 +4,16 @@
 #include "input.h"
 #include "glm/glm.hpp"
 namespace Game {
+
+
+    void LoadTextures();
+
     enum EntityType
     {
         NONE,
         PLAYER,
-        TILE
+        TILE,
+        INTERACTIVE
     };
 
     struct Entity
@@ -18,11 +23,15 @@ namespace Game {
 
         glm::vec2 position;
         glm::vec2 velocity;
+        glm::vec2 move_direction= glm::vec2(0.0f, 0.0f);;
 
         int facing;
         int width;
         int height;
         int scale;
+        bool onGround;
+        int jumpHeight;
+        bool active;
 
         float move_speed;
 
@@ -35,7 +44,8 @@ namespace Game {
 
         void Update(float dt);
         void Draw();
-        bool collidesWith(Entity ent);
+        bool collidesWithX(Entity ent,float dt);
+        bool collidesWithY(Entity ent, float dt);
         void Control(Input* input);
     };
 }
