@@ -9,8 +9,6 @@
 
 #include "raylib.h"
 
-Texture2D character;
-
 enum GameWindow
 {
     INVALID,
@@ -27,7 +25,7 @@ int main(int, char**)
     Game::Input input;
     Game::World world;
 
-    character = LoadTexture(RESOURCE_PATH "/character.png");
+    Game::LoadTextures();
 
     Game::Entity *player = world.CreatePlayer(100.0f, 100.0f);
     world.CreateTile(100.0f, 250.0f);
