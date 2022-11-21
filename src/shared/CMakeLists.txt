@@ -12,7 +12,7 @@ add_library(shared STATIC
     ${SHARED_SERIALIZATION_SRC}
     ${SHARED_DATA_STRUCTURES_SRC}
     ${SHARED_GAME_SRC}
-)
+ "game/world.cpp")
 
 target_include_directories(shared
     PRIVATE

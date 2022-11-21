@@ -10,8 +10,8 @@ void Input::Update()
     move[LEFT] = IsKeyDown(KEY_A);
     move[DOWN] = IsKeyDown(KEY_S);
     move[RIGHT] = IsKeyDown(KEY_D);
-
-    jump = IsKeyDown(KEY_SPACE);
+    move[SHIFT] = IsKeyDown(KEY_LEFT_SHIFT);
+    move[INTERACT] = IsKeyDown(KEY_I);
 }
 
 } // namespace Game
