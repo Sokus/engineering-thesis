@@ -10,36 +10,108 @@
 
 #ifdef _WIN32
 #include <Windows.h>
+#else
+#include <unistd.h>
 #endif
 
 #include <string.h>
+
+struct ProcessHandle
+{
+    #if defined(_WIN32)
+        PROCESS_INFORMATION info;
+    #else
+        pid_t pid;
+    #endif
+};
+
+
+
+bool CreateChildProcess(char **argv, int argc, ProcessHandle *out_process_handle)
+{
+    bool result = false;
+    #if defined(_WIN32)
+        char cmd[256];
+        size_t cmd_length = 0;
+        for(int arg = 0; arg < argc; arg++)
+        {
+            size_t arg_length = strlen(argv[arg]);
+            memcpy(cmd + cmd_length, argv[arg], arg_length);
+            cmd_length += arg_length;
+            if(arg < argc - 1) cmd[cmd_length++] = ' ';
+        }
+        cmd[cmd_length + 1] = '\0';
+
+        STARTUPINFOA startup_info;
+        GetStartupInfoA(&startup_info);
+        result = CreateProcessA(NULL, cmd, NULL, NULL, false, 0, NULL,
+                                NULL, &startup_info, &out_process_handle->info);
+    #else
+        pid_t pid = fork();
+        if(pid)
+            out_process_handle->pid = pid;
+        else
+            execve(argv[0], argv, 0);
+        result = true;
+    #endif
+    return result;
+}
+
+bool KillChildProcess(ProcessHandle *process_handle)
+{
+    bool result = false;
+    #if defined(_WIN32)
+        result = TerminateProcess(process_handle->info.hProcess, 0);
+    #else
+        result = kill(process_handle->pid, SIGKILL);
+    #endif
+    return result;
+}
+
+
+unsigned int GetExecutablePath(char *buffer, size_t buffer_length)
+{
+    unsigned int length = 0;
+    #if defined(_WIN32)
+        length = (unsigned int)GetModuleFileNameA(0, buffer, (DWORD)buffer_length);
+    #else
+        length = (unsigned int)readlink("/proc/self/exe", buffer, buffer_length);
+    #endif
+    return length;
+}
 
 int main(int argc, char *argv[])
 {
     unsigned short server_port = 25565;
 
-    #ifdef _WIN32
-        STARTUPINFOA startup_info;
-        GetStartupInfoA(&startup_info);
-        PROCESS_INFORMATION process_info;
-
-        char parent_directory[MAX_PATH];
-        DWORD path_length = GetModuleFileNameA(0, parent_directory, sizeof(parent_directory));
-        char *one_past_last_slash = parent_directory;
-        for(unsigned int offset = 0;
-            parent_directory[offset] != '\0' && offset < path_length;
-            offset++)
+    ProcessHandle process;
+    {
+        char server_executable[255];
+        char executable_path[255];
+        unsigned int executable_path_length = GetExecutablePath(executable_path, sizeof(executable_path));
+        unsigned int offset_to_one_past_last_slash = 0;
+        for(unsigned int offset = 0; offset < executable_path_length; offset++)
         {
-            if(parent_directory[offset] == '\\')
-                one_past_last_slash = parent_directory + offset + 1;
+            if(executable_path[offset] == '\0') break;
+            if(executable_path[offset] == '\\')
+                offset_to_one_past_last_slash = offset + 1;
         }
-        char executable_and_args[64] = {};
-        snprintf(executable_and_args, sizeof(executable_and_args), "example_server.exe -p %u", server_port);
-        memcpy(one_past_last_slash, executable_and_args, sizeof(executable_and_args));
+        memcpy(server_executable, executable_path, offset_to_one_past_last_slash);
+        char server_executable_name[] = "example_server.exe";
+        memcpy(server_executable + offset_to_one_past_last_slash,
+               server_executable_name, sizeof(server_executable_name));
 
-        bool cpr = CreateProcessA(NULL, executable_and_args, NULL, NULL, false,
-                                  0, NULL, NULL, &startup_info, &process_info);
-    #endif
+        char port_stringified[32];
+        snprintf(port_stringified, sizeof(port_stringified), "%u", server_port);
+
+        char *launch_arguments[] = {
+            server_executable,
+            "-p",
+            port_stringified
+        };
+
+        CreateChildProcess(launch_arguments, ARRAY_SIZE(launch_arguments), &process);
+    }
 
     Net::InitializeSockets();
     Time::Setup();
@@ -128,7 +200,7 @@ int main(int argc, char *argv[])
         }
 
         channel.SendPackets();
-        Time::SleepMs(3000);
+        Time::SleepMs(60);
         channel.NextFrame();
     }
 

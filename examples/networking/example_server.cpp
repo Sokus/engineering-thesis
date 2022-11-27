@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        Time::SleepMs(500);
+        Time::SleepMs(30);
     }
 
     Net::ShutdownSockets();
