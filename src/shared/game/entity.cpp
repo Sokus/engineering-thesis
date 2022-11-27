@@ -5,12 +5,9 @@
 
 namespace Game {
 
-
     Texture2D character;
     Texture2D tile;
     Texture2D interactive;
-
-
 
     void LoadTextures()
     {
@@ -49,7 +46,6 @@ namespace Game {
             move_direction.y += 1;
         }
         velocity = move_direction * move_speed;
-
     }
 
     void Entity::Draw()

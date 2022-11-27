@@ -10,11 +10,11 @@ enum LogLevel
     LOG_INFO,
     LOG_WARNING,
     LOG_ERROR,
-    LOG_FATAL,
     LOG_NONE,
 };
 
 void SetLogLevel(int log_level);
+void SetLogPrefix(const char *prefix);
 void Log(int log_level, const char *text, ...);
 
 #endif // PI_LOG_H

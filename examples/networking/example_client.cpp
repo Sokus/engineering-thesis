@@ -43,7 +43,7 @@ bool CreateChildProcess(char **argv, int argc, ProcessHandle *out_process_handle
 
         STARTUPINFOA startup_info;
         GetStartupInfoA(&startup_info);
-        result = CreateProcessA(NULL, cmd, NULL, NULL, false, 0, NULL,
+        result = CreateProcessA(NULL, cmd, NULL, NULL, true, 0, NULL,
                                 NULL, &startup_info, &out_process_handle->info);
     #else
         pid_t pid = fork();
@@ -81,6 +81,8 @@ unsigned int GetExecutablePath(char *buffer, size_t buffer_length)
 
 int main(int argc, char *argv[])
 {
+    SetLogPrefix("CLIENT: ");
+
     unsigned short server_port = 25565;
 
     ProcessHandle process;
@@ -155,12 +157,12 @@ int main(int argc, char *argv[])
             {
                 if(msg_type == JOIN_APPROVE)
                 {
-                    printf("connected to the server at %s\n", server_address.ToString());
+                    Log(LOG_INFO, "Connected to the server");
                     connection_state = CONNECTED;
                 }
                 else if(msg_type == JOIN_REFUSE)
                 {
-                    printf("connection refused\n");
+                    Log(LOG_INFO, "Connection refused", server_address.ToString());
                     connection_state = DISCONNECTED;
                     already_tried_connecting = true;
                 }
@@ -175,7 +177,7 @@ int main(int argc, char *argv[])
                 {
                     MessageValue msg_value;
                     SerializeMessageValue(&bit_reader, &msg_value);
-                    printf("value %u received from %s\n", msg_value.value, sender.ToString());
+                    Log(LOG_INFO, "Value %u received", msg_value.value);
                 }
             }
         }
@@ -183,7 +185,7 @@ int main(int argc, char *argv[])
         if(connection_state == DISCONNECTED && !already_tried_connecting)
         {
             BitPacker bit_writer = BitWriter(out_buffer, sizeof(out_buffer));
-            printf("trying to connect to %s\n", server_address.ToString());
+            Log(LOG_INFO, "Connecting to %s...", server_address.ToString());
             MessageType message = JOIN_ATTEMPT;
             SerializeInteger(&bit_writer, (int32_t *)&message, 0, MESSAGE_TYPE_MAX);
             Flush(&bit_writer);
@@ -199,7 +201,7 @@ int main(int argc, char *argv[])
             msg_value.value = 13;
             SerializeMessageValue(&bit_writer, &msg_value);
             Flush(&bit_writer);
-            printf("sending value of %d to the server\n", msg_value.value);
+            Log(LOG_INFO, "Sending a value of %d", msg_value.value);
             channel.SendMessageEx(out_buffer, BytesWritten(&bit_writer), false);
         }
 

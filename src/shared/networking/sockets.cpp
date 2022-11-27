@@ -76,7 +76,7 @@ bool Socket::SetBlockingMode(bool should_block)
     }
 #endif
     if(!success)
-        Log(LOG_WARNING, "Could not set socket blocking mode");
+        Log(LOG_ERROR, "Could not set socket blocking mode");
     return success;
 }
 

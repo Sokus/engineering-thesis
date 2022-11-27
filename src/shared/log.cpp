@@ -5,31 +5,38 @@
 #include <stdarg.h> // va_list, va_start(), va_end()
 #include <string.h> // strcpy(), strcat()
 
-// Silences strcpy/strcat warning
 static int g_log_level = LOG_INFO;
+static const char *g_prefix = 0;
+static size_t g_prefix_length = 0;
 
 void SetLogLevel(int log_level)
 {
     g_log_level = log_level;
 }
 
+void SetLogPrefix(const char *prefix)
+{
+    g_prefix = prefix;
+    g_prefix_length = strlen(prefix);
+}
+
 void Log(int log_level, const char *text, ...)
 {
-#if defined(ENABLE_LOG)
     if (log_level < g_log_level) return;
 
     va_list args;
     va_start(args, text);
 
     char buffer[MAX_LOG_MESSAGE_LENGTH] = {0};
+    if(g_prefix_length > 0)
+        strcat(buffer, g_prefix);
 
     switch (log_level)
     {
-        case LOG_DEBUG: strcpy(buffer, "DEBUG: "); break;
-        case LOG_INFO: strcpy(buffer, "INFO: "); break;
-        case LOG_WARNING: strcpy(buffer, "WARNING: "); break;
-        case LOG_ERROR: strcpy(buffer, "ERROR: "); break;
-        case LOG_FATAL: strcpy(buffer, "FATAL: "); break;
+        case LOG_DEBUG:   strcat(buffer, "DEBUG: "); break;
+        case LOG_INFO:    strcat(buffer, "INFO: "); break;
+        case LOG_WARNING: strcat(buffer, "WARNING: "); break;
+        case LOG_ERROR:   strcat(buffer, "ERROR: "); break;
         default: break;
     }
 
@@ -39,7 +46,4 @@ void Log(int log_level, const char *text, ...)
     fflush(stdout);
 
     va_end(args);
-
-    if (log_level == LOG_FATAL) exit(EXIT_FAILURE);
-#endif // ENABLE_LOG
 }

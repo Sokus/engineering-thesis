@@ -19,6 +19,8 @@ struct Client
 
 int main(int argc, char *argv[])
 {
+    SetLogPrefix("SERVER: ");
+
     Net::InitializeSockets();
     Time::Setup();
 
@@ -44,7 +46,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    printf("Starting the server on port %u\n", port);
+    Log(LOG_INFO, "Starting on port %u", port);
 
     Client clients[CLIENT_COUNT] = {};
     Net::Socket socket = Net::Socket(port, false);
@@ -93,7 +95,7 @@ int main(int argc, char *argv[])
             }
             else if(free_id != CLIENT_INVALID)
             {
-                printf("%s is connecting\n", sender.ToString());
+                Log(LOG_INFO, "Message from unrecognized address %s", sender.ToString());
                 Client *new_client = clients + free_id;
                 new_client->channel.Clear();
                 new_client->address = sender;
@@ -103,7 +105,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                printf("connection for %s refused, server full\n", sender.ToString());
+                Log(LOG_INFO, "Message from unrecognized address %s, server is full", sender.ToString());
                 BitPacker bit_packer = BitWriter(out_buffer, sizeof(out_buffer));
                 MessageType message_type = JOIN_REFUSE;
                 SerializeInteger(&bit_packer, (int32_t *)&message_type, 0, MESSAGE_TYPE_MAX);
@@ -128,7 +130,7 @@ int main(int argc, char *argv[])
                 {
                     if(msg_type == JOIN_ATTEMPT)
                     {
-                        printf("%s connected\n", client->address.ToString());
+                        Log(LOG_INFO, "%s connected", client->address.ToString());
                         BitPacker bit_writer = BitWriter(out_buffer, sizeof(out_buffer));
                         MessageType response = JOIN_APPROVE;
                         SerializeInteger(&bit_writer, (int32_t *)&response, 0, MESSAGE_TYPE_MAX);
@@ -141,14 +143,14 @@ int main(int argc, char *argv[])
                 {
                     if(msg_type == DISCONNECT)
                     {
-                        printf("%s disconnected\n", client->address.ToString());
+                        Log(LOG_INFO, "%s disconnected", client->address.ToString());
                         client->state = DISCONNECTED;
                     }
                     else if(msg_type == VALUE)
                     {
                         MessageValue msg_value;
                         SerializeMessageValue(&bit_reader, &msg_value);
-                        printf("value %u received from %s\n", msg_value.value, client->address.ToString());
+                        Log(LOG_INFO, "Value %u received from %s", msg_value.value, client->address.ToString());
                     }
                 }
             }
