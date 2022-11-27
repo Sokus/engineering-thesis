@@ -12,6 +12,8 @@
 #include <Windows.h>
 #else
 #include <unistd.h>
+#include <signal.h>
+#include <errno.h>
 #endif
 
 #include <string.h>
@@ -24,8 +26,6 @@ struct ProcessHandle
         pid_t pid;
     #endif
 };
-
-
 
 bool CreateChildProcess(char **argv, int argc, ProcessHandle *out_process_handle)
 {
@@ -51,7 +51,7 @@ bool CreateChildProcess(char **argv, int argc, ProcessHandle *out_process_handle
         if(pid)
             out_process_handle->pid = pid;
         else
-            execve(argv[0], argv, 0);
+            execv(argv[0], argv);
         result = true;
     #endif
     return result;
@@ -93,11 +93,15 @@ int main(int argc, char *argv[])
         for(unsigned int offset = 0; offset < executable_path_length; offset++)
         {
             if(executable_path[offset] == '\0') break;
-            if(executable_path[offset] == '\\')
+            if(executable_path[offset] == '\\' || executable_path[offset] == '/')
                 offset_to_one_past_last_slash = offset + 1;
         }
         memcpy(server_executable, executable_path, offset_to_one_past_last_slash);
-        char server_executable_name[] = "example_server.exe";
+        #if defined(_WIN32)
+            char server_executable_name[] = "example_server.exe";
+        #else
+            char server_executable_name[] = "example_server";
+        #endif
         memcpy(server_executable + offset_to_one_past_last_slash,
                server_executable_name, sizeof(server_executable_name));
 
@@ -106,8 +110,9 @@ int main(int argc, char *argv[])
 
         char *launch_arguments[] = {
             server_executable,
-            "-p",
-            port_stringified
+            (char *)"-p",
+            port_stringified,
+            NULL
         };
 
         CreateChildProcess(launch_arguments, ARRAY_SIZE(launch_arguments), &process);

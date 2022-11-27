@@ -1,6 +1,8 @@
 #include "world.h"
+
+#include <string.h>
+
 namespace Game {
-    
 
     void World::CalculateCollisions(Entity& player,float dt) {
         for (int entity_idx = 0; entity_idx < entity_count; entity_idx++)
