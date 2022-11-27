@@ -5,7 +5,6 @@
 #include "glm/exponential.hpp"
 #include "glm/ext/scalar_constants.hpp"
 
-#include "config.h"
 #include "opengl3_lazy_program.h"
 #include "opengl3_utils.h"
 #include "opengl3_postprocessing.h"

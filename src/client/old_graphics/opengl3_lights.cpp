@@ -6,7 +6,6 @@
 #include "glm/ext/scalar_constants.hpp"
 
 #include "opengl3_lights.h"
-#include "config.h"
 #include "macros.h"
 #include "opengl3_utils.h"
 

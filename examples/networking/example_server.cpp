@@ -2,7 +2,6 @@
 #include "serialization/serialization.h"
 #include "log.h"
 #include "pi_time.h"
-#include "config.h"
 
 #include <stddef.h>
 #include <stdio.h>

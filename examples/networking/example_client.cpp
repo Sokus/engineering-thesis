@@ -5,7 +5,6 @@
 #include "serialization/serialization.h"
 #include "log.h"
 #include "pi_time.h"
-#include "config.h"
 #include "nettemp.h"
 
 #ifdef _WIN32

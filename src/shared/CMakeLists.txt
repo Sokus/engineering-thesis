@@ -26,10 +26,11 @@ target_link_libraries(shared
     glm::glm
 )
 
-if(PLATFORM_WINDOWS)
+if(WIN32)
     target_link_libraries(shared
         Shlwapi.lib # PathRemoveFileSpec
         Winmm.lib   # time
+        wsock32.lib
         Ws2_32.lib  # sockets
         Dnsapi.lib  # DNS
 	)

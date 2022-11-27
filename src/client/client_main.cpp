@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-#include "config.h"
 #include "macros.h" // ABS
 #include "game/world.h"
 #include "user_interface.h"

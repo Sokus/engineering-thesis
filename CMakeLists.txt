@@ -11,7 +11,6 @@ option(ENABLE_LOG "Enable logging" ON)
 set(CLIENT_NAME "client")
 set(SERVER_NAME "server")
 
-include(Configure)
 include(CompileFlags)
 
 add_subdirectory(lib)

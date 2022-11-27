@@ -1,9 +1,7 @@
-#include "config.h"
-
-#if defined(PLATFORM_WINDOWS)
+#ifdef _WIN32
     #include <winsock2.h>
     #include <WS2tcpip.h>
-#elif defined(PLATFORM_LINUX)
+#else
     #include <sys/socket.h>
     #include <netinet/in.h>
     #include <fcntl.h>
@@ -20,7 +18,7 @@ namespace Net {
 
 bool InitializeSockets()
 {
-#if defined(PLATFORM_WINDOWS)
+#ifdef _WIN32
     WSADATA wsaData;
     return WSAStartup(MAKEWORD(2,2), &wsaData) == NO_ERROR;
 #else
@@ -30,7 +28,7 @@ bool InitializeSockets()
 
 void ShutdownSockets()
 {
-#if defined(PLATFORM_WINDOWS)
+#ifdef _WIN32
     WSACleanup();
 #endif
 }
@@ -66,10 +64,10 @@ bool Socket::Bind(unsigned short port)
 bool Socket::SetBlockingMode(bool should_block)
 {
     bool success = false;
-#if defined(PLATFORM_WINDOWS)
+#ifdef _WIN32
     u_long mode = should_block ? 0 : 1;
     success = (ioctlsocket(handle, FIONBIO, &mode) == 0);
-#elif defined(PLATFORM_LINUX)
+#else
     int flags = fcntl(handle, F_GETFL, 0);
     if(flags != -1)
     {
@@ -110,7 +108,7 @@ Socket::Socket(unsigned short port, bool should_block)
 
 Socket::~Socket()
 {
-#if defined(PLATFORM_WINDOWS)
+#ifdef _WIN32
     closesocket(handle);
 #elif defined(PLATFORM_LINUX)
     close(handle);

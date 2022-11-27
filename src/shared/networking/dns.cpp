@@ -1,10 +1,9 @@
-#include "config.h"
 
-#if defined(PLATFORM_WINDOWS)
+#ifdef _WIN32
     #include <winsock2.h>
     #include <WS2tcpip.h>
     #include <windns.h>
-#elif defined(PLATFORM_LINUX)
+#else
     #include <sys/types.h>
     #include <sys/socket.h>
     #include <netdb.h>
@@ -18,7 +17,7 @@ namespace Net {
 
 unsigned int QueryDNS(const char *hostname)
 {
-#if defined(PLATFORM_WINDOWS)
+#ifdef _WIN32
     DNS_RECORDA *query_result = nullptr;
     DNS_STATUS dns_status = DnsQuery_A(hostname, DNS_TYPE_A, DNS_QUERY_STANDARD,
                                        0, &query_result, 0);
@@ -35,7 +34,7 @@ unsigned int QueryDNS(const char *hostname)
         Log(LOG_ERROR, "QueryDNS failed: %s", buffer);
         return 0;
     }
-#elif defined(PLATFORM_LINUX)
+#else
     struct addrinfo* addrinfo;
     int status = getaddrinfo(hostname, 0, 0, &addrinfo);
     if(status == 0)

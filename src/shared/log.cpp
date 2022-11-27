@@ -1,5 +1,4 @@
 #include "log.h"
-#include "config.h"
 
 #include <stdlib.h> // exit()
 #include <stdio.h> // fprintf(), vprintf()
