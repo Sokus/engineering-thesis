@@ -9,14 +9,25 @@
 
 enum GameScene
 {
-    INVALID,
-    MAIN_MENU,
-    GAME
+    GS_INVALID,
+    GS_TITLE_SCREEN,
+    GS_GAME
+};
+
+enum GameMenu
+{
+    GM_NONE,
+    GM_MAIN_MENU,
+    GM_SOLO_PLAY,
+    GM_JOIN_MENU,
+    GM_HOST_MENU,
+    GM_OPTIONS_MENU,
 };
 
 struct State
 {
-    GameScene current_scene = MAIN_MENU;
+    GameScene current_scene = GS_TITLE_SCREEN;
+    GameMenu current_menu = GM_NONE;
     bool should_quit = false;
 
     struct {
@@ -26,43 +37,50 @@ struct State
     struct {
         Font font;
         UI::Style style;
+        const float menu_font_size = 30;
+        UI::Layout layout;
     } ui;
 } state = {};
 
-
 void DoMainMenu()
 {
-    const float font_size = 40;
+    state.ui.layout.Clear();
 
-    static UI::Layout layout;
-    layout.position = Vector2{GetScreenWidth() / 2.0f, 100.0f};
-    layout.origin = Vector2{0.5f, 0.0f};
-    layout.Clear();
+    UI::Button solo_play_button = UI::Button(&state.ui.style, &state.ui.font, "Solo Play", state.ui.menu_font_size);
+    UI::Button join_game_button = UI::Button(&state.ui.style, &state.ui.font, "Join Game", state.ui.menu_font_size);
+    UI::Button host_game_button = UI::Button(&state.ui.style, &state.ui.font, "Host Game", state.ui.menu_font_size);
+    UI::Button options_button = UI::Button(&state.ui.style, &state.ui.font, "Options", state.ui.menu_font_size);
+    UI::Button exit_button = UI::Button(&state.ui.style, &state.ui.font, "Exit", state.ui.menu_font_size);
+    state.ui.layout.AddElement(&solo_play_button.base);
+    state.ui.layout.EndRow();
+    state.ui.layout.AddElement(&join_game_button.base);
+    state.ui.layout.EndRow();
+    state.ui.layout.AddElement(&host_game_button.base);
+    state.ui.layout.EndRow();
+    state.ui.layout.AddElement(&options_button.base);
+    state.ui.layout.EndRow();
+    state.ui.layout.AddElement(&exit_button.base);
+    state.ui.layout.EndRow();
 
-    UI::Button start_button = UI::Button(&state.ui.style, &state.ui.font, "Start", font_size);
-    UI::Button exit_button = UI::Button(&state.ui.style, &state.ui.font, "Exit", font_size);
-    UI::Button join_button = UI::Button(&state.ui.style, &state.ui.font, "Join", font_size);
-    static UI::TextField ip_field = UI::TextField(&state.ui.style, &state.ui.font, 15, "localhost", font_size);
-    static UI::TextField port_field = UI::TextField(&state.ui.style, &state.ui.font, 5, "25565", font_size);
+    state.ui.layout.EndColumn();
 
-    layout.AddElement(&start_button.base);
-    layout.EndRow();
-    layout.AddElement(&ip_field.base);
-    layout.AddElement(&port_field.base);
-    layout.AddElement(&join_button.base);
-    layout.EndRow();
-    layout.AddElement(&exit_button.base);
-    layout.EndRow();
+    if (solo_play_button.IsReleased())
+    {
+        state.current_scene = GS_GAME;
+        state.current_menu = GM_NONE;
+    }
 
-    layout.EndColumn();
+    if (join_game_button.IsReleased())
+    {
+        state.current_menu = GM_JOIN_MENU;
+    }
 
-    if (start_button.IsReleased())
-        state.current_scene = GAME;
+    if (host_game_button.IsReleased())
+    {
+        state.current_menu = GM_HOST_MENU;
+    }
 
-    ip_field.Update();
-    port_field.Update();
-
-    if (join_button.IsReleased())
+    if (options_button.IsReleased())
     {
         // nothing done yet
     }
@@ -70,19 +88,83 @@ void DoMainMenu()
     if (exit_button.IsReleased())
         state.should_quit = true;
 
-    BeginDrawing();
-        ClearBackground(Color{20, 20, 20});
-
-        start_button.Draw();
-        join_button.Draw();
-        exit_button.Draw();
-
-        ip_field.Draw();
-        port_field.Draw();
-    EndDrawing();
+    solo_play_button.Draw();
+    join_game_button.Draw();
+    host_game_button.Draw();
+    options_button.Draw();
+    exit_button.Draw();
 }
 
-void DoGame()
+void DoJoinMenu()
+{
+    state.ui.layout.Clear();
+
+    static UI::TextField ip_field = UI::TextField(&state.ui.style, &state.ui.font, 15, "localhost", state.ui.menu_font_size);
+    static UI::TextField port_field = UI::TextField(&state.ui.style, &state.ui.font, 5, "25565", state.ui.menu_font_size);
+    UI::Button join_button = UI::Button(&state.ui.style, &state.ui.font, "Join", state.ui.menu_font_size);
+    UI::Button close_button = UI::Button(&state.ui.style, &state.ui.font, "Close", state.ui.menu_font_size);
+
+    state.ui.layout.AddElement(&ip_field.base);
+    state.ui.layout.AddElement(&port_field.base);
+    state.ui.layout.AddElement(&join_button.base);
+    state.ui.layout.EndRow();
+    state.ui.layout.AddElement(&close_button.base);
+    state.ui.layout.EndRow();
+    state.ui.layout.EndColumn();
+
+    ip_field.Update();
+    port_field.Update();
+
+    if(join_button.IsReleased())
+    {
+        // nothing done yet
+    }
+
+    if(close_button.IsReleased())
+    {
+        state.current_menu = GM_MAIN_MENU;
+    }
+
+    ip_field.Draw();
+    port_field.Draw();
+    join_button.Draw();
+    close_button.Draw();
+}
+
+void DoHostMenu()
+{
+    state.ui.layout.Clear();
+
+    UI::Button close_button = UI::Button(&state.ui.style, &state.ui.font, "Close", state.ui.menu_font_size);
+
+    state.ui.layout.AddElement(&close_button.base);
+    state.ui.layout.EndRow();
+    state.ui.layout.EndColumn();
+
+    if(close_button.IsReleased())
+    {
+        state.current_menu = GM_MAIN_MENU;
+    }
+
+    close_button.Draw();
+}
+
+void DoTitleScreenScene()
+{
+    if(state.current_menu == GM_NONE)
+        state.current_menu = GM_MAIN_MENU;
+
+    ClearBackground(Color{20, 20, 20});
+    switch(state.current_menu)
+    {
+        case GM_MAIN_MENU: DoMainMenu(); break;
+        case GM_JOIN_MENU: DoJoinMenu(); break;
+        case GM_HOST_MENU: DoHostMenu(); break;
+        default: break;
+    }
+}
+
+void DoGameScene()
 {
     static Game::World world;
     static Game::Entity *player;
@@ -105,7 +187,7 @@ void DoGame()
 
     if (IsKeyPressed(KEY_ESCAPE))
     {
-        state.current_scene = MAIN_MENU;
+        state.current_scene = GS_TITLE_SCREEN;
         state.game.world_initialised = false;
     }
 
@@ -118,17 +200,14 @@ void DoGame()
     world.CalculateCollisions(*player, delta_time);
     world.Update(delta_time);
 
-    BeginDrawing();
-        ClearBackground(Color{25, 30, 40});
-        world.Draw();
-    EndDrawing();
+    ClearBackground(Color{25, 30, 40});
+    world.Draw();
 }
 
 int main(int, char**)
 {
     InitWindow(960, 540, "PI");
     SetTargetFPS(60);
-
     SetExitKey(KEY_END);
 
     Game::LoadTextures();
@@ -142,16 +221,21 @@ int main(int, char**)
     state.ui.style.text_suggestion = GRAY;
     state.ui.style.outline_active = RED;
     state.ui.style.padding = {10.0f, 10.0f};
-    state.ui.style.spacing = {10.0f, 10.0f};
+    state.ui.style.spacing = {4.0f, 4.0f};
+
+    state.ui.layout.position = Vector2{GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+    state.ui.layout.origin = Vector2{0.5f, 0.5f};
 
     while(!state.should_quit)
     {
+        BeginDrawing();
         switch(state.current_scene)
         {
-            case MAIN_MENU: DoMainMenu(); break;
-            case GAME: DoGame(); break;
+            case GS_TITLE_SCREEN: DoTitleScreenScene(); break;
+            case GS_GAME: DoGameScene(); break;
             default: state.should_quit = true; break;
         }
+        EndDrawing();
 
         if(WindowShouldClose()) state.should_quit = true;
     }
