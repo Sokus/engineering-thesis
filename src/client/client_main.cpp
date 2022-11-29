@@ -7,125 +7,153 @@
 
 #include "raylib.h"
 
-enum GameWindow
+enum GameScene
 {
     INVALID,
     MAIN_MENU,
     GAME
 };
 
+struct State
+{
+    GameScene current_scene = MAIN_MENU;
+    bool should_quit = false;
+
+    struct {
+        bool world_initialised = false;
+    } game;
+
+    struct {
+        Font font;
+        UI::Style style;
+    } ui;
+} state = {};
+
+
+void DoMainMenu()
+{
+    const float font_size = 40;
+
+    static UI::Layout layout;
+    layout.position = Vector2{GetScreenWidth() / 2.0f, 100.0f};
+    layout.origin = Vector2{0.5f, 0.0f};
+    layout.Clear();
+
+    UI::Button start_button = UI::Button(&state.ui.style, &state.ui.font, "Start", font_size);
+    UI::Button exit_button = UI::Button(&state.ui.style, &state.ui.font, "Exit", font_size);
+    UI::Button join_button = UI::Button(&state.ui.style, &state.ui.font, "Join", font_size);
+    static UI::TextField ip_field = UI::TextField(&state.ui.style, &state.ui.font, 15, "localhost", font_size);
+    static UI::TextField port_field = UI::TextField(&state.ui.style, &state.ui.font, 5, "25565", font_size);
+
+    layout.AddElement(&start_button.base);
+    layout.EndRow();
+    layout.AddElement(&ip_field.base);
+    layout.AddElement(&port_field.base);
+    layout.AddElement(&join_button.base);
+    layout.EndRow();
+    layout.AddElement(&exit_button.base);
+    layout.EndRow();
+
+    layout.EndColumn();
+
+    if (start_button.IsReleased())
+        state.current_scene = GAME;
+
+    ip_field.Update();
+    port_field.Update();
+
+    if (join_button.IsReleased())
+    {
+        // nothing done yet
+    }
+
+    if (exit_button.IsReleased())
+        state.should_quit = true;
+
+    BeginDrawing();
+        ClearBackground(Color{20, 20, 20});
+
+        start_button.Draw();
+        join_button.Draw();
+        exit_button.Draw();
+
+        ip_field.Draw();
+        port_field.Draw();
+    EndDrawing();
+}
+
+void DoGame()
+{
+    static Game::World world;
+    static Game::Entity *player;
+
+    if(!state.game.world_initialised)
+    {
+        world.Clear();
+        player = world.CreatePlayer(100.0f, 100.0f);
+        world.CreateTile(100.0f, 250.0f);
+        world.CreateTile(164.0f, 250.0f);
+        world.CreateTile(228.0f, 250.0f);
+        world.CreateTile(292.0f, 250.0f);
+        world.CreateTile(292.0f, 314.0f);
+        world.CreateTile(356.0f, 314.0f);
+        world.CreateTile(420.0f, 314.0f);
+        world.CreateInteractive(356.0f, 250.0f);
+
+        state.game.world_initialised = true;
+    }
+
+    if (IsKeyPressed(KEY_ESCAPE))
+    {
+        state.current_scene = MAIN_MENU;
+        state.game.world_initialised = false;
+    }
+
+    Game::Input input;
+    input.Update();
+    player->Control(&input);
+    player->onGround = 0;
+    float expected_delta_time = 1.0f / (float)GetFPS();
+    float delta_time = GetFrameTime() > expected_delta_time ? expected_delta_time : GetFrameTime();
+    world.CalculateCollisions(*player, delta_time);
+    world.Update(delta_time);
+
+    BeginDrawing();
+        ClearBackground(Color{25, 30, 40});
+        world.Draw();
+    EndDrawing();
+}
+
 int main(int, char**)
 {
     InitWindow(960, 540, "PI");
-    SetTargetFPS(60); //TODO parametrize deltaTime
-    SetExitKey(KEY_END);
+    SetTargetFPS(60);
 
-    Game::Input input;
-    Game::World world;
+    SetExitKey(KEY_END);
 
     Game::LoadTextures();
 
-    Game::Entity *player = world.CreatePlayer(100.0f, 100.0f);
-    world.CreateTile(100.0f, 250.0f);
-    world.CreateTile(164.0f, 250.0f);
-    world.CreateTile(228.0f, 250.0f);
-    world.CreateTile(292.0f, 250.0f);
-    world.CreateTile(292.0f, 314.0f);
-    world.CreateTile(356.0f, 314.0f);
-    world.CreateTile(420.0f, 314.0f);
-    world.CreateInteractive(356.0f, 250.0f);
+    state.ui.font = LoadFontEx(RESOURCE_PATH "/LiberationMono-Regular.ttf", 96, 0, 0);
+    SetTextureFilter(state.ui.font.texture, TEXTURE_FILTER_BILINEAR);
 
-    GameWindow active_window = MAIN_MENU;
+    state.ui.style.fill_default = LIGHTGRAY;
+    state.ui.style.fill_active = WHITE;
+    state.ui.style.text_default = DARKGRAY;
+    state.ui.style.text_suggestion = GRAY;
+    state.ui.style.outline_active = RED;
+    state.ui.style.padding = {10.0f, 10.0f};
+    state.ui.style.spacing = {10.0f, 10.0f};
 
-    Font font = LoadFontEx(RESOURCE_PATH "/LiberationMono-Regular.ttf", 96, 0, 0);
-    SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
-
-    bool exit_window = false;
-    while(!exit_window)
+    while(!state.should_quit)
     {
-        if(WindowShouldClose()) exit_window = true;
-
-        if(active_window == MAIN_MENU)
+        switch(state.current_scene)
         {
-            const float font_size = 40;
-
-            UI::Style style = {};
-            style.fill_default = LIGHTGRAY;
-            style.fill_active = WHITE;
-            style.text_default = DARKGRAY;
-            style.text_suggestion = GRAY;
-            style.outline_active = RED;
-            style.padding = { 10.0f, 10.0f };
-            style.spacing = { 10.0f, 10.0f };
-
-            static UI::Layout layout;
-            layout.position = Vector2{ GetScreenWidth()/2.0f, 100.0f };
-            layout.origin = Vector2{ 0.5f, 0.0f };
-            layout.Clear();
-
-            UI::Button start_button = UI::Button(&style, &font, "Start", font_size);
-            UI::Button exit_button = UI::Button(&style, &font, "Exit", font_size);
-            UI::Button join_button = UI::Button(&style, &font, "Join", font_size);
-            static UI::TextField ip_field = UI::TextField(&style, &font, 15, "localhost", font_size);
-            static UI::TextField port_field = UI::TextField(&style, &font, 5, "25565", font_size);
-
-            layout.AddElement(&start_button.base);
-            layout.EndRow();
-            layout.AddElement(&ip_field.base);
-            layout.AddElement(&port_field.base);
-            layout.AddElement(&join_button.base);
-            layout.EndRow();
-            layout.AddElement(&exit_button.base);
-            layout.EndRow();
-
-            layout.EndColumn();
-
-            if(start_button.IsReleased())
-                active_window = GAME;
-
-            ip_field.Update();
-            port_field.Update();
-
-            if(join_button.IsReleased())
-            {
-                // nothing done yet
-            }
-
-            if(exit_button.IsReleased())
-                exit_window = true;
-
-            BeginDrawing();
-                ClearBackground(Color{20, 20, 20});
-
-                start_button.Draw();
-                join_button.Draw();
-                exit_button.Draw();
-
-                ip_field.Draw();
-                port_field.Draw();
-            EndDrawing();
+            case MAIN_MENU: DoMainMenu(); break;
+            case GAME: DoGame(); break;
+            default: state.should_quit = true; break;
         }
-        else if(active_window == GAME)
-        {
-            if(IsKeyPressed(KEY_ESCAPE))
-                active_window = MAIN_MENU;
 
-            input.Update();
-            player->Control(&input);
-            player->onGround = 0;
-            float deltaTime = GetFrameTime() > 0.02f ? 0.02f : GetFrameTime(); //will broke if < 60 FPS
-            world.CalculateCollisions(*player, deltaTime);
-            world.Update(deltaTime);
-
-            BeginDrawing();
-                ClearBackground(Color{25, 30, 40});
-                world.Draw();
-            EndDrawing();
-        }
-        else
-        {
-            break;
-        }
+        if(WindowShouldClose()) state.should_quit = true;
     }
 
     CloseWindow();

@@ -13,6 +13,7 @@ namespace Game {
         Entity entities[entity_count] = {};
 
     public:
+        void Clear();
         void Update(float dt);
         void Draw();
         void CalculateCollisions(Entity& player,float dt);

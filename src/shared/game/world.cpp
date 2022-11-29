@@ -42,6 +42,11 @@ namespace Game {
         }
     }
 
+    void World::Clear()
+    {
+        memset(entities, 0, sizeof(entities));
+    }
+
     void World::Update(float dt)
     {
         for (int entity_idx = 0; entity_idx < entity_count; entity_idx++)
