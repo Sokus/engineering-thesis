@@ -7,6 +7,8 @@ namespace UI {
 
 struct Style
 {
+    Font font;
+    float font_size;
     Color fill_default;
     Color fill_active;
     Color text_default;
@@ -30,9 +32,11 @@ struct LayoutRow
     Vector2 min_size;
 };
 
-class Layout
+struct Layout
 {
-public:
+    Style default_style;
+    Style *current_style;
+
     Vector2 position;
     Vector2 origin;
 
@@ -44,26 +48,28 @@ public:
     int row_count;
     Vector2 min_size;
     Vector2 element_offset;
-
-public:
-    void Clear();
-    void AddElement(Base *base);
-    void EndRow();
-    void EndColumn();
 };
+
+void Init();
+void SetDefaultStyle(Style *style);
+Style *GetCurrentStyle();
+void SetPosition(float x, float y);
+void SetOrigin(float x, float y);
+void Begin();
+void Add(Base *base);
+void EndRow();
+void End();
 
 class Button
 {
 private:
     const char *label;
-    Font *font;
-    float font_size;
 
 public:
     Base base;
     Vector2 label_size;
 
-    Button(Style *style, Font *font, char *label, float font_size);
+    Button(char *label);
     bool IsHovered();
     bool IsPressed();
     bool IsReleased();
@@ -73,9 +79,7 @@ public:
 class TextField
 {
 private:
-    const Font *font;
     const char *label;
-    float font_size;
     const char *default_value;
     static const int data_capacity = 32;
     char data[data_capacity + 1];
@@ -87,9 +91,7 @@ public:
     Base base;
     Vector2 text_size;
 
-    TextField(Style *style, Font *font,
-              int max_character_count, char *default_value,
-              float font_size);
+    TextField(int max_character_count, char *default_value);
     bool IsHovered();
     void Update();
     void Draw();

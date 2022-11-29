@@ -4,79 +4,120 @@
 
 namespace UI {
 
-void Layout::Clear()
+Layout layout;
+
+void Init()
 {
-    element_count = 0;
-    row_count = 0;
-    memset(rows, 0, sizeof(rows));
-    min_size = Vector2{ 0.0f, 0.0f };
-    element_offset = Vector2{ 0.0f, 0.0f };
+    Style *style = &layout.default_style;
+
+    style->font = LoadFontEx(RESOURCE_PATH "/LiberationMono-Regular.ttf", 96, 0, 0);
+    SetTextureFilter(style->font.texture, TEXTURE_FILTER_BILINEAR);
+    style->font_size = 30;
+    style->fill_default = LIGHTGRAY;
+    style->fill_active = WHITE;
+    style->text_default = DARKGRAY;
+    style->text_suggestion = GRAY;
+    style->outline_active = RED;
+    style->padding = {10.0f, 10.0f};
+    style->spacing = {4.0f, 4.0f};
+    layout.current_style = style;
 }
 
-void Layout::AddElement(Base *base)
+void SetDefaultStyle(Style *style)
 {
-    if(element_count >= max_element_count) return;
-    if(row_count >= max_row_count) return;
-
-    elements[element_count] = base;
-    float width = base->min_size.x + 2.0f*base->style->spacing.x;
-    float height = base->min_size.y + 2.0f*base->style->spacing.y;
-    rows[row_count].min_size.x += width;
-    if(height > rows[row_count].min_size.y)
-        rows[row_count].min_size.y = height;
-    rows[row_count].count++;
-    element_count++;
+    memcpy(&layout.default_style, style, sizeof(Style));
 }
 
-void Layout::EndRow()
+Style *GetCurrentStyle()
 {
-    if(row_count < max_row_count)
+    return layout.current_style;
+}
+
+void SetPosition(float x, float y)
+{
+    layout.position = Vector2{ x, y };
+}
+
+void SetOrigin(float x, float y)
+{
+    layout.origin = Vector2{ x, y };
+}
+
+void Begin()
+{
+    layout.element_count = 0;
+    layout.row_count = 0;
+    memset(layout.rows, 0, sizeof(layout.rows));
+    layout.min_size = Vector2{ 0.0f, 0.0f };
+    layout.element_offset = Vector2{ 0.0f, 0.0f };
+}
+
+void Add(Base *base)
+{
+    if(layout.element_count >= layout.max_element_count) return;
+    if(layout.row_count >= layout.max_row_count) return;
+
+    layout.elements[layout.element_count] = base;
+    float width = base->min_size.x + 2.0f * base->style->spacing.x;
+    float height = base->min_size.y + 2.0f * base->style->spacing.y;
+    LayoutRow *current_row = layout.rows + layout.row_count;
+    current_row->min_size.x += width;
+    if(height > current_row->min_size.y)
+        current_row->min_size.y = height;
+    current_row->count++;
+    layout.element_count++;
+}
+
+void EndRow()
+{
+    if(layout.row_count >= layout.max_row_count) return;
+
+    LayoutRow *current_row = layout.rows + layout.row_count;
+    if (current_row->min_size.x > layout.min_size.x)
+        layout.min_size.x = current_row->min_size.x;
+    layout.min_size.y += current_row->min_size.y;
+
+    layout.row_count++;
+    current_row = layout.rows + layout.row_count;
+    current_row->start = layout.element_count;
+    current_row->count = 0;
+    current_row->min_size = Vector2{ 0.0f, 0.0f };
+}
+
+void End()
+{
+    for(int row_idx = 0; row_idx < layout.row_count; row_idx++)
     {
-        if(rows[row_count].min_size.x > min_size.x)
-            min_size.x = rows[row_count].min_size.x;
-        min_size.y += rows[row_count].min_size.y;
-
-        row_count++;
-        rows[row_count].start = element_count;
-        rows[row_count].count = 0;
-        rows[row_count].min_size = Vector2{ 0.0f, 0.0f };
-    }
-}
-
-void Layout::EndColumn()
-{
-    for(int row_idx = 0; row_idx < row_count; row_idx++)
-    {
-        element_offset.x = 0.0f;
-        LayoutRow *row = rows + row_idx;
-        float free_width = min_size.x - row->min_size.x;
+        LayoutRow *row = layout.rows + row_idx;
+        layout.element_offset.x = 0.0f;
+        float free_width = layout.min_size.x - row->min_size.x;
         for(int element_idx = row->start;
             element_idx < row->start + row->count;
             element_idx++)
         {
-            Base *element = elements[element_idx];
+            Base *element = layout.elements[element_idx];
             float element_width = element->min_size.x + 2.0f*element->style->spacing.x;
             float width_ratio = element_width / row->min_size.x;
             float added_width = width_ratio * free_width;
-            float origin_position_x = position.x - origin.x * min_size.x;
-            float origin_position_y = position.y - origin.y * min_size.y;
-            element->rect.x = origin_position_x + element_offset.x + element->style->spacing.x;
+            float origin_position_x = layout.position.x - layout.origin.x * layout.min_size.x;
+            float origin_position_y = layout.position.y - layout.origin.y * layout.min_size.y;
+            element->rect.x = origin_position_x + layout.element_offset.x + element->style->spacing.x;
             element->rect.width = element->min_size.x + added_width;
-            element_offset.x += element_width + added_width;
-            element->rect.y = origin_position_y + element_offset.y + element->style->spacing.y;
+            layout.element_offset.x += element_width + added_width;
+            element->rect.y = origin_position_y + layout.element_offset.y + element->style->spacing.y;
             element->rect.height = row->min_size.y - 2.0f*element->style->spacing.y;
         }
-        element_offset.y += row->min_size.y;
+        layout.element_offset.y += row->min_size.y;
     }
 }
 
-Button::Button(Style *style, Font *font, char *label, float font_size)
-: font(font), label(label), font_size(font_size)
+Button::Button(char *label)
+: label(label)
 {
-    label_size = MeasureTextEx(*font, label, font_size, 0.0f);
-    base.min_size.x = label_size.x + 2.0f*style->padding.x;
-    base.min_size.y = label_size.y + 2.0f*style->padding.y;
-    base.style = style;
+    base.style = layout.current_style;
+    label_size = MeasureTextEx(base.style->font, label, base.style->font_size, 0.0f);
+    base.min_size.x = label_size.x + 2.0f*base.style->padding.x;
+    base.min_size.y = label_size.y + 2.0f*base.style->padding.y;
 }
 
 bool Button::IsHovered()
@@ -106,13 +147,13 @@ void Button::Draw()
         base.rect.x + (base.rect.width - label_size.x)/2.0f,
         base.rect.y + (base.rect.height - label_size.y)/2.0f
     };
-    DrawTextEx(*font, label, label_position, font_size, 0.0f, base.style->text_default);
+
+    DrawTextEx(base.style->font, label, label_position,
+               base.style->font_size, 0.0f, base.style->text_default);
 }
 
-TextField::TextField(Style *style, Font *font,
-                     int max_character_count, char *default_value,
-                     float font_size)
-: font(font), default_value(default_value), font_size(font_size)
+TextField::TextField(int max_character_count, char *default_value)
+: default_value(default_value)
 {
     if(max_character_count < 0) max_character_count = 0;
     if(max_character_count > data_capacity) max_character_count = data_capacity;
@@ -120,10 +161,10 @@ TextField::TextField(Style *style, Font *font,
     for(int i = 0; i < max_character_count; i++)
         data[i] = 'X';
     data[max_character_count] = '\0';
-    text_size = MeasureTextEx(*font, data, font_size, 0.0f);
-    base.min_size.x = text_size.x + 2.0f*style->padding.x;
-    base.min_size.y = text_size.y + 2.0f*style->padding.y;
-    base.style = style;
+    base.style = layout.current_style;
+    text_size = MeasureTextEx(base.style->font, data, base.style->font_size, 0.0f);
+    base.min_size.x = text_size.x + 2.0f*base.style->padding.x;
+    base.min_size.y = text_size.y + 2.0f*base.style->padding.y;
     memset(data, 0x0, max_character_count * sizeof(char));
     character_count = 0;
     active = false;
@@ -137,10 +178,7 @@ bool TextField::IsHovered()
 void TextField::Update()
 {
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-    {
         active = IsHovered();
-    }
-
 
     if(active)
     {
@@ -181,7 +219,7 @@ void TextField::Draw()
     };
     const char *text = character_count > 0 ? data : default_value;
     Color color = character_count > 0 ? base.style->text_default : base.style->text_suggestion;
-    DrawTextEx(*font, text, label_position, font_size, 0.0f, color);
+    DrawTextEx(base.style->font, text, label_position, base.style->font_size, 0.0f, color);
 }
 
 } // namespace UI
