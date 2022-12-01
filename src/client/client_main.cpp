@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "macros.h" // ABS
 #include "game/world.h"
@@ -27,13 +28,25 @@ enum GameMenu
 
 struct State
 {
+    GameScene last_scene = GS_INVALID;
     GameScene current_scene = GS_TITLE_SCREEN;
-    GameMenu current_menu = GM_NONE;
+    bool scene_changed = true;
+    GameMenu last_menu = GM_NONE;
+    GameMenu current_menu = GM_MAIN_MENU;
+    bool menu_changed = true;
     bool should_quit = false;
 
     struct {
-        bool world_initialised = false;
-    } game;
+        struct {
+            char ip[16];
+            char port[6];
+        } join;
+
+        struct {
+            char port[6];
+        } host;
+    } fields;
+
 } state = {};
 
 void setView(Camera2D &view,glm::vec2 position) {
@@ -87,8 +100,16 @@ void DoMainMenu()
 
 void DoJoinMenu()
 {
-    static UI::TextField ip_field = UI::TextField(15, "localhost");
-    static UI::TextField port_field = UI::TextField(5, "25565");
+    if(state.menu_changed)
+    {
+        const char default_ip[] = "localhost";
+        const char default_port[] = "25565";
+        memcpy(state.fields.join.ip, default_ip, sizeof(default_ip));
+        memcpy(state.fields.join.port, default_port, sizeof(default_port));
+    }
+
+    UI::TextField ip_field = UI::TextField(state.fields.join.ip, sizeof(state.fields.join.ip));
+    UI::TextField port_field = UI::TextField(state.fields.join.port, sizeof(state.fields.join.port));
     UI::Button join_button = UI::Button("Join");
     UI::Button close_button = UI::Button("Close");
 
@@ -122,17 +143,36 @@ void DoJoinMenu()
 
 void DoHostMenu()
 {
+    if(state.menu_changed)
+    {
+        const char default_port[] = "25565";
+        memcpy(state.fields.host.port, default_port, sizeof(default_port));
+    }
+
+    UI::TextField port_field = UI::TextField(state.fields.host.port, sizeof(state.fields.host.port));
+    UI::Button host_button = UI::Button("Host");
     UI::Button close_button = UI::Button("Close");
 
     UI::Begin();
     {
+        UI::Add(&port_field.base);
+        UI::Add(&host_button.base); UI::EndRow();
         UI::Add(&close_button.base); UI::EndRow();
     }
     UI::End();
 
+    port_field.Update();
+
+    if(host_button.IsReleased())
+    {
+        // nothing done yet
+    }
+
     if(close_button.IsReleased())
         state.current_menu = GM_MAIN_MENU;
 
+    port_field.Draw();
+    host_button.Draw();
     close_button.Draw();
 }
 
@@ -280,7 +320,6 @@ void DoPauseMenu()
     {
         state.current_scene = GS_TITLE_SCREEN;
         state.current_menu = GM_NONE;
-        state.game.world_initialised = false;
     }
 
     options_button.Draw();
@@ -304,14 +343,14 @@ void DoGameScene()
 
         state.game.world_initialised = true;
     }
-    
+
 
     input.Update();
 
     float expected_delta_time = 1.0f / (float)GetFPS();
     float delta_time = GetFrameTime() > expected_delta_time ? expected_delta_time : GetFrameTime();
 
-    if(input.shoot) 
+    if(input.shoot)
     {
         static float cooldown = 0;
         if(cooldown <= 0) {
@@ -371,6 +410,11 @@ int main(int, char**)
 
     while(!state.should_quit)
     {
+        state.scene_changed = (state.current_scene != state.last_scene);
+        state.last_scene = state.current_scene;
+        state.menu_changed = (state.current_menu != state.last_menu);
+        state.last_menu = state.current_menu;
+
         BeginDrawing();
         switch(state.current_scene)
         {

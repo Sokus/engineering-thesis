@@ -12,7 +12,6 @@ struct Style
     Color fill_default;
     Color fill_active;
     Color text_default;
-    Color text_suggestion;
     Color outline_active;
     Vector2 padding;
     Vector2 spacing;
@@ -48,6 +47,7 @@ struct Layout
     int row_count;
     Vector2 min_size;
     Vector2 element_offset;
+    Base *active_element;
 };
 
 void Init();
@@ -69,29 +69,38 @@ public:
     Base base;
     Vector2 label_size;
 
-    Button(char *label);
+    Button(const char *label);
     bool IsHovered();
     bool IsPressed();
     bool IsReleased();
     void Draw();
 };
 
+class Label
+{
+private:
+    const char *text;
+
+public:
+    Base base;
+    Vector2 label_size;
+
+    Label(const char *label);
+    void Draw();
+};
+
 class TextField
 {
 private:
-    const char *label;
-    const char *default_value;
-    static const int data_capacity = 32;
-    char data[data_capacity + 1];
-    int character_count;
-    int max_character_count;
-    bool active;
+    char *buffer;
+    int buffer_capacity;
 
 public:
     Base base;
     Vector2 text_size;
 
-    TextField(int max_character_count, char *default_value);
+    TextField(char *buffer, int buffer_capacity);
+    TextField(int max_character_count, const char *default_value);
     bool IsHovered();
     void Update();
     void Draw();

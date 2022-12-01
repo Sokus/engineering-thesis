@@ -16,7 +16,6 @@ void Init()
     style->fill_default = LIGHTGRAY;
     style->fill_active = WHITE;
     style->text_default = DARKGRAY;
-    style->text_suggestion = GRAY;
     style->outline_active = RED;
     style->padding = {10.0f, 10.0f};
     style->spacing = {4.0f, 4.0f};
@@ -109,9 +108,25 @@ void End()
         }
         layout.element_offset.y += row->min_size.y;
     }
+
+    if(IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+    {
+        layout.active_element = 0;
+
+        for(int element_idx = 0; element_idx < layout.element_count; element_idx++)
+        {
+            Base *element = layout.elements[element_idx];
+            if(CheckCollisionPointRec(GetMousePosition(), element->rect) &&
+               IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+            {
+                layout.active_element = layout.elements[element_idx];
+                break;
+            }
+        }
+    }
 }
 
-Button::Button(char *label)
+Button::Button(const char *label)
 : label(label)
 {
     base.style = layout.current_style;
@@ -152,22 +167,31 @@ void Button::Draw()
                base.style->font_size, 0.0f, base.style->text_default);
 }
 
-TextField::TextField(int max_character_count, char *default_value)
-: default_value(default_value)
+Label::Label(const char *label)
 {
-    if(max_character_count < 0) max_character_count = 0;
-    if(max_character_count > data_capacity) max_character_count = data_capacity;
-    this->max_character_count = max_character_count;
-    for(int i = 0; i < max_character_count; i++)
-        data[i] = 'X';
-    data[max_character_count] = '\0';
     base.style = layout.current_style;
-    text_size = MeasureTextEx(base.style->font, data, base.style->font_size, 0.0f);
+    label_size = MeasureTextEx(base.style->font, label, base.style->font_size, 0.0f);
+    base.min_size.x = label_size.x + 2.0f*base.style->padding.x;
+    base.min_size.y = label_size.y + 2.0f*base.style->padding.y;
+}
+
+void Label::Draw()
+{
+
+}
+
+TextField::TextField(char *buffer, int buffer_capacity)
+{
+    if(buffer_capacity < 0) buffer_capacity = 0;
+    this->buffer = buffer;
+    this->buffer_capacity = buffer_capacity;
+    char temp_buffer[512];
+    memset(temp_buffer, 'X', buffer_capacity);
+    temp_buffer[buffer_capacity - 1] = '\0';
+    base.style = layout.current_style;
+    text_size = MeasureTextEx(base.style->font, temp_buffer, base.style->font_size, 0.0f);
     base.min_size.x = text_size.x + 2.0f*base.style->padding.x;
     base.min_size.y = text_size.y + 2.0f*base.style->padding.y;
-    memset(data, 0x0, max_character_count * sizeof(char));
-    character_count = 0;
-    active = false;
 }
 
 bool TextField::IsHovered()
@@ -177,19 +201,22 @@ bool TextField::IsHovered()
 
 void TextField::Update()
 {
-    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-        active = IsHovered();
+    bool active = layout.active_element == &base;
 
     if(active)
     {
+        int character_count = 0;
+        while(buffer[character_count] && character_count < buffer_capacity)
+            character_count++;
+
         int key = GetCharPressed();
         while(key > 0)
         {
             if((key >= 32) && (key <= 125) &&
-               (character_count < max_character_count))
+               (character_count < buffer_capacity - 1))
             {
-                data[character_count] = (char)key;
-                data[character_count + 1] = '\0';
+                buffer[character_count] = (char)key;
+                buffer[character_count + 1] = '\0';
                 character_count++;
             }
 
@@ -200,13 +227,15 @@ void TextField::Update()
         {
             character_count--;
             if(character_count < 0) character_count = 0;
-            data[character_count] = '\0';
+            buffer[character_count] = '\0';
         }
     }
 }
 
 void TextField::Draw()
 {
+    bool active = layout.active_element == &base;
+
     Color fill_color = base.style->fill_default;
     if(active || IsHovered()) fill_color = base.style->fill_active;
     DrawRectangleRec(base.rect, fill_color);
@@ -217,9 +246,7 @@ void TextField::Draw()
         base.rect.x + (base.rect.width - text_size.x)/2.0f,
         base.rect.y + (base.rect.height - text_size.y)/2.0f
     };
-    const char *text = character_count > 0 ? data : default_value;
-    Color color = character_count > 0 ? base.style->text_default : base.style->text_suggestion;
-    DrawTextEx(base.style->font, text, label_position, base.style->font_size, 0.0f, color);
+    DrawTextEx(base.style->font, buffer, label_position, base.style->font_size, 0.0f, base.style->text_default);
 }
 
 } // namespace UI
