@@ -12,6 +12,7 @@ target_include_directories(server
 
 target_link_libraries(server
     shared
+    parg
 )
 
 install(TARGETS server DESTINATION "${CMAKE_INSTALL_PREFIX}")

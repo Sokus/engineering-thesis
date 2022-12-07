@@ -24,6 +24,7 @@ enum MessageType
     JOIN_REFUSE,
     DISCONNECT,
     VALUE,
+    INPUT,
 
     MESSAGE_TYPE_MAX,
 };

@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "networking/networking.h"
 #include "macros.h" // ABS
 #include "game/world.h"
 #include "user_interface.h"
+#include "pi_time.h"
 
 #include "raylib.h"
 
@@ -21,6 +23,7 @@ enum GameMenu
     GM_MAIN_MENU,
     GM_LEVEL_MENU,
     GM_JOIN_MENU,
+    GM_CONNECTING_MENU,
     GM_HOST_MENU,
     GM_OPTIONS_MENU,
     GM_PLAYER_MENU
@@ -127,9 +130,7 @@ void DoJoinMenu()
     port_field.Update();
 
     if(join_button.IsReleased())
-    {
-        // nothing done yet
-    }
+        state.current_menu = GM_CONNECTING_MENU;
 
     if(close_button.IsReleased())
         state.current_menu = GM_MAIN_MENU;
@@ -140,6 +141,16 @@ void DoJoinMenu()
     port_field.Draw();
     join_button.Draw();
     close_button.Draw();
+}
+
+void DoConnectingMenu()
+{
+    if(state.menu_changed)
+    {
+
+    }
+
+    ClearBackground(DARKGREEN);
 }
 
 void DoHostMenu()
@@ -290,6 +301,7 @@ void DoTitleScreenScene()
     {
         case GM_MAIN_MENU: DoMainMenu(); break;
         case GM_JOIN_MENU: DoJoinMenu(); break;
+        case GM_CONNECTING_MENU: DoConnectingMenu(); break;
         case GM_HOST_MENU: DoHostMenu(); break;
         case GM_LEVEL_MENU: DoLevelMenu(); break;
         case GM_OPTIONS_MENU: DoOptionsMenu(); break;
@@ -403,6 +415,8 @@ void DoGameScene()
 
 int main(int, char**)
 {
+    SetTraceLogLevel(LOG_INFO);
+
     InitWindow(960, 540, "PI");
     SetTargetFPS(60);
     SetExitKey(KEY_END);

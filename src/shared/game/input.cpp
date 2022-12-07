@@ -1,4 +1,5 @@
 #include "input.h"
+#include "serialization/serialization.h"
 
 #include "raylib.h"
 #include <stdio.h>
@@ -20,6 +21,14 @@ void Input::Update()
     if (cooldown <= 90) {
         cooldown += 1;
     }
+}
+
+bool SerializeInput(BitPacker *bit_packer, Input *input)
+{
+    for(int i = 0; i < Input::Direction::COUNT; i++)
+        SERIALIZE_BOOL(bit_packer, &input->move[i]);
+    SERIALIZE_BOOL(bit_packer, &input->jump);
+    return true;
 }
 
 } // namespace Game
