@@ -45,10 +45,13 @@ namespace Game {
     void World::Clear()
     {
         memset(entities, 0, sizeof(entities));
+        level = {};
     }
 
     void World::Update(float dt)
     {
+        level.Update(dt);
+        
         for (int entity_idx = 0; entity_idx < entity_count; entity_idx++)
         {
             Entity* entity = entities + entity_idx;
@@ -58,6 +61,8 @@ namespace Game {
 
     void World::Draw()
     {
+        level.DrawBackground({0,0});
+
         for (int entity_idx = 0; entity_idx < entity_count; entity_idx++)
         {
             Entity* entity = entities + entity_idx;
@@ -119,6 +124,10 @@ namespace Game {
             entity->scale = 4;
         }
         return entity;
+    }
+
+    void World::SetLevel(const Level &level) {
+        this->level = level;
     }
 
 }

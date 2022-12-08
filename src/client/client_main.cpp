@@ -200,10 +200,28 @@ void DoGameScene()
 {
     static Game::World world;
     static Game::Entity *player;
+    static Game::Level exampleLevel;
 
     if(!state.game.world_initialised)
     {
+        Game::ParallaxLayer hills, sky;
+
+        hills.dimensions = {960,540};
+        hills.position = {0,0,3};
+        hills.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/hills.png");
+        hills.naturalScrollSpeed = -300;
+        
+        sky.dimensions = {960,540};
+        sky.position = {0,0,6};
+        sky.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/sky.png");
+        sky.naturalScrollSpeed = -300;
+
+        exampleLevel.AddParallaxLayer(hills);
+        exampleLevel.AddParallaxLayer(sky);
+
+
         world.Clear();
+        world.SetLevel(exampleLevel);
         player = world.CreatePlayer(100.0f, 100.0f);
         world.CreateTile(100.0f, 250.0f);
         world.CreateTile(164.0f, 250.0f);

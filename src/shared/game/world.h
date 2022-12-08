@@ -2,6 +2,8 @@
 #define WORLD_H
 
 #include "entity.h"
+#include "level.h"
+
 namespace Game {
 
     class World
@@ -11,6 +13,7 @@ namespace Game {
         static float gravity_speed;
         static const int entity_count = 256;
         Entity entities[entity_count] = {};
+        Level level;
 
     public:
         void Clear();
@@ -22,6 +25,8 @@ namespace Game {
         Entity* CreatePlayer(float pos_x, float pos_y);
         Entity* CreateTile(float pos_x, float pos_y);
         Entity* CreateInteractive(float pos_x, float pos_y);
+
+        void SetLevel(const Level &level);
     };
 
 }
