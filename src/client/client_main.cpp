@@ -3,6 +3,7 @@
 
 #include "macros.h" // ABS
 #include "game/world.h"
+#include "game/content.h"
 #include "user_interface.h"
 
 #include "raylib.h"
@@ -204,6 +205,8 @@ void DoGameScene()
 
     if(!state.game.world_initialised)
     {
+        Game::InitGameContent();
+
         Game::ParallaxLayer hills, clouds, sky;
 
         hills.dimensions = {960,540};
@@ -243,16 +246,34 @@ void DoGameScene()
 
     Game::Input input;
     input.Update();
-    player->Control(&input);
-    player->onGround = 0;
+
     float expected_delta_time = 1.0f / (float)GetFPS();
     float delta_time = GetFrameTime() > expected_delta_time ? expected_delta_time : GetFrameTime();
+
+    if(input.shoot) 
+    {
+        static float cooldown = 0;
+        if(cooldown <= 0) {
+            Game::ReferenceFrame rframe;
+            rframe.position = player->position + glm::vec2(player->width, player->height)*static_cast<float>(player->scale)*0.5f;
+            rframe.velocity = glm::vec2(player->facing,1) * glm::vec2(200,50) + glm::vec2(player->velocity.x, 0);
+            rframe.angularVelocity = -360;
+            rframe.rotation = 0;
+            Game::Bullet bullet(&Game::exampleBullet, rframe, 5);
+            world.CreateBullet(bullet);
+            cooldown = 0.5f;
+        }
+        cooldown -= delta_time;
+    }
+
+    player->Control(&input);
+    player->onGround = 0;
+
     world.CalculateCollisions(*player, delta_time);
     world.Update(delta_time);
 
     ClearBackground(Color{25, 30, 40});
     world.Draw();
-
 
     if(IsKeyPressed(KEY_ESCAPE))
     {

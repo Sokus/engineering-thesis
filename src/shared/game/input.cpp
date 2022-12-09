@@ -12,6 +12,7 @@ void Input::Update()
     move[RIGHT] = IsKeyDown(KEY_D);
     move[SHIFT] = IsKeyDown(KEY_LEFT_SHIFT);
     move[INTERACT] = IsKeyDown(KEY_I);
+    shoot = IsKeyDown(KEY_SPACE);
 }
 
 } // namespace Game

@@ -18,6 +18,7 @@ struct Input
 
     bool move[Direction::COUNT];
     bool jump;
+    bool shoot;
 
     void Update();
 };

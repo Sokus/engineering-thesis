@@ -57,6 +57,17 @@ namespace Game {
             Entity* entity = entities + entity_idx;
             entity->Update(dt);
         }
+
+        int noAliveBullets = 0;
+        for(int bulletIdx = 0; bulletIdx < bullets.size(); ++bulletIdx) 
+        {
+            bullets[bulletIdx].Update(dt);
+            if(bullets[bulletIdx].IsAlive()) 
+            {
+                bullets[noAliveBullets++] = bullets[bulletIdx];
+            }
+        }
+        bullets.resize(noAliveBullets);
     }
 
     void World::Draw()
@@ -68,6 +79,9 @@ namespace Game {
             Entity* entity = entities + entity_idx;
             entity->Draw();
         }
+
+        for(const auto &bullet : bullets)
+            bullet.Draw();
     }
 
     Entity* World::GetNewEntity()
@@ -124,6 +138,10 @@ namespace Game {
             entity->scale = 4;
         }
         return entity;
+    }
+
+    void World::CreateBullet(const Bullet &bullet) {
+        bullets.push_back(bullet);
     }
 
     void World::SetLevel(const Level &level) {
