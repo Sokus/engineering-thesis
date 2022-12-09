@@ -201,36 +201,11 @@ void DoGameScene()
 {
     static Game::World world;
     static Game::Entity *player;
-    static Game::Level exampleLevel;
 
     if(!state.game.world_initialised)
     {
-        Game::InitGameContent();
-
-        Game::ParallaxLayer hills, clouds, sky;
-
-        hills.dimensions = {960,540};
-        hills.position = {0,0,3};
-        hills.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/hills.png");
-        hills.naturalScrollSpeed = -300;
-
-        clouds.dimensions = {960,540};
-        clouds.position = {0,0,10};
-        clouds.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/clouds.png");
-        clouds.naturalScrollSpeed = -300;
-        
-        sky.dimensions = {960,540};
-        sky.position = {0,0,999};
-        sky.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/sky.png");
-        sky.naturalScrollSpeed = 0;
-
-        exampleLevel.AddParallaxLayer(hills);
-        exampleLevel.AddParallaxLayer(clouds);
-        exampleLevel.AddParallaxLayer(sky);
-
-
         world.Clear();
-        world.SetLevel(exampleLevel);
+        world.SetLevel(Game::exampleLevel);
         player = world.CreatePlayer(100.0f, 100.0f);
         world.CreateTile(100.0f, 250.0f);
         world.CreateTile(164.0f, 250.0f);
@@ -306,6 +281,7 @@ int main(int, char**)
     SetExitKey(KEY_END);
 
     Game::LoadTextures();
+    Game::InitGameContent();
     UI::Init();
 
     while(!state.should_quit)
