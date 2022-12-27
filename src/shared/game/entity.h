@@ -13,7 +13,8 @@ namespace Game {
         NONE,
         PLAYER,
         TILE,
-        INTERACTIVE
+        INTERACTIVE,
+        MOVING_TILE
     };
 
     struct Entity
@@ -32,8 +33,17 @@ namespace Game {
         bool onGround;
         int jumpHeight;
         bool active;
+        int connectionGroup;
+
+        // PLAYER DATA 
 
         float move_speed;
+        int stateChange;
+        bool frameChange;
+
+        // MOVING DATA
+        bool moving;
+        glm::vec2 border[4];
 
         // CLIENT STATE
 
@@ -47,6 +57,7 @@ namespace Game {
         bool collidesWithX(Entity ent,float dt);
         bool collidesWithY(Entity ent, float dt);
         void Control(Input* input);
+        bool inBorder(float dt);
     };
 }
 #endif

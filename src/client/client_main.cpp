@@ -207,14 +207,24 @@ void DoGameScene()
         world.Clear();
         world.SetLevel(Game::exampleLevel);
         player = world.CreatePlayer(100.0f, 100.0f);
-        world.CreateTile(100.0f, 250.0f);
-        world.CreateTile(164.0f, 250.0f);
-        world.CreateTile(228.0f, 250.0f);
-        world.CreateTile(292.0f, 250.0f);
-        world.CreateTile(292.0f, 314.0f);
-        world.CreateTile(356.0f, 314.0f);
-        world.CreateTile(420.0f, 314.0f);
-        world.CreateInteractive(356.0f, 250.0f);
+        world.CreateTile(36.0f, 122.0f, 0);
+        world.CreateTile(164.0f, 122.0f, 0);
+        world.CreateTile(36.0f, 378.0f, 0);
+        world.CreateTile(100.0f, 378.0f, 0);
+        world.CreateTile(164.0f, 314.0f, 0);
+        world.CreateTile(228.0f, 314.0f, 0);
+        world.CreateTile(292.0f, 314.0f, 0);
+        world.CreateTile(292.0f, 378.0f, 0);
+        world.CreateTile(356.0f, 378.0f, 0);
+        world.CreateTile(420.0f, 378.0f, 0);
+        //world.CreateTile(356.0f, 250.0f, 0);
+        world.CreateTile(548.0f, 378.0f, 1);
+        world.CreateInteractive(356.0f, 314.0f, 1);
+        world.CreateInteractive(548.0f, 314.0f, 2);
+        world.CreateTile(676.0f, 186.0f, 2);
+        glm::vec2 border[4] = { glm::vec2(420.0f, 121.0f),glm::vec2(676.0f,121.0f),glm::vec2(420.0f,251.0f),glm::vec2(676.0f,251.0f) };
+        world.CreateMovingTile(548.0f, 186.0f, 0, glm::vec2(0, 20), border);
+
 
         state.game.world_initialised = true;
     }
@@ -241,11 +251,8 @@ void DoGameScene()
         cooldown -= delta_time;
     }
 
-    player->Control(&input);
-    player->onGround = 0;
 
-    world.CalculateCollisions(*player, delta_time);
-    world.Update(delta_time);
+    world.Update(&input, delta_time);
 
     ClearBackground(Color{25, 30, 40});
     world.Draw();

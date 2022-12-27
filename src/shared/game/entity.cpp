@@ -31,6 +31,24 @@ namespace Game {
 
             animation_frame_time += dt;
         }
+        if (type == INTERACTIVE) {
+            if (active) {
+                animation_frame = 1;
+            }
+            else {
+                animation_frame = 0;
+            }
+        }
+        if (type == MOVING_TILE) {
+            glm::vec2 tmp_pos = velocity * dt;
+            if (!inBorder(dt)) {
+                velocity = glm::vec2(0.0f, 0.0f);
+                move_direction = move_direction * glm::vec2(-1, -1);
+            }
+            else {
+                velocity = move_direction * move_speed;
+            }
+        }
     }
 
     void Entity::Control(Input* input)
@@ -43,7 +61,7 @@ namespace Game {
         if (input->move[Input::Direction::UP] && onGround)
             move_direction.y = jumpHeight*-1;
         if (!onGround) {
-            move_direction.y += 1;
+            move_direction.y += 0.5;
         }
         velocity = move_direction * move_speed;
     }
@@ -67,7 +85,7 @@ namespace Game {
 
             DrawTexturePro(character, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
         }
-        if (type == TILE) {
+        if (type == TILE && active) {
             width = 16;
             height = 16;
             Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
@@ -87,7 +105,7 @@ namespace Game {
             width = 16;
             height = 16;
             Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
-            source.x = (float)(animation_frame % 4 * width);
+            source.x = (float)(animation_frame % 2 * width);
             source.y = (ABSF(velocity.x) <= 0.001f ? 0.0f : (float)height);
             source.width = (float)(facing >= 0 ? width : -width);
             Rectangle dest = {
@@ -98,6 +116,21 @@ namespace Game {
             };
 
             DrawTexturePro(interactive, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
+        }
+        if (type == MOVING_TILE && active) {
+            width = 16;
+            height = 16;
+            Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
+            source.x = (float)(animation_frame % 2 * width);
+            source.y = (ABSF(velocity.x) <= 0.001f ? 0.0f : (float)height);
+            source.width = (float)(facing >= 0 ? width : -width);
+            Rectangle dest = {
+                position.x,
+                position.y,
+                (float)(scale * width),
+                (float)(scale * height)
+            };
+            DrawTexturePro(tile, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
         }
     }
 
@@ -117,6 +150,15 @@ namespace Game {
         tmp_pos = position + (velo * dt);
         if (tmp_pos.x + width * scale > ent.position.x && tmp_pos.x < ent.position.x + ent.width * ent.scale &&
             tmp_pos.y + height * scale > ent.position.y && tmp_pos.y < ent.position.y + ent.height * ent.scale) {
+            return 1;
+        }
+        return 0;
+    }
+    bool Entity::inBorder(float dt) {
+        glm::vec2 tmp_pos = glm::vec2(0.0f, 0.0f);
+        tmp_pos = position + (velocity * dt);
+        if (tmp_pos.x + width * scale < border[1].x && tmp_pos.x > border[0].x &&
+            tmp_pos.y + height * scale < border[3].y && tmp_pos.y > border[0].y) {
             return 1;
         }
         return 0;

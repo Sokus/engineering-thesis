@@ -20,14 +20,17 @@ namespace Game {
 
     public:
         void Clear();
-        void Update(float dt);
+        void Update(Input *input,float dt);
         void Draw();
-        void CalculateCollisions(Entity& player,float dt);
+        void CalculateCollisions(Entity& player,Input * input,float dt);
+        void UpdateActiveTiles(float dt, int connectionGroup);
+
 
         Entity* GetNewEntity();
         Entity* CreatePlayer(float pos_x, float pos_y);
-        Entity* CreateTile(float pos_x, float pos_y);
-        Entity* CreateInteractive(float pos_x, float pos_y);
+        Entity* CreateTile(float pos_x, float pos_y, int conGroup);
+        Entity* CreateMovingTile(float pos_x, float pos_y, int conGroup, glm::vec2 moveDirection, glm::vec2 border[4]);
+        Entity* CreateInteractive(float pos_x, float pos_y, int conGroup);
         void CreateBullet(const Bullet &bullet);
 
         void SetLevel(const Level &level);
