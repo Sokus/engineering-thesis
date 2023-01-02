@@ -3,8 +3,8 @@
 
 #include "macros.h" // ABS
 #include "game/world.h"
-#include "game/content.h"
 #include "user_interface.h"
+#include <config.h>
 
 #include "raylib.h"
 
@@ -35,6 +35,15 @@ struct State
         bool world_initialised = false;
     } game;
 } state = {};
+
+void setView(Camera2D &view,glm::vec2 position) {
+    view.target.x = position.x;
+    view.target.y = position.y;
+    view.zoom = 1.0f;
+    view.rotation = 0.0f;
+    view.offset.x = GetScreenWidth() / 2;
+    view.offset.y = GetScreenHeight() / 2;
+}
 
 void DoMainMenu()
 {
@@ -201,33 +210,17 @@ void DoGameScene()
 {
     static Game::World world;
     static Game::Entity *player;
-
+    Camera2D view = Camera2D();
     if(!state.game.world_initialised)
     {
         world.Clear();
-        world.SetLevel(Game::exampleLevel);
-        player = world.CreatePlayer(100.0f, 100.0f);
-        world.CreateTile(36.0f, 122.0f, 0);
-        world.CreateTile(164.0f, 122.0f, 0);
-        world.CreateTile(36.0f, 378.0f, 0);
-        world.CreateTile(100.0f, 378.0f, 0);
-        world.CreateTile(164.0f, 314.0f, 0);
-        world.CreateTile(228.0f, 314.0f, 0);
-        world.CreateTile(292.0f, 314.0f, 0);
-        world.CreateTile(292.0f, 378.0f, 0);
-        world.CreateTile(356.0f, 378.0f, 0);
-        world.CreateTile(420.0f, 378.0f, 0);
-        //world.CreateTile(356.0f, 250.0f, 0);
-        world.CreateTile(548.0f, 378.0f, 1);
-        world.CreateInteractive(356.0f, 314.0f, 1);
-        world.CreateInteractive(548.0f, 314.0f, 2);
-        world.CreateTile(676.0f, 186.0f, 2);
-        glm::vec2 border[4] = { glm::vec2(420.0f, 121.0f),glm::vec2(676.0f,121.0f),glm::vec2(420.0f,251.0f),glm::vec2(676.0f,251.0f) };
-        world.CreateMovingTile(548.0f, 186.0f, 0, glm::vec2(0, 20), border);
-
+        world.SetLevel(Game::plains);
+        Texture2D character = LoadTexture(RESOURCE_PATH "/character.png");
+        player = world.CreatePlayer(100.0f, 100.0f,character);
 
         state.game.world_initialised = true;
     }
+    
 
     Game::Input input;
     input.Update();
@@ -244,8 +237,7 @@ void DoGameScene()
             rframe.velocity = glm::vec2(player->facing,1) * glm::vec2(200,50) + glm::vec2(player->velocity.x, 0);
             rframe.angularVelocity = -360;
             rframe.rotation = 0;
-            Game::Bullet bullet(&Game::exampleBullet, rframe, 5);
-            world.CreateBullet(bullet);
+            world.CreateBullet(rframe,5,Game::bulletTexture);
             cooldown = 0.5f;
         }
         cooldown -= delta_time;
@@ -254,8 +246,12 @@ void DoGameScene()
 
     world.Update(&input, delta_time);
 
+    setView(view,player->position);
+
+    BeginMode2D(view);
     ClearBackground(Color{25, 30, 40});
     world.Draw();
+    EndMode2D();
 
     if(IsKeyPressed(KEY_ESCAPE))
     {
@@ -287,7 +283,6 @@ int main(int, char**)
     SetTargetFPS(60);
     SetExitKey(KEY_END);
 
-    Game::LoadTextures();
     Game::InitGameContent();
     UI::Init();
 

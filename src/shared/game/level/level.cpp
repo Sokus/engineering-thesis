@@ -6,6 +6,7 @@
 
 namespace Game {
 
+
     float floorMod(float a, float b) {
         return fmod(fmod(a,b)+b, b);
     }
@@ -79,5 +80,38 @@ namespace Game {
         for(auto &layer : parallaxLayers) {
             layer.Draw(cameraPosition);
         }
+    }
+    void Level::LoadTextures() {
+        for (std::string s: textures) {
+            textures2d.push_back(LoadTexture(s.c_str()));
+        }
+    }
+    Level::Level(std::vector<TileData> tiles,
+        std::vector<TileData> movingTiles,
+        std::vector<TileData> interactiveTiles,
+        std::vector<TileData> collectibles,
+        std::vector<TileData> damagingTiles,
+        std::vector<std::string> textures) {
+        this->tiles = tiles;
+        this->movingTiles = movingTiles;
+        this->interactiveTiles = interactiveTiles;
+        this->collectibles = collectibles;
+        this->damagingTiles = damagingTiles;
+        this->textures = textures;
+    }
+    TileData::TileData(float positionx, float positiony, int connGroup,int texture) {
+        this->position.x = positionx;
+        this->position.y = positiony;
+        this->connGroup = connGroup;
+        this->texture = texture;
+    }
+    TileData::TileData(float positionx, float positiony, int connGroup,int texture, glm::vec2 velocity, glm::vec2 border[2]) {
+        this->position.x = positionx;
+        this->position.y = positiony;
+        this->connGroup = connGroup;
+        this->velocity = velocity;
+        this->texture = texture;
+        this->border[0] = border[0];
+        this->border[1] = border[1];
     }
 }

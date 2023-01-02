@@ -5,6 +5,7 @@ file(GLOB SHARED_NETWORKING_SRC networking/*.cpp)
 file(GLOB SHARED_SERIALIZATION_SRC serialization/*.cpp)
 file(GLOB SHARED_DATA_STRUCTURES_SRC data_structures/*.cpp)
 file(GLOB SHARED_GAME_SRC game/*.cpp)
+file(GLOB SHARED_LEVEL_SRC game/level/*.cpp)
 file(GLOB SHARED_MATH_SRC math/*.cpp )
 
 add_library(shared STATIC
@@ -13,9 +14,10 @@ add_library(shared STATIC
     ${SHARED_SERIALIZATION_SRC}
     ${SHARED_DATA_STRUCTURES_SRC}
     ${SHARED_GAME_SRC}
+    ${SHARED_LEVEL_SRC}
     ${SHARED_MATH_SRC}
  "game/world.cpp"
- "game/level.cpp")
+ "game/level/level.cpp" "game/level/plains.cpp")
 
 target_include_directories(shared
     PRIVATE

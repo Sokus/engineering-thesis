@@ -2,18 +2,32 @@
 #include <macros.h>
 #include <raylib.h>
 #include <config.h>
+#include <game/level/content.h>
 
 namespace Game {
+    void Entity::SetDrag(float dragCoefficient) {
+        ln1MinusDragCoefficient = log(1 - dragCoefficient);
+    }
+    float interpolate(float progress, const std::vector<float>& keyframes) {
 
-    Texture2D character;
-    Texture2D tile;
-    Texture2D interactive;
+        if (keyframes.size() == 1)
+            return keyframes.front();
 
-    void LoadTextures()
-    {
-        character = LoadTexture(RESOURCE_PATH "/character.png");
-        tile = LoadTexture(RESOURCE_PATH "/tile.png");
-        interactive = LoadTexture(RESOURCE_PATH "/interactive.png");
+        if (progress < 0)
+            return keyframes.front();
+
+        if (progress > 1)
+            return keyframes.back();
+
+        int intPart = progress * (keyframes.size() - 1);
+        float realPart = progress * (keyframes.size() - 1) - intPart;
+
+        if (intPart >= keyframes.size() - 1) {
+            intPart = keyframes.size() - 2;
+            realPart = 1;
+        }
+
+        return glm::mix(keyframes[intPart], keyframes[intPart + 1], realPart);
     }
 
 	void Entity::Update(float dt)
@@ -49,9 +63,15 @@ namespace Game {
                 velocity = move_direction * move_speed;
             }
         }
+        if (type == BULLET) {
+            referenceFrame.Update(dt);
+            referenceFrame.velocity.y += gravity * dt;
+            referenceFrame.velocity *= 1 + ln1MinusDragCoefficient * dt;
+            lifetime += dt;
+        }
     }
 
-    void Entity::Control(Input* input)
+    void Entity::Control(Input* input,float dt)
     {
         ASSERT(type == PLAYER);
         move_direction.x = 0;
@@ -83,7 +103,7 @@ namespace Game {
                 (float)(scale * height)
             };
 
-            DrawTexturePro(character, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
+            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
         }
         if (type == TILE && active) {
             width = 16;
@@ -99,7 +119,7 @@ namespace Game {
                 (float)(scale * height)
             };
 
-            DrawTexturePro(tile, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
+            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
         }
         if (type == INTERACTIVE) {
             width = 16;
@@ -115,7 +135,7 @@ namespace Game {
                 (float)(scale * height)
             };
 
-            DrawTexturePro(interactive, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
+            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
         }
         if (type == MOVING_TILE && active) {
             width = 16;
@@ -130,7 +150,74 @@ namespace Game {
                 (float)(scale * width),
                 (float)(scale * height)
             };
-            DrawTexturePro(tile, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
+            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
+        }
+        if (type == COLLECTIBLE && active) {
+            width = 16;
+            height = 16;
+            Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
+            source.x = (float)(animation_frame % 4 * width);
+            source.y = (ABSF(velocity.x) <= 0.001f ? 0.0f : (float)height);
+            source.width = (float)(facing >= 0 ? width : -width);
+            Rectangle dest = {
+                position.x,
+                position.y,
+                (float)(scale * width),
+                (float)(scale * height)
+            };
+
+            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
+        }
+        if (type == DAMAGING_TILE && active) {
+            width = 16;
+            height = 16;
+            Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
+            source.x = (float)(animation_frame % 4 * width);
+            source.y = (ABSF(velocity.x) <= 0.001f ? 0.0f : (float)height);
+            source.width = (float)(facing >= 0 ? width : -width);
+            Rectangle dest = {
+                position.x,
+                position.y,
+                (float)(scale * width),
+                (float)(scale * height)
+            };
+
+            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
+        }
+        if (type == BULLET) {
+            if (lifetime > maxLifetime) {
+                type = NONE;
+            }
+            else {
+                const int totalAnimationFrames = animationFrames.x * animationFrames.y;
+                const int frameNo = static_cast<int>(lifetime / animationLength * totalAnimationFrames) % totalAnimationFrames;
+                const glm::vec2 frameSize = glm::vec2(texture.width, texture.height) / glm::vec2(animationFrames);
+                SetDrag(0.5);
+                // 0 when spawned, 1 when at max lifetime
+                const float lifetimeProgress = lifetime / maxLifetime;
+                const float sizeMultiplier = interpolate(lifetimeProgress, sizeKeyframes);
+                const float alphaMultiplier = interpolate(lifetimeProgress, alphaKeyframes);
+
+                Rectangle source, dest;
+
+                source.x = frameSize.x * (frameNo % animationFrames.x);
+                source.y = frameSize.y * (frameNo / animationFrames.x);;
+                source.width = frameSize.x;
+                source.height = frameSize.y;
+
+                dest.x = referenceFrame.position.x;
+                dest.y = referenceFrame.position.y;
+                dest.width = visibleSize.x * sizeMultiplier;
+                dest.height = visibleSize.y * sizeMultiplier;
+
+                DrawTexturePro(
+                    texture,
+                    source, dest,
+                    { visibleSize.x * sizeMultiplier / 2, visibleSize.y * sizeMultiplier / 2 },
+                    referenceFrame.rotation,
+                    { 255,255,255,static_cast<unsigned char>(255 * alphaMultiplier) }
+                );
+            }
         }
     }
 
@@ -158,10 +245,9 @@ namespace Game {
         glm::vec2 tmp_pos = glm::vec2(0.0f, 0.0f);
         tmp_pos = position + (velocity * dt);
         if (tmp_pos.x + width * scale < border[1].x && tmp_pos.x > border[0].x &&
-            tmp_pos.y + height * scale < border[3].y && tmp_pos.y > border[0].y) {
+            tmp_pos.y + height * scale < border[1].y && tmp_pos.y > border[0].y) {
             return 1;
         }
         return 0;
     }
-
 }

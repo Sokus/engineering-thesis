@@ -4,21 +4,14 @@
 
 namespace Game {
 
-    BulletType exampleBullet;
-
-    Level exampleLevel;
+    Level plains;
+    Texture2D bulletTexture;
+    std::vector<Level> levels = { plains };
 
     void InitGameContent() {
-        exampleBullet.maxLifetime = 1.5;
-        exampleBullet.visibleSize = {50,50};
-        exampleBullet.texture = LoadTexture(RESOURCE_PATH "/ballLightning.2x2.png");
-        exampleBullet.animationFrames = {2,2};
-        exampleBullet.animationLength = 0.5;
-        exampleBullet.sizeKeyframes = {0.5, 1.5, 0.5};
-        exampleBullet.alphaKeyframes = {1, 1, 0};
-        exampleBullet.SetDrag(0.5);
-        exampleBullet.gravity = -200;
-
+        plains = Level(plainsTiles,plainsMovingTiles,plainsInteractiveTiles,plainsCollectibles,plainsDamagingTiles,plainTextures);
+        
+        Game::bulletTexture = LoadTexture(RESOURCE_PATH "/ballLightning.2x2.png");
         Game::ParallaxLayer hills, clouds, sky;
 
         hills.dimensions = {960,540};
@@ -36,9 +29,8 @@ namespace Game {
         sky.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/sky.png");
         sky.naturalScrollSpeed = 0;
 
-        exampleLevel.AddParallaxLayer(hills);
-        exampleLevel.AddParallaxLayer(clouds);
-        exampleLevel.AddParallaxLayer(sky);
+        plains.AddParallaxLayer(hills);
+        plains.AddParallaxLayer(clouds);
+        plains.AddParallaxLayer(sky);
     }
-
 }
