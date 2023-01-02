@@ -61,7 +61,7 @@ void setView(Camera2D &view,glm::vec2 position) {
 void DoMainMenu()
 {
     UI::Button solo_play_button = UI::Button("Solo Play");
-    UI::Button join_game_button = UI::Button("Join Game");
+    UI::Button join_game_button = UI::Button("Join Multiplayer");
     UI::Button host_game_button = UI::Button("Host Game");
     UI::Button options_button = UI::Button("Options");
     UI::Button exit_button = UI::Button("Exit");
@@ -69,7 +69,7 @@ void DoMainMenu()
     UI::Begin();
     {
         UI::Add(&solo_play_button.base); UI::EndRow();
-        UI::Add(&join_game_button.base); UI::EndRow();
+        UI::Add(&join_game_button.base);
         UI::Add(&host_game_button.base); UI::EndRow();
         UI::Add(&options_button.base); UI::EndRow();
         UI::Add(&exit_button.base); UI::EndRow();
@@ -118,6 +118,7 @@ void DoJoinMenu()
         UI::Add(&ip_field.base);
         UI::Add(&port_field.base);
         UI::Add(&join_button.base); UI::EndRow();
+        UI::AddSpace(); UI::EndRow();
         UI::Add(&close_button.base); UI::EndRow();
     }
     UI::End();
@@ -157,6 +158,7 @@ void DoHostMenu()
     {
         UI::Add(&port_field.base);
         UI::Add(&host_button.base); UI::EndRow();
+        UI::AddSpace(); UI::EndRow();
         UI::Add(&close_button.base); UI::EndRow();
     }
     UI::End();

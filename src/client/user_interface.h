@@ -11,7 +11,8 @@ struct Style
     float font_size;
     Color fill_default;
     Color fill_active;
-    Color text_default;
+    Color text_dark;
+    Color text_light;
     Color outline_active;
     Vector2 padding;
     Vector2 spacing;
@@ -57,6 +58,7 @@ void SetPosition(float x, float y);
 void SetOrigin(float x, float y);
 void Begin();
 void Add(Base *base);
+void AddSpace();
 void EndRow();
 void End();
 
@@ -73,19 +75,6 @@ public:
     bool IsHovered();
     bool IsPressed();
     bool IsReleased();
-    void Draw();
-};
-
-class Label
-{
-private:
-    const char *text;
-
-public:
-    Base base;
-    Vector2 label_size;
-
-    Label(const char *label);
     void Draw();
 };
 

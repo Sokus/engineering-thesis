@@ -15,7 +15,8 @@ void Init()
     style->font_size = 30;
     style->fill_default = LIGHTGRAY;
     style->fill_active = WHITE;
-    style->text_default = DARKGRAY;
+    style->text_dark = DARKGRAY;
+    style->text_light = RAYWHITE;
     style->outline_active = RED;
     style->padding = {10.0f, 10.0f};
     style->spacing = {4.0f, 4.0f};
@@ -65,6 +66,14 @@ void Add(Base *base)
         current_row->min_size.y = height;
     current_row->count++;
     layout.element_count++;
+}
+
+void AddSpace()
+{
+    Base base;
+    base.style = layout.current_style;
+    base.min_size = MeasureTextEx(layout.current_style->font, "X", layout.current_style->font_size, 0.0f);
+    Add(&base);
 }
 
 void EndRow()
@@ -164,20 +173,7 @@ void Button::Draw()
     };
 
     DrawTextEx(base.style->font, label, label_position,
-               base.style->font_size, 0.0f, base.style->text_default);
-}
-
-Label::Label(const char *label)
-{
-    base.style = layout.current_style;
-    label_size = MeasureTextEx(base.style->font, label, base.style->font_size, 0.0f);
-    base.min_size.x = label_size.x + 2.0f*base.style->padding.x;
-    base.min_size.y = label_size.y + 2.0f*base.style->padding.y;
-}
-
-void Label::Draw()
-{
-
+               base.style->font_size, 0.0f, base.style->text_dark);
 }
 
 TextField::TextField(char *buffer, int buffer_capacity)
@@ -246,7 +242,7 @@ void TextField::Draw()
         base.rect.x + (base.rect.width - text_size.x)/2.0f,
         base.rect.y + (base.rect.height - text_size.y)/2.0f
     };
-    DrawTextEx(base.style->font, buffer, label_position, base.style->font_size, 0.0f, base.style->text_default);
+    DrawTextEx(base.style->font, buffer, label_position, base.style->font_size, 0.0f, base.style->text_dark);
 }
 
 } // namespace UI
