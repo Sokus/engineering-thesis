@@ -16,6 +16,17 @@
 
 namespace Time {
 
+struct State
+{
+    bool initialized;
+    bool sleep_granular;
+    #if defined(_WIN32)
+        LARGE_INTEGER freq;
+        LARGE_INTEGER start;
+    #else
+        uint64_t start;
+    #endif
+};
 static State state;
 
 void Setup()

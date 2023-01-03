@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 
-#include "bitpacker.h"
 #include "macros.h"
 
+struct BitPacker;
 bool SerializeInteger(BitPacker *bit_packer, int32_t *value, int32_t min, int32_t max);
 
 #define SERIALIZE_BITS(bit_packer_ptr, type, value_ptr, bits)\

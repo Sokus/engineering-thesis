@@ -1,8 +1,9 @@
 #include "entity.h"
-#include <macros.h>
-#include <raylib.h>
-#include <config.h>
-#include <game/level/content.h>
+#include "macros.h"
+#include "config.h"
+#include "game/level/content.h"
+
+#include "raylib.h"
 
 namespace Game {
 
@@ -73,7 +74,7 @@ namespace Game {
                 move_direction.y = move_direction.y * -1;
             }
             rF.velocity = move_direction * move_speed;
-            
+
             rF.position += rF.velocity * dt;
         }
         if (type == BULLET) {

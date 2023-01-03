@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "networking/networking.h"
 #include "macros.h" // ABS
 #include "game/world.h"
 #include "user_interface.h"
 #include "pi_time.h"
+#include "game/input.h"
 
 #include "raylib.h"
 

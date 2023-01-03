@@ -3,23 +3,7 @@
 
 #include <stdint.h>
 
-#if defined(_WIN32)
-    #include <windows.h>
-#endif
-
 namespace Time {
-
-struct State
-{
-    bool initialized;
-    bool sleep_granular;
-    #if defined(_WIN32)
-        LARGE_INTEGER freq;
-        LARGE_INTEGER start;
-    #else
-        uint64_t start;
-    #endif
-};
 
 void Setup();
 uint64_t Now();

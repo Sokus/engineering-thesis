@@ -1,13 +1,15 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-#include "input.h"
 #include "glm/glm.hpp"
-#include <raylib.h>
+#include "math/rframe.h"
+#include "raylib.h"
+
 #include <vector>
-#include <math/rframe.h>
+
 namespace Game {
 
+    struct Input;
 
 
     enum EntityType
@@ -60,7 +62,7 @@ namespace Game {
         int facing;
         bool ability_reset;
     };
-    
+
 
     struct Entity
     {

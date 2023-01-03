@@ -1,8 +1,6 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include "serialization/serialization.h"
-
 namespace Game {
 
 struct Input
@@ -28,6 +26,7 @@ struct Input
     void Update();
 };
 
+struct BitPacker;
 bool SerializeInput(BitPacker *bit_packer, Input *input);
 
 } // namespace Game
