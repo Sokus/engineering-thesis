@@ -82,7 +82,7 @@ namespace Game {
         bool frameChange;
         int connectionGroup;
         int stateChange;
-        float damage;
+        int damage;
 
         //STATE DATA
         bool collidable;

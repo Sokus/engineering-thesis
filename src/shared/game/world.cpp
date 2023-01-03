@@ -1,5 +1,8 @@
 #include "world.h"
+#include "input.h"
+
 #include "raylib.h"
+
 #include <string.h>
 
 namespace Game {
@@ -40,7 +43,7 @@ namespace Game {
                         player.rF.velocity.y = 0;
                         player.move_direction.y = 0.5;
                     }
-                    if (velocity.y < 0 && ent_vel.y != 0) { 
+                    if (velocity.y < 0 && ent_vel.y != 0) {
                         player.rF.position.y = ent_pos.y + collideEntity->height * collideEntity->scale;
                         player.rF.velocity.y = 0;
                         player.move_direction.y = 1;
@@ -49,7 +52,7 @@ namespace Game {
                         player.rF.position.x = ent_pos.x + player.width * player.scale;
                     if (ent_vel.x < 0)
                         player.rF.position.x = ent_pos.x - player.width * player.scale;
-                   
+
                 }
             }
             else if (collideEntity->type == INTERACTIVE) {
@@ -129,7 +132,7 @@ namespace Game {
     void World::Update(Input *input, float dt)
     {
         level.Update(dt);
-        
+
         for (int entity_idx = 0; entity_idx < entity_count; entity_idx++)
         {
             Entity* entity = entities + entity_idx;
@@ -194,7 +197,7 @@ namespace Game {
             entity->collidable = 0;
             switch (playertype)
             {
-            case ROUGE: 
+            case ROUGE:
                 entity->base_health = 80;
                 entity->base_speed = 220.0f;
                 entity->playerData.jumpHeight = 12;
@@ -311,7 +314,7 @@ namespace Game {
         }
         return entity;
     }
-    Entity* World::CreateBullet(ReferenceFrame rframe,float dmg, Texture2D texture) {
+    Entity* World::CreateBullet(ReferenceFrame rframe, int dmg, Texture2D texture) {
         Entity* entity = nullptr;
         if (entity = GetNewEntity())
         {

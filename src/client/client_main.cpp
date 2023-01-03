@@ -50,6 +50,10 @@ struct State
         } host;
     } fields;
 
+    struct {
+        bool world_initialised = false;
+    } game;
+
 } state = {};
 
 void setView(Camera2D &view,glm::vec2 position) {
@@ -57,8 +61,8 @@ void setView(Camera2D &view,glm::vec2 position) {
     view.target.y = position.y;
     view.zoom = 1.0f;
     view.rotation = 0.0f;
-    view.offset.x = GetScreenWidth() / 2;
-    view.offset.y = GetScreenHeight() / 2;
+    view.offset.x = (float)GetScreenWidth() / 2.0f;
+    view.offset.y = (float)GetScreenHeight() / 2.0f;
 }
 
 void DoMainMenu()

@@ -36,7 +36,7 @@ namespace Game {
         Entity* CreateInteractive(float pos_x, float pos_y, int conGroup, Texture2D texture);
         Entity* CreateCollectible(float pos_x, float pos_y, int conGroup, Texture2D texture);
         Entity* CreateDamagingTile(float pos_x, float pos_y, int conGroup, Texture2D texture);
-        Entity* CreateBullet(ReferenceFrame rframe, float dmg, Texture2D texture);
+        Entity* CreateBullet(ReferenceFrame rframe, int dmg, Texture2D texture);
         Entity* CreateDestroyTile(float pos_x, float pos_y, int conGroup, Texture2D texture);
         Entity* CreateCheckpoint(float pos_x, float pos_y, Texture2D texture);
         Entity* CreateExit(float pos_x, float pos_y, Texture2D texture);

@@ -2,6 +2,7 @@
 #include "macros.h"
 #include "config.h"
 #include "game/level/content.h"
+#include "input.h"
 
 #include "raylib.h"
 
@@ -21,11 +22,11 @@ namespace Game {
         if (progress > 1)
             return keyframes.back();
 
-        int intPart = progress * (keyframes.size() - 1);
+        int intPart = (int)(progress * (float)(keyframes.size() - 1));
         float realPart = progress * (keyframes.size() - 1) - intPart;
 
         if (intPart >= keyframes.size() - 1) {
-            intPart = keyframes.size() - 2;
+            intPart = (int)keyframes.size() - 2;
             realPart = 1;
         }
 
@@ -95,7 +96,7 @@ namespace Game {
         setMoveSpeed(input);
         if (move_direction.x != 0.0f) playerData.facing = (int)move_direction.x;
         if (input->move[Input::Direction::UP] && playerData.onGround)
-            move_direction.y = playerData.jumpHeight*-1;
+            move_direction.y = (float)playerData.jumpHeight * -1.0f;
         if (!playerData.onGround) {
             move_direction.y += 0.5;
         }

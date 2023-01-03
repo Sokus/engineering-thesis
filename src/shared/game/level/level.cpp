@@ -13,7 +13,7 @@ namespace Game {
 
     bool intersects(const Rectangle &a, const Rectangle &b) {
         return MAX(a.x, b.x) <= MIN(a.x+a.width,  b.x+b.width) &&
-               MAX(a.y, b.y) <= MIN(a.y+a.height, b.y+b.height); 
+               MAX(a.y, b.y) <= MIN(a.y+a.height, b.y+b.height);
     }
 
     void ParallaxLayer::Update(float dt) {
@@ -28,8 +28,8 @@ namespace Game {
         Rectangle source, dest, visibleArea;
 
         source.x = source.y = 0;
-        source.width = texture.width;
-        source.height = texture.height;
+        source.width = (float)texture.width;
+        source.height = (float)texture.height;
 
         dest.x = displacementFromCamera.x / position.z;
         dest.y = displacementFromCamera.y / position.z;
@@ -37,9 +37,9 @@ namespace Game {
         dest.height = dimensions.y;
 
         visibleArea.x = visibleArea.y = 0;
-        visibleArea.width = GetScreenWidth();
-        visibleArea.height = GetScreenHeight();
-        
+        visibleArea.width = (float)GetScreenWidth();
+        visibleArea.height = (float)GetScreenHeight();
+
         if(repeatHorizontally) {
 
             // Position the layer to the left of the visible area
@@ -55,7 +55,7 @@ namespace Game {
 
             DrawTexturePro(texture, source, dest, {0,0}, 0, WHITE);
 
-        } 
+        }
     }
 
     void Level::AddParallaxLayer(const ParallaxLayer &layer) {
@@ -65,7 +65,7 @@ namespace Game {
 
         // keep layers sorted by position.z descending to ensure proper draw order
         std::sort(
-            parallaxLayers.begin(), parallaxLayers.end(), 
+            parallaxLayers.begin(), parallaxLayers.end(),
             [](const ParallaxLayer &a, const ParallaxLayer &b){return a.position.z > b.position.z;}
         );
     }
