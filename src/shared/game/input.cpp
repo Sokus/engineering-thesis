@@ -1,8 +1,12 @@
 #include "input.h"
 
 #include "raylib.h"
+#include <stdio.h>
 
 namespace Game {
+    Input::Input() {
+        cooldown = 0;
+    }
 
 void Input::Update()
 {
@@ -10,9 +14,12 @@ void Input::Update()
     move[LEFT] = IsKeyDown(KEY_A);
     move[DOWN] = IsKeyDown(KEY_S);
     move[RIGHT] = IsKeyDown(KEY_D);
-    move[SHIFT] = IsKeyDown(KEY_LEFT_SHIFT);
-    move[INTERACT] = IsKeyDown(KEY_I);
+    sprint = IsKeyDown(KEY_C);
+    interact = IsKeyDown(KEY_I);
     shoot = IsKeyDown(KEY_SPACE);
+    if (cooldown <= 90) {
+        cooldown += 1;
+    }
 }
 
 } // namespace Game

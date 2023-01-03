@@ -53,6 +53,7 @@ namespace Game {
             std::vector<TileData> interactiveTiles,
             std::vector<TileData> collectibles,
             std::vector<TileData> damagingTiles,
+            std::vector<TileData> destroyTiles,
             std::vector<std::string> textures
         );
         void AddParallaxLayer(const ParallaxLayer &layer);
@@ -64,6 +65,7 @@ namespace Game {
         std::vector<TileData> interactiveTiles;
         std::vector<TileData> collectibles;
         std::vector<TileData> damagingTiles;
+        std::vector<TileData> destroyTiles;
         std::vector<std::string> textures;
         std::vector<Texture2D> textures2d;
     };

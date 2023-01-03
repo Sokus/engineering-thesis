@@ -91,12 +91,14 @@ namespace Game {
         std::vector<TileData> interactiveTiles,
         std::vector<TileData> collectibles,
         std::vector<TileData> damagingTiles,
+        std::vector<TileData> destroyTiles,
         std::vector<std::string> textures) {
         this->tiles = tiles;
         this->movingTiles = movingTiles;
         this->interactiveTiles = interactiveTiles;
         this->collectibles = collectibles;
         this->damagingTiles = damagingTiles;
+        this->destroyTiles = destroyTiles;
         this->textures = textures;
     }
     TileData::TileData(float positionx, float positiony, int connGroup,int texture) {

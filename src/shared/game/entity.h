@@ -19,7 +19,31 @@ namespace Game {
         MOVING_TILE,
         COLLECTIBLE,
         DAMAGING_TILE,
-        BULLET
+        BULLET,
+        DESTROY_TILE
+    };
+
+    struct BulletData {
+        //BULLET DATA
+        float damage = 0;
+        float lifetime = 0;
+        float maxLifetime = 1.5;
+        float ln1MinusDragCoefficient = 0;
+        /// Constant vertical acceleration applied to the bullet.
+        float gravity;
+        /// Visible width and height of the bullet's sprite.
+        glm::vec2 visibleSize;
+        glm::ivec2 animationFrames;
+        /// Length of 1 full animation cycle, in seconds.
+        float animationLength;
+        std::vector<float> sizeKeyframes;
+        std::vector<float> alphaKeyframes;
+        /** drag coefficient = how much velocity is lost per second.
+         *
+         * e.g. 0.5 would cause the projectile to loose half of its velocity each second.
+         */
+        void SetDrag(float dragCoefficient);
+        Game::ReferenceFrame referenceFrame;
     };
     
 
@@ -54,29 +78,7 @@ namespace Game {
         bool moving;
         glm::vec2 border[2];
 
-        //BULLET DATA
-        float damage = 0;
-        float lifetime = 0;
-        
-        float maxLifetime = 1.5;
-        float ln1MinusDragCoefficient = 0;
-        /// Constant vertical acceleration applied to the bullet.
-        float gravity;
-        /// Visible width and height of the bullet's sprite.
-        glm::vec2 visibleSize;
-        glm::ivec2 animationFrames;
-        /// Length of 1 full animation cycle, in seconds.
-        float animationLength;
-        std::vector<float> sizeKeyframes;
-        std::vector<float> alphaKeyframes;
-        /** drag coefficient = how much velocity is lost per second.
-         *
-         * e.g. 0.5 would cause the projectile to loose half of its velocity each second.
-         */
-        void SetDrag(float dragCoefficient);
-
-        Game::ReferenceFrame referenceFrame;
-
+        Game::BulletData bulletData;
 
 
         // CLIENT STATE
@@ -87,10 +89,12 @@ namespace Game {
         float max_animation_frame_time;
 
         void Update(float dt);
+        void setMoveSpeed(Input* input);
         void Draw();
-        bool collidesWithX(Entity ent,float dt);
-        bool collidesWithY(Entity ent, float dt);
+        bool collidesWith(Entity ent);
         void Control(Input* input,float dt);
+        void MoveX(float dt);
+        void MoveY(float dt);
         bool inBorder(float dt);
     };
 }

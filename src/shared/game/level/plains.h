@@ -8,13 +8,15 @@ namespace Game {
 		PLAINMOVINGTILE,
 		PLAINCOLLECTIBLE,
 		PLAININTERACTIVE,
-		PLAINDMG
+		PLAINDMG,
+		PLAINDESTROY
 	};
 	extern std::vector<TileData> plainsTiles;
 	extern std::vector<TileData> plainsMovingTiles;
 	extern std::vector<TileData> plainsInteractiveTiles;
 	extern std::vector<TileData> plainsCollectibles;
 	extern std::vector<TileData> plainsDamagingTiles;
+	extern std::vector<TileData> plainsDestroyTiles;
 	extern std::vector<std::string> plainTextures;
 }
 #endif

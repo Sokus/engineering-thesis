@@ -4,7 +4,6 @@
 #include "macros.h" // ABS
 #include "game/world.h"
 #include "user_interface.h"
-#include <config.h>
 
 #include "raylib.h"
 
@@ -19,7 +18,7 @@ enum GameMenu
 {
     GM_NONE,
     GM_MAIN_MENU,
-    GM_SOLO_PLAY,
+    GM_LEVEL_MENU,
     GM_JOIN_MENU,
     GM_HOST_MENU,
     GM_OPTIONS_MENU,
@@ -64,10 +63,7 @@ void DoMainMenu()
     UI::End();
 
     if (solo_play_button.IsReleased())
-    {
-        state.current_scene = GS_GAME;
-        state.current_menu = GM_NONE;
-    }
+        state.current_menu = GM_LEVEL_MENU;
 
     if (join_game_button.IsReleased())
         state.current_menu = GM_JOIN_MENU;
@@ -139,6 +135,46 @@ void DoHostMenu()
     close_button.Draw();
 }
 
+void DoLevelMenu()
+{
+    UI::Button lvl1_button = UI::Button("Level 1");
+    UI::Button lvl2_button = UI::Button("Level 2");
+    UI::Button lvl3_button = UI::Button("Level 3");
+    UI::Button close_button = UI::Button("Close");
+
+    UI::Begin();
+    {
+        UI::Add(&lvl1_button.base);
+        UI::Add(&lvl2_button.base);
+        UI::Add(&lvl3_button.base); UI::EndRow();
+        UI::Add(&close_button.base); UI::EndRow();
+    }
+    UI::End();
+
+    if (close_button.IsReleased())
+        state.current_menu = GM_MAIN_MENU;
+    if (lvl1_button.IsReleased()) {
+        Game::ActualLevel = Game::plains;
+        state.current_menu = GM_NONE;
+        state.current_scene = GS_GAME;
+    }
+    if (lvl2_button.IsReleased()) {
+        Game::ActualLevel = Game::plains;
+        state.current_menu = GM_NONE;
+        state.current_scene = GS_GAME;
+    }
+    if (lvl3_button.IsReleased()) {
+        Game::ActualLevel = Game::plains;
+        state.current_menu = GM_NONE;
+        state.current_scene = GS_GAME;
+    }
+
+    lvl1_button.Draw();
+    lvl2_button.Draw();
+    lvl3_button.Draw();
+    close_button.Draw();
+}
+
 void DoOptionsMenu()
 {
     UI::Button close_button = UI::Button("Close");
@@ -169,6 +205,7 @@ void DoTitleScreenScene()
         case GM_MAIN_MENU: DoMainMenu(); break;
         case GM_JOIN_MENU: DoJoinMenu(); break;
         case GM_HOST_MENU: DoHostMenu(); break;
+        case GM_LEVEL_MENU: DoLevelMenu(); break;
         case GM_OPTIONS_MENU: DoOptionsMenu(); break;
         default: break;
     }
@@ -210,11 +247,13 @@ void DoGameScene()
 {
     static Game::World world;
     static Game::Entity *player;
-    Camera2D view = Camera2D();
+    static Game::Input input;
+    Camera2D view;
     if(!state.game.world_initialised)
     {
+        input = Game::Input();
         world.Clear();
-        world.SetLevel(Game::plains);
+        world.SetLevel(Game::ActualLevel);
         Texture2D character = LoadTexture(RESOURCE_PATH "/character.png");
         player = world.CreatePlayer(100.0f, 100.0f,character);
 
@@ -222,7 +261,6 @@ void DoGameScene()
     }
     
 
-    Game::Input input;
     input.Update();
 
     float expected_delta_time = 1.0f / (float)GetFPS();

@@ -9,6 +9,7 @@ namespace Game {
 		RESOURCE_PATH "/collectible.png",
 		RESOURCE_PATH "/interactive.png",
 		RESOURCE_PATH "/dmgtile.png",
+		RESOURCE_PATH "/destroytile.png",
 	};
 	std::vector<TileData> plainsTiles = {
 	TileData(0.0f, 768.0f, 0,PLAINTILE),
@@ -63,6 +64,9 @@ namespace Game {
 	};
 	std::vector<TileData> plainsDamagingTiles = {
 		TileData(320.0f, 704.0f, 0,PLAINDMG)
+	};
+	std::vector<TileData> plainsDestroyTiles = {
+		TileData(512.0f, 704.0f, 0,PLAINDESTROY)
 	};
 }
 

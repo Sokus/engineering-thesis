@@ -8,6 +8,8 @@
 
 namespace Game {
 
+    extern Level ActualLevel;
+
     class World
     {
     private:
@@ -22,7 +24,7 @@ namespace Game {
         void Clear();
         void Update(Input *input,float dt);
         void Draw();
-        void CalculateCollisions(Entity& player,Input * input,float dt);
+        void CalculateCollisions(Entity& player,glm::vec2 velocity,Input * input,float dt,bool dim);
         void UpdateActiveTiles(float dt, int connectionGroup);
 
 
@@ -34,9 +36,11 @@ namespace Game {
         Entity* CreateCollectible(float pos_x, float pos_y, int conGroup, Texture2D texture);
         Entity* CreateDamagingTile(float pos_x, float pos_y, int conGroup, Texture2D texture);
         Entity* CreateBullet(ReferenceFrame rframe, float dmg, Texture2D texture);
+        Entity* CreateDestroyTile(float pos_x, float pos_y, int conGroup, Texture2D texture);
         void LoadTextures();
         void SetLevel(Level &level);
         void ClearLevel();
+        void hitObstacles(Entity& bullet);
     };
 
 }
