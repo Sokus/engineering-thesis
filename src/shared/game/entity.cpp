@@ -31,15 +31,16 @@ namespace Game {
         return glm::mix(keyframes[intPart], keyframes[intPart + 1], realPart);
     }
     void Entity::setMoveSpeed(Input* input) {
-        if (input->sprint && input->cooldown > 90) {
+        if (input->dash && input->cooldown > 90 && playerData.ability_reset) {
             move_speed *= 10;
             input->cooldown = 0;
+            playerData.ability_reset = 0;
         }
-        else if (move_speed > 200) {
+        else if (move_speed > base_speed) {
             move_speed -= 250.0f;
         }
         else {
-            move_speed = 200.0f;
+            move_speed = base_speed;
         }
     }
 
@@ -58,7 +59,7 @@ namespace Game {
             animation_frame_time += dt;
         }
         if (type == INTERACTIVE) {
-            if (active) {
+            if (enabled) {
                 animation_frame = 1;
             }
             else {
@@ -66,20 +67,19 @@ namespace Game {
             }
         }
         if (type == MOVING_TILE) {
-            glm::vec2 tmp_pos = velocity * dt;
+            glm::vec2 tmp_pos = rF.velocity * dt;
             if (!inBorder(dt)) {
-                velocity = glm::vec2(0.0f, 0.0f);
-                move_direction = move_direction * glm::vec2(-1, -1);
+                move_direction.x = move_direction.x * -1;
+                move_direction.y = move_direction.y * -1;
             }
-            else {
-                velocity = move_direction * move_speed;
-            }
-            position += velocity * dt;
+            rF.velocity = move_direction * move_speed;
+            
+            rF.position += rF.velocity * dt;
         }
         if (type == BULLET) {
-            bulletData.referenceFrame.Update(dt);
-            bulletData.referenceFrame.velocity.y += bulletData.gravity * dt;
-            bulletData.referenceFrame.velocity *= 1 + bulletData.ln1MinusDragCoefficient * dt;
+            rF.Update(dt);
+            rF.velocity.y += bulletData.gravity * dt;
+            rF.velocity *= 1 + bulletData.ln1MinusDragCoefficient * dt;
             bulletData.lifetime += dt;
         }
 
@@ -92,22 +92,22 @@ namespace Game {
         move_direction.x -= input->move[Input::Direction::LEFT] * 2.0f;
         move_direction.x += input->move[Input::Direction::RIGHT] * 2.0f;
         setMoveSpeed(input);
-        if (move_direction.x != 0.0f) facing = (int)move_direction.x;
-        if (input->move[Input::Direction::UP] && onGround)
-            move_direction.y = jumpHeight*-1;
-        if (!onGround) {
+        if (move_direction.x != 0.0f) playerData.facing = (int)move_direction.x;
+        if (input->move[Input::Direction::UP] && playerData.onGround)
+            move_direction.y = playerData.jumpHeight*-1;
+        if (!playerData.onGround) {
             move_direction.y += 0.5;
         }
-        velocity.x = move_direction.x * move_speed;
-        velocity.y = move_direction.y * 100.0f;
+        rF.velocity.x = move_direction.x * move_speed;
+        rF.velocity.y = move_direction.y * 100.0f;
     }
     void Entity::MoveX(float dt) {
         ASSERT(type == PLAYER);
-        position.x += velocity.x * dt;
+        rF.position.x += rF.velocity.x * dt;
     }
     void Entity::MoveY(float dt) {
         ASSERT(type == PLAYER);
-        position.y += velocity.y * dt;
+        rF.position.y += rF.velocity.y * dt;
     }
 
     void Entity::Draw()
@@ -118,90 +118,90 @@ namespace Game {
             height = 24;
             Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
             source.x = (float)(animation_frame % 4 * width);
-            source.y = (ABSF(velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(facing >= 0 ? width : -width);
+            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
+            source.width = (float)(playerData.facing >= 0 ? width : -width);
             Rectangle dest = {
-                position.x,
-                position.y,
+                rF.position.x,
+                rF.position.y,
                 (float)(scale * width),
                 (float)(scale * height)
             };
 
             DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
         }
-        if (type == TILE && active) {
+        if (type == TILE && visible) {
             width = 16;
             height = 16;
             Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
             source.x = (float)(animation_frame % 4 * width);
-            source.y = (ABSF(velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(facing >= 0 ? width : -width);
+            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
+            source.width = (float)(width);
             Rectangle dest = {
-                position.x,
-                position.y,
+                rF.position.x,
+                rF.position.y,
                 (float)(scale * width),
                 (float)(scale * height)
             };
 
             DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
         }
-        if (type == INTERACTIVE) {
+        if (type == INTERACTIVE && visible) {
             width = 16;
             height = 16;
             Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
             source.x = (float)(animation_frame % 2 * width);
-            source.y = (ABSF(velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(facing >= 0 ? width : -width);
+            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
+            source.width = (float)(width);
             Rectangle dest = {
-                position.x,
-                position.y,
+                rF.position.x,
+                rF.position.y,
                 (float)(scale * width),
                 (float)(scale * height)
             };
 
             DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
         }
-        if (type == MOVING_TILE && active) {
+        if (type == MOVING_TILE && visible) {
             width = 16;
             height = 16;
             Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
             source.x = (float)(animation_frame % 2 * width);
-            source.y = (ABSF(velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(facing >= 0 ? width : -width);
+            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
+            source.width = (float)(width);
             Rectangle dest = {
-                position.x,
-                position.y,
+                rF.position.x,
+                rF.position.y,
                 (float)(scale * width),
                 (float)(scale * height)
             };
             DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
         }
-        if (type == COLLECTIBLE && active) {
+        if (type == COLLECTIBLE && visible) {
             width = 16;
             height = 16;
             Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
             source.x = (float)(animation_frame % 4 * width);
-            source.y = (ABSF(velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(facing >= 0 ? width : -width);
+            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
+            source.width = (float)(width);
             Rectangle dest = {
-                position.x,
-                position.y,
+                rF.position.x,
+                rF.position.y,
                 (float)(scale * width),
                 (float)(scale * height)
             };
 
             DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
         }
-        if (type == DAMAGING_TILE && active) {
+        if (type == DAMAGING_TILE && visible) {
             width = 16;
             height = 16;
             Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
             source.x = (float)(animation_frame % 4 * width);
-            source.y = (ABSF(velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(facing >= 0 ? width : -width);
+            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
+            source.width = (float)(width);
             Rectangle dest = {
-                position.x,
-                position.y,
+                rF.position.x,
+                rF.position.y,
                 (float)(scale * width),
                 (float)(scale * height)
             };
@@ -229,8 +229,8 @@ namespace Game {
                 source.width = frameSize.x;
                 source.height = frameSize.y;
 
-                dest.x = bulletData.referenceFrame.position.x;
-                dest.y = bulletData.referenceFrame.position.y;
+                dest.x = rF.position.x;
+                dest.y = rF.position.y;
                 dest.width = bulletData.visibleSize.x * sizeMultiplier;
                 dest.height = bulletData.visibleSize.y * sizeMultiplier;
 
@@ -238,21 +238,53 @@ namespace Game {
                     texture,
                     source, dest,
                     { bulletData.visibleSize.x * sizeMultiplier / 2, bulletData.visibleSize.y * sizeMultiplier / 2 },
-                    bulletData.referenceFrame.rotation,
+                    rF.rotation,
                     { 255,255,255,static_cast<unsigned char>(255 * alphaMultiplier) }
                 );
             }
         }
-        if (type == DESTROY_TILE && active) {
+        if (type == DESTROY_TILE && visible) {
             width = 16;
             height = 16;
             Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
             source.x = (float)(animation_frame % 4 * width);
-            source.y = (ABSF(velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(facing >= 0 ? width : -width);
+            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
+            source.width = (float)(width);
             Rectangle dest = {
-                position.x,
-                position.y,
+                rF.position.x,
+                rF.position.y,
+                (float)(scale * width),
+                (float)(scale * height)
+            };
+
+            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
+        }
+        if (type == CHECKPOINT && visible) {
+            width = 16;
+            height = 16;
+            Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
+            source.x = (float)(animation_frame % 2 * width);
+            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
+            source.width = (float)(width);
+            Rectangle dest = {
+                rF.position.x,
+                rF.position.y,
+                (float)(scale * width),
+                (float)(scale * height)
+            };
+
+            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
+        }
+        if (type == EXIT && visible) {
+            width = 16;
+            height = 16;
+            Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
+            source.x = (float)(animation_frame % 2 * width);
+            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
+            source.width = (float)(width);
+            Rectangle dest = {
+                rF.position.x,
+                rF.position.y,
                 (float)(scale * width),
                 (float)(scale * height)
             };
@@ -262,15 +294,14 @@ namespace Game {
     }
 
     bool Entity::collidesWith(Entity ent) {
-        if (position.x + width * scale > ent.position.x && position.x < ent.position.x + ent.width * ent.scale &&
-            position.y + height * scale > ent.position.y && position.y < ent.position.y + ent.height * ent.scale) {
+        if (rF.position.x + width * scale > ent.rF.position.x && rF.position.x < ent.rF.position.x + ent.width * ent.scale &&
+            rF.position.y + height * scale > ent.rF.position.y && rF.position.y < ent.rF.position.y + ent.height * ent.scale) {
             return 1;
         }
         return 0;
     }
     bool Entity::inBorder(float dt) {
-        glm::vec2 tmp_pos = glm::vec2(0.0f, 0.0f);
-        tmp_pos = position + (velocity * dt);
+        glm::vec2 tmp_pos = rF.position + (rF.velocity * dt);
         if (tmp_pos.x + width * scale < border[1].x && tmp_pos.x > border[0].x &&
             tmp_pos.y + height * scale < border[1].y && tmp_pos.y > border[0].y) {
             return 1;

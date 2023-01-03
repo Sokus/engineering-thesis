@@ -14,7 +14,7 @@ void Input::Update()
     move[LEFT] = IsKeyDown(KEY_A);
     move[DOWN] = IsKeyDown(KEY_S);
     move[RIGHT] = IsKeyDown(KEY_D);
-    sprint = IsKeyDown(KEY_C);
+    dash = IsKeyDown(KEY_C);
     interact = IsKeyDown(KEY_I);
     shoot = IsKeyDown(KEY_SPACE);
     if (cooldown <= 90) {

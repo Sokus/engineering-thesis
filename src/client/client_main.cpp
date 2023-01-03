@@ -22,6 +22,7 @@ enum GameMenu
     GM_JOIN_MENU,
     GM_HOST_MENU,
     GM_OPTIONS_MENU,
+    GM_PLAYER_MENU
 };
 
 struct State
@@ -155,18 +156,15 @@ void DoLevelMenu()
         state.current_menu = GM_MAIN_MENU;
     if (lvl1_button.IsReleased()) {
         Game::ActualLevel = Game::plains;
-        state.current_menu = GM_NONE;
-        state.current_scene = GS_GAME;
+        state.current_menu = GM_PLAYER_MENU;
     }
     if (lvl2_button.IsReleased()) {
         Game::ActualLevel = Game::plains;
-        state.current_menu = GM_NONE;
-        state.current_scene = GS_GAME;
+        state.current_menu = GM_PLAYER_MENU;
     }
     if (lvl3_button.IsReleased()) {
         Game::ActualLevel = Game::plains;
-        state.current_menu = GM_NONE;
-        state.current_scene = GS_GAME;
+        state.current_menu = GM_PLAYER_MENU;
     }
 
     lvl1_button.Draw();
@@ -174,7 +172,53 @@ void DoLevelMenu()
     lvl3_button.Draw();
     close_button.Draw();
 }
+void DoPlayerMenu()
+{
+    UI::Button player1_button = UI::Button("Rouge");
+    UI::Button player2_button = UI::Button("Sniper");
+    UI::Button player3_button = UI::Button("Healer");
+    UI::Button player4_button = UI::Button("Warrior");
+    UI::Button close_button = UI::Button("Return");
 
+    UI::Begin();
+    {
+        UI::Add(&player1_button.base);
+        UI::Add(&player2_button.base);
+        UI::Add(&player3_button.base);
+        UI::Add(&player4_button.base); UI::EndRow();
+        UI::Add(&close_button.base); UI::EndRow();
+    }
+    UI::End();
+
+    if (close_button.IsReleased())
+        state.current_menu = GM_LEVEL_MENU;
+    if (player1_button.IsReleased()) {
+        Game::ActualPlayer = Game::ROUGE;
+        state.current_menu = GM_NONE;
+        state.current_scene = GS_GAME;
+    }
+    if (player2_button.IsReleased()) {
+        Game::ActualPlayer = Game::SNIPER;
+        state.current_menu = GM_NONE;
+        state.current_scene = GS_GAME;
+    }
+    if (player3_button.IsReleased()) {
+        Game::ActualPlayer = Game::HEALER;
+        state.current_menu = GM_NONE;
+        state.current_scene = GS_GAME;
+    }
+    if (player4_button.IsReleased()) {
+        Game::ActualPlayer = Game::WARRIOR;
+        state.current_menu = GM_NONE;
+        state.current_scene = GS_GAME;
+    }
+
+    player1_button.Draw();
+    player2_button.Draw();
+    player3_button.Draw();
+    player4_button.Draw();
+    close_button.Draw();
+}
 void DoOptionsMenu()
 {
     UI::Button close_button = UI::Button("Close");
@@ -207,6 +251,7 @@ void DoTitleScreenScene()
         case GM_HOST_MENU: DoHostMenu(); break;
         case GM_LEVEL_MENU: DoLevelMenu(); break;
         case GM_OPTIONS_MENU: DoOptionsMenu(); break;
+        case GM_PLAYER_MENU: DoPlayerMenu(); break;
         default: break;
     }
 }
@@ -255,7 +300,7 @@ void DoGameScene()
         world.Clear();
         world.SetLevel(Game::ActualLevel);
         Texture2D character = LoadTexture(RESOURCE_PATH "/character.png");
-        player = world.CreatePlayer(100.0f, 100.0f,character);
+        player = world.CreatePlayer(Game::ActualLevel.spawnpoint.x, Game::ActualLevel.spawnpoint.y,character,Game::ActualPlayer);
 
         state.game.world_initialised = true;
     }
@@ -271,8 +316,8 @@ void DoGameScene()
         static float cooldown = 0;
         if(cooldown <= 0) {
             Game::ReferenceFrame rframe;
-            rframe.position = player->position + glm::vec2(player->width, player->height)*static_cast<float>(player->scale)*0.5f;
-            rframe.velocity = glm::vec2(player->facing,1) * glm::vec2(200,50) + glm::vec2(player->velocity.x, 0);
+            rframe.position = player->rF.position + glm::vec2(player->width, player->height)*static_cast<float>(player->scale)*0.5f;
+            rframe.velocity = glm::vec2(player->playerData.facing,1) * glm::vec2(200,50) + glm::vec2(player->rF.velocity.x, 0);
             rframe.angularVelocity = -360;
             rframe.rotation = 0;
             world.CreateBullet(rframe,5,Game::bulletTexture);
@@ -284,7 +329,7 @@ void DoGameScene()
 
     world.Update(&input, delta_time);
 
-    setView(view,player->position);
+    setView(view,player->rF.position);
 
     BeginMode2D(view);
     ClearBackground(Color{25, 30, 40});

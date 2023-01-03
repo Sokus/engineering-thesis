@@ -1,22 +1,27 @@
 #ifndef PLAINS_H
 #define PLAINS_H
 #include "level.h"
+enum TextureNum
+{
+	PLAINTILE,
+	PLAINMOVINGTILE,
+	PLAINCOLLECTIBLE,
+	PLAININTERACTIVE,
+	PLAINDMG,
+	PLAINDESTROY,
+	PLAINCHECKPOINT,
+	PLAINEXIT
+};
+extern std::vector<Game::TileData> plainsTiles;
+extern std::vector<Game::TileData> plainsMovingTiles;
+extern std::vector<Game::TileData> plainsInteractiveTiles;
+extern std::vector<Game::TileData> plainsCollectibles;
+extern std::vector<Game::TileData> plainsDamagingTiles;
+extern std::vector<Game::TileData> plainsDestroyTiles;
+extern std::vector<Game::TileData> plainsCheckpoints;
+extern std::vector<Game::TileData> plainsExit;
+extern std::vector<std::string> plainTextures;
 namespace Game {
-	enum TextureNum
-	{
-		PLAINTILE,
-		PLAINMOVINGTILE,
-		PLAINCOLLECTIBLE,
-		PLAININTERACTIVE,
-		PLAINDMG,
-		PLAINDESTROY
-	};
-	extern std::vector<TileData> plainsTiles;
-	extern std::vector<TileData> plainsMovingTiles;
-	extern std::vector<TileData> plainsInteractiveTiles;
-	extern std::vector<TileData> plainsCollectibles;
-	extern std::vector<TileData> plainsDamagingTiles;
-	extern std::vector<TileData> plainsDestroyTiles;
-	extern std::vector<std::string> plainTextures;
+	extern Level plains;
 }
 #endif

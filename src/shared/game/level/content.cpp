@@ -4,13 +4,11 @@
 
 namespace Game {
 
-    Level plains;
+    extern Level plains;
     Texture2D bulletTexture;
     std::vector<Level> levels = { plains };
 
     void InitGameContent() {
-        plains = Level(plainsTiles,plainsMovingTiles,plainsInteractiveTiles,plainsCollectibles,plainsDamagingTiles, plainsDestroyTiles,plainTextures);
-        
         Game::bulletTexture = LoadTexture(RESOURCE_PATH "/ballLightning.2x2.png");
         Game::ParallaxLayer hills, clouds, sky;
 

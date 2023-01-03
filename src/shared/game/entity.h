@@ -20,12 +20,20 @@ namespace Game {
         COLLECTIBLE,
         DAMAGING_TILE,
         BULLET,
-        DESTROY_TILE
+        DESTROY_TILE,
+        CHECKPOINT,
+        EXIT
+    };
+    enum PlayerType
+    {
+        ROUGE,
+        SNIPER,
+        HEALER,
+        WARRIOR
     };
 
     struct BulletData {
         //BULLET DATA
-        float damage = 0;
         float lifetime = 0;
         float maxLifetime = 1.5;
         float ln1MinusDragCoefficient = 0;
@@ -43,42 +51,51 @@ namespace Game {
          * e.g. 0.5 would cause the projectile to loose half of its velocity each second.
          */
         void SetDrag(float dragCoefficient);
-        Game::ReferenceFrame referenceFrame;
+    };
+
+    struct PlayerData {
+        int moneyCount;
+        bool onGround;
+        int jumpHeight;
+        int facing;
+        bool ability_reset;
     };
     
 
     struct Entity
     {
-        // SHARED STATE
-        EntityType type;
-        Texture2D texture;
-
-        glm::vec2 position;
-        glm::vec2 velocity;
-        glm::vec2 move_direction= glm::vec2(0.0f, 0.0f);;
-
-        int facing;
         int width;
         int height;
         int scale;
-        bool onGround;
-        int jumpHeight;
-        bool active;
-        int connectionGroup;
 
-        // PLAYER DATA 
+        // SHARED STATE
 
-        float health;
+        glm::vec2 move_direction= glm::vec2(0.0f, 0.0f);
+
         float move_speed;
-        int stateChange;
+        float base_speed;
+        int base_health;
+        int health;
+
         bool frameChange;
-        int moneyCount;
+        int connectionGroup;
+        int stateChange;
+        float damage;
+
+        //STATE DATA
+        bool collidable;
+        bool enabled;
+        bool visible;
+
 
         // MOVING DATA
-        bool moving;
         glm::vec2 border[2];
 
+        EntityType type;
+        Texture2D texture;
+        Game::PlayerData playerData;
         Game::BulletData bulletData;
+        Game::ReferenceFrame rF;
 
 
         // CLIENT STATE

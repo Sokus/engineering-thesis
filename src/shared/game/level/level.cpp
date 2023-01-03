@@ -86,19 +86,25 @@ namespace Game {
             textures2d.push_back(LoadTexture(s.c_str()));
         }
     }
-    Level::Level(std::vector<TileData> tiles,
+    Level::Level(glm::vec2 spawnpoint,
+        std::vector<TileData> tiles,
         std::vector<TileData> movingTiles,
         std::vector<TileData> interactiveTiles,
         std::vector<TileData> collectibles,
         std::vector<TileData> damagingTiles,
         std::vector<TileData> destroyTiles,
+        std::vector<TileData> checkpoints,
+        std::vector<TileData> levelExit,
         std::vector<std::string> textures) {
+        this->spawnpoint = spawnpoint;
         this->tiles = tiles;
         this->movingTiles = movingTiles;
         this->interactiveTiles = interactiveTiles;
         this->collectibles = collectibles;
         this->damagingTiles = damagingTiles;
         this->destroyTiles = destroyTiles;
+        this->checkpoints = checkpoints;
+        this->levelExits = levelExit;
         this->textures = textures;
     }
     TileData::TileData(float positionx, float positiony, int connGroup,int texture) {

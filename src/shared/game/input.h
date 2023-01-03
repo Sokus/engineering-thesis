@@ -19,7 +19,7 @@ struct Input
     bool jump;
     bool shoot;
     bool interact;
-    bool sprint;
+    bool dash;
     int cooldown;
 
 

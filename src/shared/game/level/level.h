@@ -48,26 +48,33 @@ namespace Game {
         Level() {
 
         };
-        Level(std::vector<TileData> tiles,
+        Level(glm::vec2 spawnpoint, 
+            std::vector<TileData> tiles,
             std::vector<TileData> movingTiles,
             std::vector<TileData> interactiveTiles,
             std::vector<TileData> collectibles,
             std::vector<TileData> damagingTiles,
             std::vector<TileData> destroyTiles,
+            std::vector<TileData> checkpoints,
+            std::vector<TileData> levelExit,
             std::vector<std::string> textures
         );
         void AddParallaxLayer(const ParallaxLayer &layer);
         void LoadTextures();
         void Update(float dt);
         void DrawBackground(glm::vec2 cameraPosition) const;
+        glm::vec2 spawnpoint;
         std::vector<TileData> tiles;
         std::vector<TileData> movingTiles;
         std::vector<TileData> interactiveTiles;
         std::vector<TileData> collectibles;
         std::vector<TileData> damagingTiles;
         std::vector<TileData> destroyTiles;
+        std::vector<TileData> checkpoints;
+        std::vector<TileData> levelExits;
         std::vector<std::string> textures;
         std::vector<Texture2D> textures2d;
+        bool finished;
     };
 }
 
