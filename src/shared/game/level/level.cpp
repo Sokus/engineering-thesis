@@ -119,7 +119,7 @@ namespace Game {
         this->connGroup = connGroup;
         this->texture = texture;
     }
-    TileData::TileData(float positionx, float positiony,float size_x,float size_y, int connGroup,int texture, Vector2 velocity, Vector2 border[2]) {
+    TileData::TileData(float positionx, float positiony,float size_x,float size_y, int connGroup,int texture, Vector2 velocity, Vector2 endpoint) {
         this->position.x = positionx;
         this->position.y = positiony;
         this->size.x = size_x;
@@ -127,7 +127,6 @@ namespace Game {
         this->connGroup = connGroup;
         this->velocity = velocity;
         this->texture = texture;
-        this->border[0] = border[0];
-        this->border[1] = border[1];
+        this->endpoint = endpoint;
     }
 }

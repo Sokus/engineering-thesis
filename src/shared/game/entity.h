@@ -49,7 +49,8 @@ namespace Game {
 
         // NOT SERIALIZED
         int entity_group; // used to connect tiles with interactibles
-        Vector2 endpoints[2];  // ENTITY_TYPE_MOVING_TILE
+        Vector2 endpoints[2]; // ENTITY_TYPE_MOVING_TILE
+        bool target;
         unsigned int num_frames;
         float frame_time;
         float max_frame_time;
@@ -90,7 +91,7 @@ namespace Game {
         void Control(Input* input,float dt);
         void MoveX(float dt);
         void MoveY(float dt);
-        bool inBorder(float dt);
+        bool reachedEndpoint(Vector2 target, float dt);
     };
 
     struct EntityReference

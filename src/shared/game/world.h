@@ -39,7 +39,7 @@ namespace Game {
 
         AddEntityResult CreatePlayer(float pos_x, float pos_y,Texture2D texture, Game::PlayerType playertype);
         AddEntityResult CreateTile(float pos_x, float pos_y,float width,float height, int conGroup, Texture2D texture);
-        Entity* CreateMovingTile(float pos_x, float pos_y, float width, float height, int conGroup, Vector2 moveDirection, Vector2 border[2], Texture2D texture);
+        Entity* CreateMovingTile(float pos_x, float pos_y, float width, float height, int conGroup, Vector2 moveDirection, Vector2 endpoint, Texture2D texture);
         Entity* CreateInteractive(float pos_x, float pos_y, float width, float height, int conGroup, Texture2D texture);
         Entity* CreateCollectible(float pos_x, float pos_y, float width, float height, int conGroup, Texture2D texture);
         Entity* CreateDamagingTile(float pos_x, float pos_y, float width, float height, int conGroup, Texture2D texture);

@@ -25,7 +25,7 @@ Game::TileData( 208.0f, 160.0f,16.0f,32.0f, 1, PLAINTILE),
 };
 Vector2 border[2] = { Vector2{95.0f, 80.0f}, Vector2{129.0f, 177.0f} };
 std::vector<Game::TileData> plainsMovingTiles = {
-	Game::TileData(96.0f, 160.0f,32.0f,16.0f, 0, PLAINMOVINGTILE, Vector2{0, 30}, border)
+	Game::TileData(96.0f, 80.0f,32.0f,16.0f, 0, PLAINMOVINGTILE, Vector2{0, 30}, Vector2{96.0f,160.0f})
 };
 std::vector<Game::TileData> plainsInteractiveTiles = {
 	Game::TileData(176.0f, 48.0f,16.0f,16.0f, 1, PLAININTERACTIVE)

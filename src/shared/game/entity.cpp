@@ -53,7 +53,10 @@ namespace Game {
 
         if (type == ENTITY_TYPE_MOVING_TILE) {
             Vector2 tmp_pos = Vector2Scale(velocity, dt);
-            if (!inBorder(dt)) {
+            move_direction.x = (position.x - endpoints[target].x)*-1;
+            move_direction.y = (position.y - endpoints[target].y)*-1;
+            if (reachedEndpoint(endpoints[target], dt)) {
+                target = !target;
                 move_direction.x = move_direction.x * -1;
                 move_direction.y = move_direction.y * -1;
             }
@@ -149,16 +152,27 @@ namespace Game {
         if ((position.y + size.y / 2) - (ent.position.y + ent.size.y / 2) > 0) {
             collideTop = true;
         }
-        printf("L:%d,R:%d,T:%d,D:%d\n", collideLeft, collideRight, collideTop, on_ground);
     }
 
-    bool Entity::inBorder(float dt) {
-        Vector2 tmp_pos = {};
-        tmp_pos.x = position.x + velocity.x * dt;
-        tmp_pos.y = position.y + velocity.y * dt;
-        if (tmp_pos.x + size.x < endpoints[1].x && tmp_pos.x > endpoints[0].x &&
-            tmp_pos.y + size.y < endpoints[1].y && tmp_pos.y > endpoints[0].y) {
-            return 1;
+    bool Entity::reachedEndpoint(Vector2 target,float dt) {
+        
+        if (endpoints[0].x == endpoints[1].x) {
+            float distance1 = sqrt(pow(abs(position.y - target.y), 2));
+            if ((distance1 < 0.1)) {
+                return 1;
+            }
+        }
+        if (endpoints[0].y == endpoints[1].y) {
+            float distance1 = sqrt(pow(abs(position.x - target.x), 2));
+            if ((distance1 < 0.1)) {
+                return 1;
+            }
+        }
+        else {
+            float distance1 = sqrt(pow(abs(position.y - target.y), 2) + pow(abs(position.x - target.x), 2));
+            if ((distance1 < 0.1)) {
+                return 1;
+            }
         }
         return 0;
     }

@@ -293,17 +293,18 @@ namespace Game {
         return entity;
     }
 
-    Entity* World::CreateMovingTile(float pos_x, float pos_y,float width,float height, int conGroup, Vector2 moveDirection, Vector2 border[2], Texture2D texture)
+    Entity* World::CreateMovingTile(float pos_x, float pos_y,float width,float height, int conGroup, Vector2 moveDirection, Vector2 endpoint, Texture2D texture)
     {
         Entity* entity = nullptr;
         if (entity = AddEntity(ENTITY_TYPE_MOVING_TILE, pos_x, pos_y, width,height, texture).entity)
         {
-            entity->move_direction = moveDirection;
+            entity->move_direction.x = (pos_x - endpoint.x)*-1;
+            entity->move_direction.y = (pos_y - endpoint.y)*-1;
             entity->move_speed = 1.0f;
             entity->entity_group = conGroup;
             entity->active = true;
-            entity->endpoints[0] = Vector2{border[0].x, border[0].y};
-            entity->endpoints[1] = Vector2{border[1].x, border[1].y};
+            entity->endpoints[1] = Vector2{pos_x, pos_y};
+            entity->endpoints[0] = Vector2{ endpoint.x, endpoint.y };
             entity->collidable = true;
         }
         return entity;
@@ -372,8 +373,8 @@ namespace Game {
         for (auto& tile : level->tiles) {
             this->CreateTile(tile.position.x, tile.position.y,tile.size.x,tile.size.y, tile.connGroup, this->level.textures2d.at(tile.texture));
         }
-        for (auto& tile : level->movingTiles) {
-            this->CreateMovingTile(tile.position.x, tile.position.y,tile.size.x,tile.size.y, tile.connGroup,tile.velocity,tile.border, this->level.textures2d.at(tile.texture));
+        for (auto& tile : level.movingTiles) {
+            this->CreateMovingTile(tile.position.x, tile.position.y,tile.size.x,tile.size.y, tile.connGroup,tile.velocity,tile.endpoint, this->level.textures2d.at(tile.texture));
         }
         for (auto& tile : level->interactiveTiles) {
             this->CreateInteractive(tile.position.x, tile.position.y, tile.size.x, tile.size.y, tile.connGroup, this->level.textures2d.at(tile.texture));
