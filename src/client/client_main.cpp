@@ -38,6 +38,7 @@ void DoPauseMenu()
     {
         game_state.current_scene = GAME_SCENE_TITLE_SCREEN;
         game_state.current_menu = GAME_MENU_NONE;
+        state.game.world_initialised = false;
     }
 
     options_button.Draw();
@@ -57,6 +58,10 @@ void DoGameScene()
         player = game_state.world.CreatePlayer(spawnpoint.x, spawnpoint.y, character, game_state.player_type_selected).entity;
 
         game_state.world.initialised = true;
+    }
+    if (world.level.finished) {
+        world.Clear();
+        state.current_menu = GM_WON_MENU;
     }
 
     float expected_delta_time = 1.0f / (float)GetFPS();

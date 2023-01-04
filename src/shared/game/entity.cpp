@@ -65,6 +65,9 @@ namespace Game {
             Vector2 delta_pos = Vector2Scale(velocity, dt);
             position = Vector2Add(position, delta_pos);
         }
+        if (type == ENTITY_TYPE_ENEMY) {
+            position = Vector2Scale( velocity,dt);
+        }
     }
 
     void Entity::Control(Input* input, float dt)

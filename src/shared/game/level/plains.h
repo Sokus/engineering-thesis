@@ -10,7 +10,8 @@ enum TextureNum
 	PLAINDMG,
 	PLAINDESTROY,
 	PLAINCHECKPOINT,
-	PLAINEXIT
+	PLAINEXIT,
+	PLAINENEMY
 };
 extern std::vector<Game::TileData> plainsTiles;
 extern std::vector<Game::TileData> plainsMovingTiles;
@@ -20,6 +21,7 @@ extern std::vector<Game::TileData> plainsDamagingTiles;
 extern std::vector<Game::TileData> plainsDestroyTiles;
 extern std::vector<Game::TileData> plainsCheckpoints;
 extern std::vector<Game::TileData> plainsExit;
+extern std::vector<Game::TileData> plainsEnemies;
 extern std::vector<std::string> plainTextures;
 namespace Game {
 	extern Level plains;

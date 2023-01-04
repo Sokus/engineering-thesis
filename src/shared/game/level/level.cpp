@@ -99,6 +99,7 @@ namespace Game {
         std::vector<TileData> destroyTiles,
         std::vector<TileData> checkpoints,
         std::vector<TileData> levelExit,
+        std::vector<TileData> levelEnemies,
         std::vector<std::string> textures) {
         this->spawnpoint = spawnpoint;
         this->tiles = tiles;
@@ -109,6 +110,7 @@ namespace Game {
         this->destroyTiles = destroyTiles;
         this->checkpoints = checkpoints;
         this->levelExits = levelExit;
+        this->enemies = levelEnemies;
         this->textures = textures;
     }
     TileData::TileData(float positionx, float positiony, float size_x, float size_y, int connGroup,int texture) {

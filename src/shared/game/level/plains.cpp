@@ -8,7 +8,8 @@ std::vector<std::string> plainTextures = {
 	RESOURCE_PATH "/dmgtile.png",
 	RESOURCE_PATH "/destroytile.png",
 	RESOURCE_PATH "/checkpoint.png",
-	RESOURCE_PATH "/exit.png"
+	RESOURCE_PATH "/exit.png",
+	RESOURCE_PATH "/enemy.png"
 };
 
 std::vector<Game::TileData> plainsTiles = {
@@ -46,6 +47,9 @@ std::vector<Game::TileData> plainsCheckpoints = {
 std::vector<Game::TileData> plainsExit = {
 	Game::TileData(320.0f, 160.0f,32.0f,32.0f, 0, PLAINEXIT)
 };
+std::vector<Game::TileData> plainsEnemies = {
+	Game::TileData(352.0f, 176.0f,16.0f,16.0f, 0,PLAINENEMY),
+};
 
 namespace Game {
 	Level plains = Level(
@@ -58,6 +62,7 @@ namespace Game {
 		plainsDestroyTiles,
 		plainsCheckpoints,
 		plainsExit,
+		plainsEnemies,
 		plainTextures);
 }
 

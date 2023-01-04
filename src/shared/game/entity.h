@@ -21,6 +21,7 @@ namespace Game {
         ENTITY_TYPE_DAMAGING_TILE,
         ENTITY_TYPE_DESTRUCTIBLE_TILE,
         ENTITY_TYPE_CHECKPOINT,
+        ENTITY_TYPE_ENEMY,
         ENTITY_TYPE_EXIT
     };
 

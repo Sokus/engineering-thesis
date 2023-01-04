@@ -21,15 +21,16 @@ namespace Game {
         static float gravity_speed;
         static const int max_entity_count = 1024;
         Entity entities[max_entity_count] = {};
-        Level level;
 
     public:
         bool initialised;
+        Level level;
+        int entity_count = 1;
 
         void Clear();
         void Update(Input *input, float dt);
         void Draw();
-        void CalculateCollisions(Entity &player, Vector2 velocity, Input *input, float dt, bool dim);
+        void CalculateCollisions(Entity& player, Vector2 velocity,Input * input, float dt, bool dim);
         void UpdateActiveTiles(float dt, int connectionGroup);
 
         EntityReference GetFreeEntityReference();
@@ -46,6 +47,7 @@ namespace Game {
         Entity* CreateDestroyTile(float pos_x, float pos_y, float width, float height, int conGroup, Texture2D texture);
         Entity* CreateCheckpoint(float pos_x, float pos_y, float width, float height, Texture2D texture);
         Entity* CreateExit(float pos_x, float pos_y, float width, float height, Texture2D texture);
+        Entity* CreateEnemy(float pos_x, float pos_y, float width, float height, Texture2D texture);
         void LoadTextures();
         void SetLevel(Level *level);
         void ClearLevel();

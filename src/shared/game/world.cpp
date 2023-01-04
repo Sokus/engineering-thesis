@@ -2,10 +2,33 @@
 #include "input.h"
 
 #include "raylib.h"
+#include "raymath.h"
 
 #include <string.h>
 
 namespace Game {
+
+    void World::MoveEnemy(Entity& enemy,float dt) {
+        Vector2 ent_pos;
+        for (int collide_idx = 0; collide_idx < entity_count; collide_idx++)
+        {
+            Entity* collideEntity = entities + collide_idx;
+            if (collideEntity->type != ENTITY_TYPE_NONE && collideEntity->collidable) {
+                ent_pos = Vector2Add(collideEntity->position ,(Vector2Scale(collideEntity->velocity,dt)));
+                if (enemy.collidesWith(*collideEntity)) {
+                    if (enemy.velocity.x > 0) {
+                        enemy.velocity.x = enemy.velocity.x * -1;
+                        enemy.position.x = ent_pos.x - enemy.size.x;
+                    }
+                    else if (enemy.velocity.x < 0) {
+                        enemy.velocity.x = enemy.velocity.x * -1;
+                        enemy.position.x = ent_pos.x + collideEntity->size.x;
+                    }
+                }
+            }
+
+        }
+    }
 
     void World::CalculateCollisions(Entity& player, Vector2 velocity, Input* input, float dt,bool dim) {
         for (int collide_idx = 0; collide_idx < max_entity_count; collide_idx++)
@@ -156,6 +179,10 @@ namespace Game {
                 entity->collideRight = 0;
                 entity->collideTop = 0;
             }
+            else if (entity->type == ENTITY_TYPE_ENEMY) {
+                MoveEnemy(*entity,dt);
+            }
+
         }
     }
 
@@ -365,6 +392,15 @@ namespace Game {
         }
         return entity;
     }
+    Entity* World::CreateEnemy(float pos_x, float pos_y, float width, float height, Texture2D texture)
+    {
+        Entity* entity = nullptr;
+        if (entity = AddEntity(ENTITY_TYPE_ENEMY, pos_x, pos_y, width, height, texture).entity)
+        {
+            entity->velocity.x = 10.0f;
+        }
+        return entity;
+    }
 
 
     void World::SetLevel(Level *level) {
@@ -393,6 +429,9 @@ namespace Game {
         }
         for (auto& tile : level->levelExits) {
             this->CreateExit(tile.position.x, tile.position.y, tile.size.x, tile.size.y, this->level.textures2d.at(tile.texture));
+        }
+        for (auto& tile : level.enemies) {
+            this->CreateEnemy(tile.position.x, tile.position.y, tile.size.x, tile.size.y, this->level.textures2d.at(tile.texture));
         }
         this->level.finished = 0;
     }
