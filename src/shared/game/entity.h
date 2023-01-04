@@ -68,6 +68,8 @@ namespace Game {
         bool ability_reset;
         float dash_cooldown;
 
+        bool collideLeft, collideRight, collideTop;
+
         // TODO: Decide what to do with everything below this line
         // most of the things are either:
         // - weidly phrased/used
@@ -84,6 +86,7 @@ namespace Game {
         void setMoveSpeed(Input* input);
         void Draw();
         bool collidesWith(Entity ent);
+        void calculateCollisionSide(Entity ent);
         void Control(Input* input,float dt);
         void MoveX(float dt);
         void MoveY(float dt);

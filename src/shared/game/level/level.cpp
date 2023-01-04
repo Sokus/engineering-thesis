@@ -111,15 +111,19 @@ namespace Game {
         this->levelExits = levelExit;
         this->textures = textures;
     }
-    TileData::TileData(float positionx, float positiony, int connGroup,int texture) {
+    TileData::TileData(float positionx, float positiony, float size_x, float size_y, int connGroup,int texture) {
         this->position.x = positionx;
         this->position.y = positiony;
+        this->size.x = size_x;
+        this->size.y = size_y;
         this->connGroup = connGroup;
         this->texture = texture;
     }
-    TileData::TileData(float positionx, float positiony, int connGroup,int texture, Vector2 velocity, Vector2 border[2]) {
+    TileData::TileData(float positionx, float positiony,float size_x,float size_y, int connGroup,int texture, Vector2 velocity, Vector2 border[2]) {
         this->position.x = positionx;
         this->position.y = positiony;
+        this->size.x = size_x;
+        this->size.y = size_y;
         this->connGroup = connGroup;
         this->velocity = velocity;
         this->texture = texture;

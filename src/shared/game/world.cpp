@@ -21,11 +21,14 @@ namespace Game {
                 Vector2 ent_vel = {};
                 if (dim == 0) {
                     ent_vel.x = collideEntity->velocity.x;
+                    ent_vel.y = 0;
                 }
                 else {
+                    ent_vel.x = 0;
                     ent_vel.y = collideEntity->velocity.y;
                 }
                 if (player.collidesWith(*collideEntity)) {
+                    //player.calculateCollisionSide(*collideEntity); 
                     if (velocity.x > 0) {
                         player.velocity.x = 0;
                         player.position.x = ent_pos.x - player.size.x;
@@ -35,26 +38,31 @@ namespace Game {
                         player.position.x = ent_pos.x + collideEntity->size.x;
                     }
                     if (velocity.y < 0) {
-                        player.position.y = ent_pos.y + collideEntity->size.y;
+                        player.position.y = collideEntity->position.y + collideEntity->size.y;
                         player.velocity.y = 0;
+                        player.move_direction.y = 0;
+                        if (ent_vel.y > 0) {
+                            player.position.y = ent_pos.y + collideEntity->size.y;
+                        }
                     }
                     if (velocity.y > 0) {
-                        player.position.y = ent_pos.y - player.size.y;
+                        player.position.y = collideEntity->position.y - player.size.y;
                         player.on_ground = true;
                         player.ability_reset = true;
                         player.velocity.y = 0;
-                        player.move_direction.y = 0.5;
+                        if (ent_vel.y < 0) {
+                            float offset = ent_pos.y - collideEntity->position.y;
+                            player.position.y = collideEntity->position.y - player.size.y + offset;
+                        }
                     }
-                    if (velocity.y < 0 && ent_vel.y != 0) {
-                        player.position.y = ent_pos.y + collideEntity->size.y;
-                        player.velocity.y = 0;
-                        player.move_direction.y = 1;
+                    if (ent_vel.x > 0) {
+                        player.position.x = collideEntity->position.x + player.size.x;
+                        player.collideLeft = true;
                     }
-                    if (ent_vel.x > 0)
-                        player.position.x = ent_pos.x + player.size.x;
-                    if (ent_vel.x < 0)
-                        player.position.x = ent_pos.x - player.size.x;
-
+                    if (ent_vel.x < 0) {
+                        player.position.x = collideEntity->position.x - player.size.x;
+                        player.collideRight = true;
+                    }
                 }
             }
             else if (collideEntity->type == ENTITY_TYPE_INTERACTIVE) {
@@ -148,6 +156,12 @@ namespace Game {
                 entity->on_ground = 0;
                 entity->MoveY(dt);
                 CalculateCollisions(*entity, Vector2{0.0f,entity->velocity.y}, input, dt,1);
+                if ((entity->on_ground && entity->collideTop) || (entity->collideLeft && entity->collideRight)) {
+                    entity->health = 0;
+                }
+                entity->collideLeft = 0;
+                entity->collideRight = 0;
+                entity->collideTop = 0;
             }
         }
     }
@@ -242,7 +256,7 @@ namespace Game {
             case PLAYER_TYPE_ROUGE:
                 entity->base_health = 80;
                 entity->base_speed = 55.0f;
-                entity->jump_height = 8.0f;
+                entity->jump_height = 10.0f;
                 break;
             case PLAYER_TYPE_SNIPER:
                 entity->base_health = 70;
@@ -267,9 +281,9 @@ namespace Game {
         return result;
     }
 
-    AddEntityResult World::CreateTile(float pos_x, float pos_y,int conGroup, Texture2D texture)
+    AddEntityResult World::CreateTile(float pos_x, float pos_y, float width,float height,int conGroup, Texture2D texture)
     {
-        AddEntityResult result = AddEntity(ENTITY_TYPE_TILE, pos_x, pos_y, 16, 16, texture);
+        AddEntityResult result = AddEntity(ENTITY_TYPE_TILE, pos_x, pos_y, width, height, texture);
         if (result.entity)
         {
             Entity *entity = result.entity;
@@ -280,20 +294,20 @@ namespace Game {
         return result;
     }
 
-    Entity* World::CreateInteractive(float pos_x, float pos_y,int conGroup, Texture2D texture)
+    Entity* World::CreateInteractive(float pos_x, float pos_y,float width,float height,int conGroup, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_INTERACTIVE, pos_x, pos_y, 16, 16, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_INTERACTIVE, pos_x, pos_y, width,height, texture).entity)
         {
             entity->entity_group = conGroup;
         }
         return entity;
     }
 
-    Entity* World::CreateMovingTile(float pos_x, float pos_y, int conGroup, Vector2 moveDirection, Vector2 border[2], Texture2D texture)
+    Entity* World::CreateMovingTile(float pos_x, float pos_y,float width,float height, int conGroup, Vector2 moveDirection, Vector2 border[2], Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_MOVING_TILE, pos_x, pos_y, 16, 16, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_MOVING_TILE, pos_x, pos_y, width,height, texture).entity)
         {
             entity->move_direction = moveDirection;
             entity->move_speed = 1.0f;
@@ -306,10 +320,10 @@ namespace Game {
         return entity;
     }
 
-    Entity* World::CreateCollectible(float pos_x, float pos_y, int conGroup, Texture2D texture)
+    Entity* World::CreateCollectible(float pos_x, float pos_y, float width, float height, int conGroup, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_COLLECTIBLE, pos_x, pos_y, 16, 16, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_COLLECTIBLE, pos_x, pos_y, width, height, texture).entity)
         {
             entity->entity_group = conGroup;
             entity->active = true;
@@ -317,10 +331,10 @@ namespace Game {
         return entity;
     }
 
-    Entity* World::CreateDamagingTile(float pos_x, float pos_y, int conGroup, Texture2D texture)
+    Entity* World::CreateDamagingTile(float pos_x, float pos_y, float width, float height, int conGroup, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_DAMAGING_TILE, pos_x, pos_y, 16, 16, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_DAMAGING_TILE, pos_x, pos_y, width,height, texture).entity)
         {
             entity->entity_group = conGroup;
             entity->active = true;
@@ -329,10 +343,10 @@ namespace Game {
         return entity;
     }
 
-    Entity* World::CreateDestroyTile(float pos_x, float pos_y, int conGroup, Texture2D texture)
+    Entity* World::CreateDestroyTile(float pos_x, float pos_y, float width, float height, int conGroup, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_DESTRUCTIBLE_TILE, pos_x, pos_y, 16, 16, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_DESTRUCTIBLE_TILE, pos_x, pos_y, width,height, texture).entity)
         {
             entity->entity_group = conGroup;
             entity->active = true;
@@ -342,20 +356,20 @@ namespace Game {
         return entity;
     }
 
-    Entity* World::CreateCheckpoint(float pos_x, float pos_y, Texture2D texture)
+    Entity* World::CreateCheckpoint(float pos_x, float pos_y, float width, float height, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_CHECKPOINT, pos_x, pos_y, 16, 16, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_CHECKPOINT, pos_x, pos_y, width,height, texture).entity)
         {
 
         }
         return entity;
     }
 
-    Entity* World::CreateExit(float pos_x, float pos_y, Texture2D texture)
+    Entity* World::CreateExit(float pos_x, float pos_y, float width, float height, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_EXIT, pos_x, pos_y, 16, 16, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_EXIT, pos_x, pos_y, width,height, texture).entity)
         {
 
         }
@@ -367,28 +381,28 @@ namespace Game {
         this->level = level;
         this->level.LoadTextures();
         for (auto& tile : level.tiles) {
-            this->CreateTile(tile.position.x, tile.position.y, tile.connGroup, this->level.textures2d.at(tile.texture));
+            this->CreateTile(tile.position.x, tile.position.y,tile.size.x,tile.size.y, tile.connGroup, this->level.textures2d.at(tile.texture));
         }
         for (auto& tile : level.movingTiles) {
-            this->CreateMovingTile(tile.position.x, tile.position.y, tile.connGroup,tile.velocity,tile.border, this->level.textures2d.at(tile.texture));
+            this->CreateMovingTile(tile.position.x, tile.position.y,tile.size.x,tile.size.y, tile.connGroup,tile.velocity,tile.border, this->level.textures2d.at(tile.texture));
         }
         for (auto& tile : level.interactiveTiles) {
-            this->CreateInteractive(tile.position.x, tile.position.y, tile.connGroup, this->level.textures2d.at(tile.texture));
+            this->CreateInteractive(tile.position.x, tile.position.y, tile.size.x, tile.size.y, tile.connGroup, this->level.textures2d.at(tile.texture));
         }
         for (auto& tile : level.collectibles) {
-            this->CreateCollectible(tile.position.x, tile.position.y, tile.connGroup, this->level.textures2d.at(tile.texture));
+            this->CreateCollectible(tile.position.x, tile.position.y,tile.size.x,tile.size.y, tile.connGroup, this->level.textures2d.at(tile.texture));
         }
         for (auto& tile : level.damagingTiles) {
-            this->CreateDamagingTile(tile.position.x, tile.position.y, tile.connGroup, this->level.textures2d.at(tile.texture));
+            this->CreateDamagingTile(tile.position.x, tile.position.y, tile.size.x, tile.size.y, tile.connGroup, this->level.textures2d.at(tile.texture));
         }
         for (auto& tile : level.destroyTiles) {
-            this->CreateDestroyTile(tile.position.x, tile.position.y, tile.connGroup, this->level.textures2d.at(tile.texture));
+            this->CreateDestroyTile(tile.position.x, tile.position.y, tile.size.x, tile.size.y, tile.connGroup, this->level.textures2d.at(tile.texture));
         }
         for (auto& tile : level.checkpoints) {
-            this->CreateCheckpoint(tile.position.x, tile.position.y, this->level.textures2d.at(tile.texture));
+            this->CreateCheckpoint(tile.position.x, tile.position.y, tile.size.x, tile.size.y, this->level.textures2d.at(tile.texture));
         }
         for (auto& tile : level.levelExits) {
-            this->CreateExit(tile.position.x, tile.position.y, this->level.textures2d.at(tile.texture));
+            this->CreateExit(tile.position.x, tile.position.y, tile.size.x, tile.size.y, this->level.textures2d.at(tile.texture));
         }
         this->level.finished = 0;
     }

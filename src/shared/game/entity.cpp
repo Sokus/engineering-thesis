@@ -17,7 +17,7 @@ namespace Game {
             ability_reset = false;
         }
         else if (move_speed > base_speed) {
-            move_speed -= 75.0f;
+            move_speed -= 100.0f;
         }
         else {
             move_speed = base_speed;
@@ -76,10 +76,10 @@ namespace Game {
         if (input->move[Input::DIRECTION_UP] && on_ground)
             move_direction.y = (float)jump_height * -1.0f;
         if (!on_ground) {
-            move_direction.y += 0.125f;
+            move_direction.y += 0.75f;
         }
         velocity.x = move_direction.x * move_speed;
-        velocity.y = move_direction.y * 25.0f;
+        velocity.y = move_direction.y * 30.0f;
     }
     void Entity::MoveX(float dt) {
         ASSERT(type == ENTITY_TYPE_PLAYER);
@@ -139,6 +139,19 @@ namespace Game {
         }
         return 0;
     }
+    void Entity::calculateCollisionSide(Entity ent) {
+        if ((position.x+size.x/2) - (ent.position.x+ent.size.x/2) > 0) {
+            collideLeft = true;
+        }
+        if ((position.x + size.x / 2) - (ent.position.x + ent.size.x / 2) < 0) {
+            collideRight = true;
+        }
+        if ((position.y + size.y / 2) - (ent.position.y + ent.size.y / 2) > 0) {
+            collideTop = true;
+        }
+        printf("L:%d,R:%d,T:%d,D:%d\n", collideLeft, collideRight, collideTop, on_ground);
+    }
+
     bool Entity::inBorder(float dt) {
         Vector2 tmp_pos = {};
         tmp_pos.x = position.x + velocity.x * dt;

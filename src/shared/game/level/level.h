@@ -25,9 +25,10 @@ namespace Game {
         float horizontalOffset = 0;
     };
     struct TileData {
-        TileData(float positionx, float positiony, int connGroup, int text);
-        TileData(float positionx, float positiony, int connGroup, int text, Vector2 velocity, Vector2 border[2]);
+        TileData(float positionx, float positiony,float size_x,float size_y, int connGroup, int text);
+        TileData(float positionx, float positiony,float size_x,float size_y, int connGroup, int text, Vector2 velocity, Vector2 border[2]);
         Vector2 position;
+        Vector2 size;
         int connGroup;
         Vector2 border[2];
         Vector2 velocity;

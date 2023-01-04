@@ -41,14 +41,14 @@ namespace Game {
         void World::FreeEntity(Entity *entity);
 
         AddEntityResult CreatePlayer(float pos_x, float pos_y,Texture2D texture, Game::PlayerType playertype);
-        AddEntityResult CreateTile(float pos_x, float pos_y, int conGroup, Texture2D texture);
-        Entity* CreateMovingTile(float pos_x, float pos_y, int conGroup, Vector2 moveDirection, Vector2 border[2], Texture2D texture);
-        Entity* CreateInteractive(float pos_x, float pos_y, int conGroup, Texture2D texture);
-        Entity* CreateCollectible(float pos_x, float pos_y, int conGroup, Texture2D texture);
-        Entity* CreateDamagingTile(float pos_x, float pos_y, int conGroup, Texture2D texture);
-        Entity* CreateDestroyTile(float pos_x, float pos_y, int conGroup, Texture2D texture);
-        Entity* CreateCheckpoint(float pos_x, float pos_y, Texture2D texture);
-        Entity* CreateExit(float pos_x, float pos_y, Texture2D texture);
+        AddEntityResult CreateTile(float pos_x, float pos_y,float width,float height, int conGroup, Texture2D texture);
+        Entity* CreateMovingTile(float pos_x, float pos_y, float width, float height, int conGroup, Vector2 moveDirection, Vector2 border[2], Texture2D texture);
+        Entity* CreateInteractive(float pos_x, float pos_y, float width, float height, int conGroup, Texture2D texture);
+        Entity* CreateCollectible(float pos_x, float pos_y, float width, float height, int conGroup, Texture2D texture);
+        Entity* CreateDamagingTile(float pos_x, float pos_y, float width, float height, int conGroup, Texture2D texture);
+        Entity* CreateDestroyTile(float pos_x, float pos_y, float width, float height, int conGroup, Texture2D texture);
+        Entity* CreateCheckpoint(float pos_x, float pos_y, float width, float height, Texture2D texture);
+        Entity* CreateExit(float pos_x, float pos_y, float width, float height, Texture2D texture);
         void LoadTextures();
         void SetLevel(Level &level);
         void ClearLevel();
