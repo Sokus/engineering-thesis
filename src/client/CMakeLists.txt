@@ -9,7 +9,6 @@ add_executable(client
 )
 
 target_link_libraries(client
-	glm::glm
 	raylib
     shared
 )

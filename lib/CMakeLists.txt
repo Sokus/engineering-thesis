@@ -1,6 +1,6 @@
 project(lib)
 
-add_subdirectory(glm)
+set(OpenGL_GL_PREFERENCE "GLVND")
 add_subdirectory(raylib)
 add_subdirectory(parg)
 
