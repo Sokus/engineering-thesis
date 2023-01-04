@@ -36,7 +36,8 @@ namespace Game {
 
         EntityReference GetFreeEntityReference();
         Entity *GetEntityByReference(EntityReference reference);
-        AddEntityResult World::AddEntity(EntityType type, float x, float y, Texture2D texture);
+        AddEntityResult World::AddEntity(EntityType type, float x, float y, float w, float h, Texture2D texture);
+        void World::FreeEntity(Entity *entity);
 
         Entity* CreatePlayer(float pos_x, float pos_y,Texture2D texture, Game::PlayerType playertype);
         Entity* CreateTile(float pos_x, float pos_y, int conGroup, Texture2D texture);

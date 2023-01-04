@@ -65,9 +65,9 @@ namespace Game {
                 collideEntity->stateChange++;
             }
             else if (collideEntity->type == ENTITY_TYPE_COLLECTIBLE) {
-                if (player.collidesWith(*collideEntity) && collideEntity->visible) {
-                    collideEntity->visible = 0;
+                if (player.collidesWith(*collideEntity)) {
                     player.playerData.moneyCount++;
+                    FreeEntity(collideEntity);
                 }
             }
             else if (collideEntity->type == ENTITY_TYPE_DAMAGING_TILE) {
@@ -99,7 +99,6 @@ namespace Game {
             Entity* entity = entities + entity_idx;
             if (entity->type == ENTITY_TYPE_TILE && entity->connectionGroup == connGroup) {
                 entity->enabled = abs(entity->enabled - 1);
-                entity->visible = abs(entity->visible - 1);
                 entity->collidable = abs(entity->collidable - 1);
             }
         }
@@ -163,8 +162,9 @@ namespace Game {
 
         for (int entity_idx = 0; entity_idx < entity_count; entity_idx++)
         {
-            Entity* entity = entities + entity_idx;
-            entity->Draw();
+            Entity *entity = &entities[entity_idx];
+            if (entity->type != ENTITY_TYPE_NONE)
+                entity->Draw();
         }
     }
 
@@ -194,7 +194,7 @@ namespace Game {
         return entity;
     }
 
-    AddEntityResult World::AddEntity(EntityType type, float x, float y, Texture2D texture)
+    AddEntityResult World::AddEntity(EntityType type, float x, float y, float w, float h, Texture2D texture)
     {
         AddEntityResult result = {};
         EntityReference reference = GetFreeEntityReference();
@@ -205,6 +205,8 @@ namespace Game {
             memset(entity, 0, sizeof(Entity));
             entity->type = type;
             entity->rF.position = glm::vec2(x, y);
+            entity->width = w;
+            entity->height = h;
             entity->texture = texture;
 
             result.reference = reference;
@@ -214,12 +216,25 @@ namespace Game {
         return result;
     }
 
+    void World::FreeEntity(Entity *entity)
+    {
+        if (entity)
+        {
+            if (entity->type != ENTITY_TYPE_NONE)
+            {
+                entity->type = ENTITY_TYPE_NONE;
+                entity->revision++;
+            }
+        }
+    }
+
     Entity* World::CreatePlayer(float pos_x, float pos_y,Texture2D texture,Game::PlayerType playertype)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_PLAYER, pos_x, pos_y, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_PLAYER, pos_x, pos_y, 16, 24, texture).entity)
         {
-            entity->max_animation_frame_time = 0.25f;
+            entity->num_frames = 4;
+            entity->max_frame_time = 0.25f;
             entity->collidable = 0;
             switch (playertype)
             {
@@ -254,13 +269,11 @@ namespace Game {
     Entity* World::CreateTile(float pos_x, float pos_y,int conGroup, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_TILE, pos_x, pos_y, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_TILE, pos_x, pos_y, 16, 16, texture).entity)
         {
-            entity->max_animation_frame_time = 0.25f;
             entity->connectionGroup = conGroup;
-            entity->visible = 1;
             entity->collidable = 1;
-            entity->enabled = entity->visible;
+            entity->enabled = 1;
         }
         return entity;
     }
@@ -268,14 +281,9 @@ namespace Game {
     Entity* World::CreateInteractive(float pos_x, float pos_y,int conGroup, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_INTERACTIVE, pos_x, pos_y, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_INTERACTIVE, pos_x, pos_y, 16, 16, texture).entity)
         {
-            entity->max_animation_frame_time = 1.0f;
-            entity->frameChange = 0;
             entity->connectionGroup = conGroup;
-            entity->enabled = 0;
-            entity->visible = 1;
-            entity->collidable = 0;
         }
         return entity;
     }
@@ -283,15 +291,12 @@ namespace Game {
     Entity* World::CreateMovingTile(float pos_x, float pos_y, int conGroup, glm::vec2 moveDirection, glm::vec2 border[2], Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_MOVING_TILE, pos_x, pos_y, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_MOVING_TILE, pos_x, pos_y, 16, 16, texture).entity)
         {
             entity->move_direction = moveDirection;
-            entity->max_animation_frame_time = 1.0f;
             entity->move_speed = 1.0f;
-            entity->frameChange = 0;
             entity->connectionGroup = conGroup;
             entity->enabled = 1;
-            entity->visible = 1;
             entity->border[0] = border[0];
             entity->border[1] = border[1];
             entity->collidable = 1;
@@ -302,14 +307,10 @@ namespace Game {
     Entity* World::CreateCollectible(float pos_x, float pos_y, int conGroup, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_COLLECTIBLE, pos_x, pos_y, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_COLLECTIBLE, pos_x, pos_y, 16, 16, texture).entity)
         {
-            entity->max_animation_frame_time = 1.0f;
-            entity->frameChange = 0;
             entity->connectionGroup = conGroup;
             entity->enabled = 1;
-            entity->visible = 1;
-            entity->collidable = 0;
         }
         return entity;
     }
@@ -317,59 +318,22 @@ namespace Game {
     Entity* World::CreateDamagingTile(float pos_x, float pos_y, int conGroup, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_DAMAGING_TILE, pos_x, pos_y, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_DAMAGING_TILE, pos_x, pos_y, 16, 16, texture).entity)
         {
-            entity->max_animation_frame_time = 1.0f;
-            entity->frameChange = 0;
             entity->connectionGroup = conGroup;
             entity->enabled = 1;
-            entity->visible = 1;
-            entity->collidable = 0;
             entity->damage = 10;
         }
         return entity;
     }
 
-    /*
-    Entity* World::CreateBullet(ReferenceFrame rframe, int dmg, Texture2D texture) {
-        Entity* entity = nullptr;
-        if (entity = GetNewEntity())
-        {
-            entity->type = EntityType::BULLET;
-            entity->rF = rframe;
-            entity->damage = dmg;
-            entity->bulletData.animationFrames = { 2,2 };
-            entity->bulletData.visibleSize = { 10,10 };
-            entity->bulletData.animationLength = 0.5;
-            entity->bulletData.gravity = -50;
-            entity->bulletData.maxLifetime = 1.5;
-            entity->bulletData.ln1MinusDragCoefficient = 0;
-            entity->bulletData.sizeKeyframes ={ 05,1.5,0.5f };
-            entity->bulletData.alphaKeyframes = { 1,1,0 };
-
-
-            entity->max_animation_frame_time = 1.0f;
-            entity->frameChange = 0;
-            entity->connectionGroup = 0;
-            entity->enabled = 1;
-            entity->visible = 1;
-            entity->texture = texture;
-            entity->collidable = 0;
-        }
-        return entity;
-    }
-    */
-
     Entity* World::CreateDestroyTile(float pos_x, float pos_y, int conGroup, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_DESTRUCTIBLE_TILE, pos_x, pos_y, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_DESTRUCTIBLE_TILE, pos_x, pos_y, 16, 16, texture).entity)
         {
-            entity->max_animation_frame_time = 1.0f;
-            entity->frameChange = 0;
             entity->connectionGroup = conGroup;
             entity->enabled = 1;
-            entity->visible = 1;
             entity->health = 15;
             entity->collidable = 1;
         }
@@ -379,14 +343,9 @@ namespace Game {
     Entity* World::CreateCheckpoint(float pos_x, float pos_y, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_CHECKPOINT, pos_x, pos_y, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_CHECKPOINT, pos_x, pos_y, 16, 16, texture).entity)
         {
-            entity->max_animation_frame_time = 1.0f;
-            entity->frameChange = 0;
-            entity->connectionGroup = 0;
-            entity->enabled = 0;
-            entity->visible = 1;
-            entity->collidable = 0;
+
         }
         return entity;
     }
@@ -394,13 +353,9 @@ namespace Game {
     Entity* World::CreateExit(float pos_x, float pos_y, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_EXIT, pos_x, pos_y, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_EXIT, pos_x, pos_y, 16, 16, texture).entity)
         {
-            entity->max_animation_frame_time = 1.0f;
-            entity->frameChange = 0;
-            entity->enabled = 0;
-            entity->visible = 1;
-            entity->collidable = 0;
+
         }
         return entity;
     }

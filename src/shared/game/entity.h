@@ -69,8 +69,8 @@ namespace Game {
     struct Entity
     {
         uint16_t revision;
-        int width;
-        int height;
+        float width;
+        float height;
 
         // SHARED STATE
 
@@ -89,7 +89,7 @@ namespace Game {
         //STATE DATA
         bool collidable;
         bool enabled;
-        bool visible;
+        bool hidden;
 
 
         // MOVING DATA
@@ -101,13 +101,12 @@ namespace Game {
         //Game::BulletData bulletData;
         Game::ReferenceFrame rF;
 
+        unsigned int current_frame;
+        unsigned int num_frames;
+        float frame_time;
+        float max_frame_time;
 
-        // CLIENT STATE
 
-        // TODO: more robust animation system
-        unsigned int animation_frame;
-        float animation_frame_time;
-        float max_animation_frame_time;
 
         void Update(float dt);
         void setMoveSpeed(Input* input);

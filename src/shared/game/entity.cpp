@@ -48,26 +48,17 @@ namespace Game {
 
 	void Entity::Update(float dt)
     {
-
-        if (type == ENTITY_TYPE_PLAYER)
+        if (num_frames)
         {
+            frame_time += dt;
 
-            if (animation_frame_time >= max_animation_frame_time)
+            if (frame_time > max_frame_time)
             {
-                animation_frame++;
-                animation_frame_time = 0.0f;
+                current_frame = (current_frame + 1) % num_frames;
+                frame_time = 0.0f;
             }
+        }
 
-            animation_frame_time += dt;
-        }
-        if (type == ENTITY_TYPE_INTERACTIVE) {
-            if (enabled) {
-                animation_frame = 1;
-            }
-            else {
-                animation_frame = 0;
-            }
-        }
         if (type == ENTITY_TYPE_MOVING_TILE) {
             glm::vec2 tmp_pos = rF.velocity * dt;
             if (!inBorder(dt)) {
@@ -78,13 +69,6 @@ namespace Game {
 
             rF.position += rF.velocity * dt;
         }
-        // if (type == BULLET) {
-        //     rF.Update(dt);
-        //     rF.velocity.y += bulletData.gravity * dt;
-        //     rF.velocity *= 1 + bulletData.ln1MinusDragCoefficient * dt;
-        //     bulletData.lifetime += dt;
-        // }
-
     }
 
     void Entity::Control(Input* input,float dt)
@@ -114,187 +98,40 @@ namespace Game {
 
     void Entity::Draw()
     {
-        if (type == ENTITY_TYPE_PLAYER)
+        if (hidden)
+            return;
+
+        Rectangle source = Rectangle{ 0.0f, 0.0f, (float)width, (float)height };
+
+        if (num_frames)
         {
-            width = 16;
-            height = 24;
-            Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
-            source.x = (float)(animation_frame % 4 * width);
-            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(playerData.facing >= 0 ? width : -width);
-            Rectangle dest = {
-                rF.position.x,
-                rF.position.y,
-                (float)(width),
-                (float)(height)
-            };
-
-            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
+            source.x = (float)(current_frame * width);
         }
-        if (type == ENTITY_TYPE_TILE && visible) {
-            width = 16;
-            height = 16;
-            Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
-            source.x = (float)(animation_frame % 4 * width);
-            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(width);
-            Rectangle dest = {
-                rF.position.x,
-                rF.position.y,
-                (float)(width),
-                (float)(height)
-            };
 
-            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
+        switch (type)
+        {
+            case ENTITY_TYPE_PLAYER:
+            {
+                source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
+                source.width = (float)(playerData.facing >= 0 ? width : -width);
+            } break;
+
+            case ENTITY_TYPE_INTERACTIVE:
+            {
+                if (enabled)
+                    source.x = (float)width;
+            } break;
+
+            default: break;
         }
-        if (type == ENTITY_TYPE_INTERACTIVE && visible) {
-            width = 16;
-            height = 16;
-            Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
-            source.x = (float)(animation_frame % 2 * width);
-            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(width);
-            Rectangle dest = {
-                rF.position.x,
-                rF.position.y,
-                (float)(width),
-                (float)(height)
-            };
 
-            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
-        }
-        if (type == ENTITY_TYPE_MOVING_TILE && visible) {
-            width = 16;
-            height = 16;
-            Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
-            source.x = (float)(animation_frame % 2 * width);
-            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(width);
-            Rectangle dest = {
-                rF.position.x,
-                rF.position.y,
-                (float)(width),
-                (float)(height)
-            };
-            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
-        }
-        if (type == ENTITY_TYPE_COLLECTIBLE && visible) {
-            width = 16;
-            height = 16;
-            Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
-            source.x = (float)(animation_frame % 4 * width);
-            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(width);
-            Rectangle dest = {
-                rF.position.x,
-                rF.position.y,
-                (float)(width),
-                (float)(height)
-            };
+        Rectangle destination = {};
+        destination.x = rF.position.x;
+        destination.y = rF.position.y;
+        destination.width = (float)width;
+        destination.height = (float)height;
 
-            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
-        }
-        if (type == ENTITY_TYPE_DAMAGING_TILE && visible) {
-            width = 16;
-            height = 16;
-            Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
-            source.x = (float)(animation_frame % 4 * width);
-            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(width);
-            Rectangle dest = {
-                rF.position.x,
-                rF.position.y,
-                (float)(width),
-                (float)(height)
-            };
-
-            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
-        }
-        /*
-        if (type == BULLET) {
-            if (bulletData.lifetime > bulletData.maxLifetime) {
-                type = NONE;
-            }
-            else {
-                const int totalAnimationFrames = bulletData.animationFrames.x * bulletData.animationFrames.y;
-                const int frameNo = static_cast<int>(bulletData.lifetime / bulletData.animationLength * totalAnimationFrames) % totalAnimationFrames;
-                const glm::vec2 frameSize = glm::vec2(texture.width, texture.height) / glm::vec2(bulletData.animationFrames);
-                bulletData.SetDrag(0.5);
-                // 0 when spawned, 1 when at max lifetime
-                const float lifetimeProgress = bulletData.lifetime / bulletData.maxLifetime;
-                const float sizeMultiplier = interpolate(lifetimeProgress, bulletData.sizeKeyframes);
-                const float alphaMultiplier = interpolate(lifetimeProgress, bulletData.alphaKeyframes);
-
-                Rectangle source, dest;
-
-                source.x = frameSize.x * (frameNo % bulletData.animationFrames.x);
-                source.y = frameSize.y * (frameNo / bulletData.animationFrames.x);;
-                source.width = frameSize.x;
-                source.height = frameSize.y;
-
-                dest.x = rF.position.x;
-                dest.y = rF.position.y;
-                dest.width = bulletData.visibleSize.x * sizeMultiplier;
-                dest.height = bulletData.visibleSize.y * sizeMultiplier;
-
-                DrawTexturePro(
-                    texture,
-                    source, dest,
-                    { bulletData.visibleSize.x * sizeMultiplier / 2, bulletData.visibleSize.y * sizeMultiplier / 2 },
-                    rF.rotation,
-                    { 255,255,255,static_cast<unsigned char>(255 * alphaMultiplier) }
-                );
-            }
-        }
-        */
-        if (type == ENTITY_TYPE_DESTRUCTIBLE_TILE && visible) {
-            width = 16;
-            height = 16;
-            Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
-            source.x = (float)(animation_frame % 4 * width);
-            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(width);
-            Rectangle dest = {
-                rF.position.x,
-                rF.position.y,
-                (float)(width),
-                (float)(height)
-            };
-
-            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
-        }
-        if (type == ENTITY_TYPE_CHECKPOINT && visible) {
-            width = 16;
-            height = 16;
-            Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
-            source.x = (float)(animation_frame % 2 * width);
-            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(width);
-            Rectangle dest = {
-                rF.position.x,
-                rF.position.y,
-                (float)(width),
-                (float)(height)
-            };
-
-            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
-        }
-        if (type == ENTITY_TYPE_EXIT && visible) {
-            width = 16;
-            height = 16;
-            Rectangle source = Rectangle{ 0.0f, 0.0f, 0.0f, (float)height };
-            source.x = (float)(animation_frame % 2 * width);
-            source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
-            source.width = (float)(width);
-            Rectangle dest = {
-                rF.position.x,
-                rF.position.y,
-                (float)(width),
-                (float)(height)
-            };
-
-            DrawTexturePro(texture, source, dest, Vector2{ 0.0f, 0.0f }, 0.0f, Color{ 255, 255, 255, 255 });
-        }
+        DrawTexturePro(texture, source, destination, Vector2{}, 0.0f, WHITE);
     }
 
     bool Entity::collidesWith(Entity ent) {
