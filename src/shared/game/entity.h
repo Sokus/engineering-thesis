@@ -4,6 +4,7 @@
 #include "glm/glm.hpp"
 #include "math/rframe.h"
 #include "raylib.h"
+#include "stdint.h"
 
 #include <vector>
 
@@ -14,26 +15,28 @@ namespace Game {
 
     enum EntityType
     {
-        NONE,
-        PLAYER,
-        TILE,
-        INTERACTIVE,
-        MOVING_TILE,
-        COLLECTIBLE,
-        DAMAGING_TILE,
-        BULLET,
-        DESTROY_TILE,
-        CHECKPOINT,
-        EXIT
-    };
-    enum PlayerType
-    {
-        ROUGE,
-        SNIPER,
-        HEALER,
-        WARRIOR
+        ENTITY_TYPE_NONE,
+        ENTITY_TYPE_PLAYER,
+        ENTITY_TYPE_TILE,
+        ENTITY_TYPE_INTERACTIVE,
+        ENTITY_TYPE_MOVING_TILE,
+        ENTITY_TYPE_COLLECTIBLE,
+        ENTITY_TYPE_DAMAGING_TILE,
+        // BULLET,
+        ENTITY_TYPE_DESTRUCTIBLE_TILE,
+        ENTITY_TYPE_CHECKPOINT,
+        ENTITY_TYPE_EXIT
     };
 
+    enum PlayerType
+    {
+        PLAYER_TYPE_ROUGE,
+        PLAYER_TYPE_SNIPER,
+        PLAYER_TYPE_HEALER,
+        PLAYER_TYPE_WARRIOR
+    };
+
+    /*
     struct BulletData {
         //BULLET DATA
         float lifetime = 0;
@@ -48,17 +51,16 @@ namespace Game {
         float animationLength;
         std::vector<float> sizeKeyframes;
         std::vector<float> alphaKeyframes;
-        /** drag coefficient = how much velocity is lost per second.
-         *
-         * e.g. 0.5 would cause the projectile to loose half of its velocity each second.
-         */
+        // drag coefficient = how much velocity is lost per second.
+        // e.g. 0.5 would cause the projectile to loose half of its velocity each second.
         void SetDrag(float dragCoefficient);
     };
+    */
 
     struct PlayerData {
         int moneyCount;
         bool onGround;
-        int jumpHeight;
+        float jumpHeight;
         int facing;
         bool ability_reset;
     };
@@ -66,9 +68,9 @@ namespace Game {
 
     struct Entity
     {
+        uint16_t revision;
         int width;
         int height;
-        int scale;
 
         // SHARED STATE
 
@@ -96,7 +98,7 @@ namespace Game {
         EntityType type;
         Texture2D texture;
         Game::PlayerData playerData;
-        Game::BulletData bulletData;
+        //Game::BulletData bulletData;
         Game::ReferenceFrame rF;
 
 
@@ -115,6 +117,12 @@ namespace Game {
         void MoveX(float dt);
         void MoveY(float dt);
         bool inBorder(float dt);
+    };
+
+    struct EntityReference
+    {
+        int index;
+        uint16_t revision;
     };
 }
 #endif

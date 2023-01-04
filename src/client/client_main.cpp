@@ -250,22 +250,22 @@ void DoPlayerMenu()
     if (close_button.IsReleased())
         state.current_menu = GM_LEVEL_MENU;
     if (player1_button.IsReleased()) {
-        Game::ActualPlayer = Game::ROUGE;
+        Game::ActualPlayer = Game::PLAYER_TYPE_ROUGE;
         state.current_menu = GM_NONE;
         state.current_scene = GS_GAME;
     }
     if (player2_button.IsReleased()) {
-        Game::ActualPlayer = Game::SNIPER;
+        Game::ActualPlayer = Game::PLAYER_TYPE_SNIPER;
         state.current_menu = GM_NONE;
         state.current_scene = GS_GAME;
     }
     if (player3_button.IsReleased()) {
-        Game::ActualPlayer = Game::HEALER;
+        Game::ActualPlayer = Game::PLAYER_TYPE_HEALER;
         state.current_menu = GM_NONE;
         state.current_scene = GS_GAME;
     }
     if (player4_button.IsReleased()) {
-        Game::ActualPlayer = Game::WARRIOR;
+        Game::ActualPlayer = Game::PLAYER_TYPE_WARRIOR;
         state.current_menu = GM_NONE;
         state.current_scene = GS_GAME;
     }
@@ -368,12 +368,13 @@ void DoGameScene()
     float expected_delta_time = 1.0f / (float)GetFPS();
     float delta_time = GetFrameTime() > expected_delta_time ? expected_delta_time : GetFrameTime();
 
+    /*
     if(input.shoot)
     {
         static float cooldown = 0;
         if(cooldown <= 0) {
             Game::ReferenceFrame rframe;
-            rframe.position = player->rF.position + glm::vec2(player->width, player->height)*static_cast<float>(player->scale)*0.5f;
+            rframe.position = player->rF.position + glm::vec2(player->width, player->height)*0.5f;
             rframe.velocity = glm::vec2(player->playerData.facing,1) * glm::vec2(200,50) + glm::vec2(player->rF.velocity.x, 0);
             rframe.angularVelocity = -360;
             rframe.rotation = 0;
@@ -382,7 +383,7 @@ void DoGameScene()
         }
         cooldown -= delta_time;
     }
-
+    */
 
     world.Update(&input, delta_time);
 

@@ -11,6 +11,12 @@ namespace Game {
     extern Level ActualLevel;
     extern PlayerType ActualPlayer;
 
+    struct AddEntityResult
+    {
+        EntityReference reference;
+        Entity *entity;
+    };
+
     class World
     {
     private:
@@ -28,8 +34,10 @@ namespace Game {
         void CalculateCollisions(Entity& player,glm::vec2 velocity,Input * input,float dt,bool dim);
         void UpdateActiveTiles(float dt, int connectionGroup);
 
+        EntityReference GetFreeEntityReference();
+        Entity *GetEntityByReference(EntityReference reference);
+        AddEntityResult World::AddEntity(EntityType type, float x, float y, Texture2D texture);
 
-        Entity* GetNewEntity();
         Entity* CreatePlayer(float pos_x, float pos_y,Texture2D texture, Game::PlayerType playertype);
         Entity* CreateTile(float pos_x, float pos_y, int conGroup, Texture2D texture);
         Entity* CreateMovingTile(float pos_x, float pos_y, int conGroup, glm::vec2 moveDirection, glm::vec2 border[2], Texture2D texture);
