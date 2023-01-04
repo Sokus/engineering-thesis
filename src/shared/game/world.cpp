@@ -16,73 +16,71 @@ namespace Game {
         {
             Entity* collideEntity = entities + collide_idx; //TODO add reaction to squishing - dmg, teleport?
             if (collideEntity->type!= ENTITY_TYPE_NONE && collideEntity->collidable) {
-                ent_pos = collideEntity->rF.position + (collideEntity->rF.velocity * dt);
+                ent_pos = collideEntity->position + (collideEntity->velocity * dt);
                 if (dim == 0) {
-                    ent_vel = glm::vec2(collideEntity->rF.velocity.x, 0.0f);
+                    ent_vel = glm::vec2(collideEntity->velocity.x, 0.0f);
                 }
                 else {
-                    ent_vel = glm::vec2(0.0f,collideEntity->rF.velocity.y);
+                    ent_vel = glm::vec2(0.0f,collideEntity->velocity.y);
                 }
                 if (player.collidesWith(*collideEntity)) {
                     if (velocity.x > 0) {
-                        player.rF.velocity.x = 0;
-                        player.rF.position.x = ent_pos.x - player.width;
+                        player.velocity.x = 0;
+                        player.position.x = ent_pos.x - player.size.x;
                     }
                     if (velocity.x < 0) {
-                        player.rF.velocity.x = 0;
-                        player.rF.position.x = ent_pos.x + collideEntity->width;
+                        player.velocity.x = 0;
+                        player.position.x = ent_pos.x + collideEntity->size.x;
                     }
                     if (velocity.y < 0) {
-                        player.rF.position.y = ent_pos.y + collideEntity->height;
-                        player.rF.velocity.y = 0;
+                        player.position.y = ent_pos.y + collideEntity->size.y;
+                        player.velocity.y = 0;
                     }
                     if (velocity.y > 0) {
-                        player.rF.position.y = ent_pos.y - player.height;
-                        player.playerData.onGround = 1;
-                        player.playerData.ability_reset = 1;
-                        player.rF.velocity.y = 0;
+                        player.position.y = ent_pos.y - player.size.y;
+                        player.on_ground = true;
+                        player.ability_reset = true;
+                        player.velocity.y = 0;
                         player.move_direction.y = 0.5;
                     }
                     if (velocity.y < 0 && ent_vel.y != 0) {
-                        player.rF.position.y = ent_pos.y + collideEntity->height;
-                        player.rF.velocity.y = 0;
+                        player.position.y = ent_pos.y + collideEntity->size.y;
+                        player.velocity.y = 0;
                         player.move_direction.y = 1;
                     }
                     if (ent_vel.x > 0)
-                        player.rF.position.x = ent_pos.x + player.width;
+                        player.position.x = ent_pos.x + player.size.x;
                     if (ent_vel.x < 0)
-                        player.rF.position.x = ent_pos.x - player.width;
+                        player.position.x = ent_pos.x - player.size.x;
 
                 }
             }
             else if (collideEntity->type == ENTITY_TYPE_INTERACTIVE) {
                 if (player.collidesWith(*collideEntity) && input->interact
-                    && collideEntity->stateChange > 15) { //change if state is the same longer then 1/4 of sec
-                    collideEntity->enabled = abs(collideEntity->enabled - 1);
-                    UpdateActiveTiles(dt, collideEntity->connectionGroup);
-                    collideEntity->stateChange = 0;
+                    && collideEntity->time_until_state_change_allowed <= 0.0f) {
+                    collideEntity->active = !collideEntity->active;
+                    UpdateActiveTiles(dt, collideEntity->entity_group);
+                    collideEntity->time_until_state_change_allowed = 0.25f; // change if state is the same longer then 1/4 of sec
                 }
-                collideEntity->stateChange++;
             }
             else if (collideEntity->type == ENTITY_TYPE_COLLECTIBLE) {
                 if (player.collidesWith(*collideEntity)) {
-                    player.playerData.moneyCount++;
+                    player.money_count++;
                     FreeEntity(collideEntity);
                 }
             }
             else if (collideEntity->type == ENTITY_TYPE_DAMAGING_TILE) {
                 if (player.collidesWith(*collideEntity)
-                    && collideEntity->stateChange > 90) { //hurts every 1.5 of sec
+                    && collideEntity->time_until_state_change_allowed <= 0.0f) {
                     player.health -= collideEntity->damage;
-                    collideEntity->stateChange = 0;
+                    collideEntity->time_until_state_change_allowed = 1.5f; //hurts every 1.5 of sec
                 }
-                collideEntity->stateChange++;
             }
             else if (collideEntity->type == ENTITY_TYPE_CHECKPOINT) {
-                if (player.collidesWith(*collideEntity) && !collideEntity->enabled) {
-                    float pos_y = collideEntity->rF.position.y + collideEntity->height - player.height;
-                    collideEntity->enabled = 1;
-                    level.spawnpoint = glm::vec2(collideEntity->rF.position.x, pos_y);
+                if (player.collidesWith(*collideEntity) && !collideEntity->active) {
+                    float pos_y = collideEntity->position.y + collideEntity->size.y - player.size.y;
+                    collideEntity->active = true;
+                    level.spawnpoint = glm::vec2(collideEntity->position.x, pos_y);
                 }
             }
             else if (collideEntity->type == ENTITY_TYPE_EXIT) {
@@ -97,9 +95,9 @@ namespace Game {
         for (int entity_idx = 0; entity_idx < entity_count; entity_idx++)
         {
             Entity* entity = entities + entity_idx;
-            if (entity->type == ENTITY_TYPE_TILE && entity->connectionGroup == connGroup) {
-                entity->enabled = abs(entity->enabled - 1);
-                entity->collidable = abs(entity->collidable - 1);
+            if (entity->type == ENTITY_TYPE_TILE && entity->entity_group == connGroup) {
+                entity->active = !entity->active;
+                entity->collidable = !entity->collidable;
             }
         }
     }
@@ -138,21 +136,17 @@ namespace Game {
             entity->Update(dt);
             if (entity->type == ENTITY_TYPE_PLAYER) {
                 if (entity->health <= 0) {
-                    entity->rF.position = level.spawnpoint; //Add some death animation
+                    entity->position = level.spawnpoint; //Add some death animation
                     entity->health = entity->base_health;
                     break;
                 }
                 entity->Control(input,dt);
                 entity->MoveX(dt);
-                CalculateCollisions(*entity,glm::vec2(entity->rF.velocity.x,0.0f), input, dt,0);
-                entity->playerData.onGround = 0;
+                CalculateCollisions(*entity,glm::vec2(entity->velocity.x,0.0f), input, dt,0);
+                entity->on_ground = 0;
                 entity->MoveY(dt);
-                CalculateCollisions(*entity, glm::vec2(0.0f,entity->rF.velocity.y), input, dt,1);
+                CalculateCollisions(*entity, glm::vec2(0.0f,entity->velocity.y), input, dt,1);
             }
-            // if (entity->type == BULLET) {
-            //     entity->rF.position = entity->rF.position;
-            //     hitObstacles(*entity);
-            // }
         }
     }
 
@@ -204,9 +198,9 @@ namespace Game {
         {
             memset(entity, 0, sizeof(Entity));
             entity->type = type;
-            entity->rF.position = glm::vec2(x, y);
-            entity->width = w;
-            entity->height = h;
+            entity->position = glm::vec2(x, y);
+            entity->size.x = w;
+            entity->size.y = h;
             entity->texture = texture;
 
             result.reference = reference;
@@ -241,22 +235,22 @@ namespace Game {
             case PLAYER_TYPE_ROUGE:
                 entity->base_health = 80;
                 entity->base_speed = 55.0f;
-                entity->playerData.jumpHeight = 3.0f;
+                entity->jump_height = 8.0f;
                 break;
             case PLAYER_TYPE_SNIPER:
                 entity->base_health = 70;
                 entity->base_speed = 50.0f;
-                entity->playerData.jumpHeight = 3.0f;
+                entity->jump_height = 3.0f;
                 break;
             case PLAYER_TYPE_HEALER:
                 entity->base_health = 100;
                 entity->base_speed = 45.0f;
-                entity->playerData.jumpHeight = 5.0f;
+                entity->jump_height = 5.0f;
                 break;
             case PLAYER_TYPE_WARRIOR:
                 entity->base_health = 120;
                 entity->base_speed = 37.5f;
-                entity->playerData.jumpHeight = 2.25f;
+                entity->jump_height = 2.25f;
                 break;
             default: break;
             }
@@ -271,9 +265,9 @@ namespace Game {
         Entity* entity = nullptr;
         if (entity = AddEntity(ENTITY_TYPE_TILE, pos_x, pos_y, 16, 16, texture).entity)
         {
-            entity->connectionGroup = conGroup;
-            entity->collidable = 1;
-            entity->enabled = 1;
+            entity->entity_group = conGroup;
+            entity->collidable = true;
+            entity->active = true;
         }
         return entity;
     }
@@ -283,7 +277,7 @@ namespace Game {
         Entity* entity = nullptr;
         if (entity = AddEntity(ENTITY_TYPE_INTERACTIVE, pos_x, pos_y, 16, 16, texture).entity)
         {
-            entity->connectionGroup = conGroup;
+            entity->entity_group = conGroup;
         }
         return entity;
     }
@@ -295,10 +289,10 @@ namespace Game {
         {
             entity->move_direction = moveDirection;
             entity->move_speed = 1.0f;
-            entity->connectionGroup = conGroup;
-            entity->enabled = 1;
-            entity->border[0] = border[0];
-            entity->border[1] = border[1];
+            entity->entity_group = conGroup;
+            entity->active = true;
+            entity->endpoints[0] = border[0];
+            entity->endpoints[1] = border[1];
             entity->collidable = 1;
         }
         return entity;
@@ -309,8 +303,8 @@ namespace Game {
         Entity* entity = nullptr;
         if (entity = AddEntity(ENTITY_TYPE_COLLECTIBLE, pos_x, pos_y, 16, 16, texture).entity)
         {
-            entity->connectionGroup = conGroup;
-            entity->enabled = 1;
+            entity->entity_group = conGroup;
+            entity->active = true;
         }
         return entity;
     }
@@ -320,8 +314,8 @@ namespace Game {
         Entity* entity = nullptr;
         if (entity = AddEntity(ENTITY_TYPE_DAMAGING_TILE, pos_x, pos_y, 16, 16, texture).entity)
         {
-            entity->connectionGroup = conGroup;
-            entity->enabled = 1;
+            entity->entity_group = conGroup;
+            entity->active = true;
             entity->damage = 10;
         }
         return entity;
@@ -332,8 +326,8 @@ namespace Game {
         Entity* entity = nullptr;
         if (entity = AddEntity(ENTITY_TYPE_DESTRUCTIBLE_TILE, pos_x, pos_y, 16, 16, texture).entity)
         {
-            entity->connectionGroup = conGroup;
-            entity->enabled = 1;
+            entity->entity_group = conGroup;
+            entity->active = true;
             entity->health = 15;
             entity->collidable = 1;
         }

@@ -83,7 +83,7 @@ std::vector<Game::TileData> plainsExit = {
 
 namespace Game {
 	Level plains = Level(
-		glm::vec2(0.0f,0.0f),
+		glm::vec2(0.0f, 100.0f),
 		plainsTiles,
 		plainsMovingTiles,
 		plainsInteractiveTiles,

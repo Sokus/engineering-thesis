@@ -33,10 +33,10 @@ namespace Game {
         return glm::mix(keyframes[intPart], keyframes[intPart + 1], realPart);
     }
     void Entity::setMoveSpeed(Input* input) {
-        if (input->dash && input->cooldown > 90 && playerData.ability_reset) {
+        if (input->dash && input->cooldown > 90 && ability_reset) {
             move_speed *= 10;
             input->cooldown = 0;
-            playerData.ability_reset = 0;
+            ability_reset = false;
         }
         else if (move_speed > base_speed) {
             move_speed -= 75.0f;
@@ -59,15 +59,22 @@ namespace Game {
             }
         }
 
+        if (time_until_state_change_allowed > 0.0f)
+        {
+            time_until_state_change_allowed -= dt;
+            if (time_until_state_change_allowed < 0.0f)
+                time_until_state_change_allowed = 0.0f;
+        }
+
         if (type == ENTITY_TYPE_MOVING_TILE) {
-            glm::vec2 tmp_pos = rF.velocity * dt;
+            glm::vec2 tmp_pos = velocity * dt;
             if (!inBorder(dt)) {
                 move_direction.x = move_direction.x * -1;
                 move_direction.y = move_direction.y * -1;
             }
-            rF.velocity = move_direction * move_speed;
+            velocity = move_direction * move_speed;
 
-            rF.position += rF.velocity * dt;
+            position += velocity * dt;
         }
     }
 
@@ -78,73 +85,78 @@ namespace Game {
         move_direction.x -= input->move[Input::Direction::LEFT] * 2.0f;
         move_direction.x += input->move[Input::Direction::RIGHT] * 2.0f;
         setMoveSpeed(input);
-        if (move_direction.x != 0.0f) playerData.facing = (int)move_direction.x;
-        if (input->move[Input::Direction::UP] && playerData.onGround)
-            move_direction.y = (float)playerData.jumpHeight * -1.0f;
-        if (!playerData.onGround) {
+        if (move_direction.x != 0.0f)
+            facing = (int)move_direction.x;
+        if (input->move[Input::Direction::UP] && on_ground)
+            move_direction.y = (float)jump_height * -1.0f;
+        if (!on_ground) {
             move_direction.y += 0.125f;
         }
-        rF.velocity.x = move_direction.x * move_speed;
-        rF.velocity.y = move_direction.y * 25.0f;
+        velocity.x = move_direction.x * move_speed;
+        velocity.y = move_direction.y * 25.0f;
     }
     void Entity::MoveX(float dt) {
         ASSERT(type == ENTITY_TYPE_PLAYER);
-        rF.position.x += rF.velocity.x * dt;
+        position.x += velocity.x * dt;
     }
     void Entity::MoveY(float dt) {
         ASSERT(type == ENTITY_TYPE_PLAYER);
-        rF.position.y += rF.velocity.y * dt;
+        position.y += velocity.y * dt;
     }
 
     void Entity::Draw()
     {
-        if (hidden)
-            return;
-
-        Rectangle source = Rectangle{ 0.0f, 0.0f, (float)width, (float)height };
+        Rectangle source = {};
+        source.width = facing >= 0 ? size.x : -size.x;
+        source.height = size.y;
 
         if (num_frames)
         {
-            source.x = (float)(current_frame * width);
+            source.x = (float)(current_frame * size.x);
         }
 
         switch (type)
         {
             case ENTITY_TYPE_PLAYER:
             {
-                source.y = (ABSF(rF.velocity.x) <= 0.001f ? 0.0f : (float)height);
-                source.width = (float)(playerData.facing >= 0 ? width : -width);
+                source.y += (ABSF(velocity.x) <= 0.001f ? 0.0f : size.y);
             } break;
 
             case ENTITY_TYPE_INTERACTIVE:
             {
-                if (enabled)
-                    source.x = (float)width;
+                if (active)
+                    source.x = size.x;
+            } break;
+
+            case ENTITY_TYPE_TILE:
+            {
+                if (!active)
+                    return;
             } break;
 
             default: break;
         }
 
         Rectangle destination = {};
-        destination.x = rF.position.x;
-        destination.y = rF.position.y;
-        destination.width = (float)width;
-        destination.height = (float)height;
+        destination.x = position.x;
+        destination.y = position.y;
+        destination.width = size.x;
+        destination.height = size.y;
 
         DrawTexturePro(texture, source, destination, Vector2{}, 0.0f, WHITE);
     }
 
     bool Entity::collidesWith(Entity ent) {
-        if (rF.position.x + width > ent.rF.position.x && rF.position.x < ent.rF.position.x + ent.width &&
-            rF.position.y + height > ent.rF.position.y && rF.position.y < ent.rF.position.y + ent.height) {
+        if (position.x + size.x > ent.position.x && position.x < ent.position.x + ent.size.x &&
+            position.y + size.y > ent.position.y && position.y < ent.position.y + ent.size.y) {
             return 1;
         }
         return 0;
     }
     bool Entity::inBorder(float dt) {
-        glm::vec2 tmp_pos = rF.position + (rF.velocity * dt);
-        if (tmp_pos.x + width < border[1].x && tmp_pos.x > border[0].x &&
-            tmp_pos.y + height < border[1].y && tmp_pos.y > border[0].y) {
+        glm::vec2 tmp_pos = position + (velocity * dt);
+        if (tmp_pos.x + size.x < endpoints[1].x && tmp_pos.x > endpoints[0].x &&
+            tmp_pos.y + size.y < endpoints[1].y && tmp_pos.y > endpoints[0].y) {
             return 1;
         }
         return 0;

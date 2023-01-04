@@ -56,15 +56,6 @@ struct State
 
 } state = {};
 
-void setView(Camera2D &view,glm::vec2 position) {
-    view.target.x = position.x;
-    view.target.y = position.y;
-    view.zoom = 1.0f;
-    view.rotation = 0.0f;
-    view.offset.x = (float)GetScreenWidth() / 2.0f;
-    view.offset.y = (float)GetScreenHeight() / 2.0f;
-}
-
 void DoMainMenu()
 {
     UI::Button solo_play_button = UI::Button("Solo Play");
@@ -350,7 +341,7 @@ void DoGameScene()
     static Game::World world;
     static Game::Entity *player;
     static Game::Input input;
-    Camera2D view;
+
     if(!state.game.world_initialised)
     {
         input = Game::Input();
@@ -387,9 +378,14 @@ void DoGameScene()
 
     world.Update(&input, delta_time);
 
-    setView(view,player->rF.position);
+    Camera2D camera = {};
+    camera.offset = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+    camera.zoom = 3.0f;
+    camera.target.x = player->position.x;
+    camera.target.y = player->position.y;
+    camera.zoom = 4.0f;
 
-    BeginMode2D(view);
+    BeginMode2D(camera);
     ClearBackground(Color{25, 30, 40});
     world.Draw();
     EndMode2D();

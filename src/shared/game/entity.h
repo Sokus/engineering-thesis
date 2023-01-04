@@ -2,7 +2,6 @@
 #define ENTITY_H
 
 #include "glm/glm.hpp"
-#include "math/rframe.h"
 #include "raylib.h"
 #include "stdint.h"
 
@@ -11,7 +10,6 @@
 namespace Game {
 
     struct Input;
-
 
     enum EntityType
     {
@@ -22,7 +20,6 @@ namespace Game {
         ENTITY_TYPE_MOVING_TILE,
         ENTITY_TYPE_COLLECTIBLE,
         ENTITY_TYPE_DAMAGING_TILE,
-        // BULLET,
         ENTITY_TYPE_DESTRUCTIBLE_TILE,
         ENTITY_TYPE_CHECKPOINT,
         ENTITY_TYPE_EXIT
@@ -36,77 +33,52 @@ namespace Game {
         PLAYER_TYPE_WARRIOR
     };
 
-    /*
-    struct BulletData {
-        //BULLET DATA
-        float lifetime = 0;
-        float maxLifetime = 1.5;
-        float ln1MinusDragCoefficient = 0;
-        /// Constant vertical acceleration applied to the bullet.
-        float gravity;
-        /// Visible width and height of the bullet's sprite.
-        glm::vec2 visibleSize;
-        glm::ivec2 animationFrames;
-        /// Length of 1 full animation cycle, in seconds.
-        float animationLength;
-        std::vector<float> sizeKeyframes;
-        std::vector<float> alphaKeyframes;
-        // drag coefficient = how much velocity is lost per second.
-        // e.g. 0.5 would cause the projectile to loose half of its velocity each second.
-        void SetDrag(float dragCoefficient);
-    };
-    */
-
-    struct PlayerData {
-        int moneyCount;
-        bool onGround;
-        float jumpHeight;
-        int facing;
-        bool ability_reset;
-    };
-
-
     struct Entity
     {
-        uint16_t revision;
-        float width;
-        float height;
+        // NOTE: Only data that is absolutely necessary
+        // to represent the game on the client side is serialized.
+        // The client will not try to run the simulation himself thus
+        // things like velocity, time remaining in animation frame or
+        // state that does not affect visual appearance are not serialized.
 
-        // SHARED STATE
-
-        glm::vec2 move_direction= glm::vec2(0.0f, 0.0f);
-
-        float move_speed;
-        float base_speed;
-        int base_health;
-        int health;
-
-        bool frameChange;
-        int connectionGroup;
-        int stateChange;
-        int damage;
-
-        //STATE DATA
-        bool collidable;
-        bool enabled;
-        bool hidden;
-
-
-        // MOVING DATA
-        glm::vec2 border[2];
-
+        // SERIALIZED
         EntityType type;
-        Texture2D texture;
-        Game::PlayerData playerData;
-        //Game::BulletData bulletData;
-        Game::ReferenceFrame rF;
-
+        uint16_t revision;
         unsigned int current_frame;
+        glm::vec2 endpoints[2]; // ENTITY_TYPE_MOVING_TILE
+        int entity_group; // used to connect tiles with interactibles
+        glm::vec2 size;
+        glm::vec2 position;
+
+        // NOT SERIALIZED
         unsigned int num_frames;
         float frame_time;
         float max_frame_time;
+        float time_until_state_change_allowed;
+        Texture2D texture; // move it out?
+        int health;
+        int base_health; // move it out?
+        float move_speed;
+        float base_speed; // move it out?
+        int damage;
 
+        int money_count; // move it out when implementing the server
+        bool on_ground;
+        float jump_height; // move it out?
+        int facing;
+        bool ability_reset;
 
+        // TODO: Decide what to do with everything below this line
+        // most of the things are either:
+        // - weidly phrased/used
+        // - unnecessary/derived from what is above
+        // - do not belong to entity structure and should be held outside
+
+        glm::vec2 move_direction;
+        glm::vec2 velocity;
+
+        bool collidable;
+        bool active;
 
         void Update(float dt);
         void setMoveSpeed(Input* input);
