@@ -5,23 +5,20 @@ namespace Game {
 
 struct Input
 {
-    Input();
     enum Direction
     {
-        UP    = 0,
-        LEFT  = 1,
-        DOWN  = 2,
-        RIGHT = 3,
-        COUNT = 4
+        DIRECTION_UP    = 0,
+        DIRECTION_LEFT  = 1,
+        DIRECTION_DOWN  = 2,
+        DIRECTION_RIGHT = 3,
+        DIRECTION_COUNT = 4
     };
 
-    bool move[Direction::COUNT];
+    bool move[DIRECTION_COUNT];
     bool jump;
     bool shoot;
     bool interact;
     bool dash;
-    int cooldown;
-
 
     void Update();
 };

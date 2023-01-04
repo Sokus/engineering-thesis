@@ -9,19 +9,21 @@ namespace Game {
     Level ActualLevel;
     PlayerType ActualPlayer;
 
-    void World::CalculateCollisions(Entity& player,glm::vec2 velocity, Input* input, float dt,bool dim) {
-        glm::vec2 ent_pos;
-        glm::vec2 ent_vel;
-        for (int collide_idx = 0; collide_idx < entity_count; collide_idx++)
+    void World::CalculateCollisions(Entity& player, Vector2 velocity, Input* input, float dt,bool dim) {
+        for (int collide_idx = 0; collide_idx < max_entity_count; collide_idx++)
         {
             Entity* collideEntity = entities + collide_idx; //TODO add reaction to squishing - dmg, teleport?
             if (collideEntity->type!= ENTITY_TYPE_NONE && collideEntity->collidable) {
-                ent_pos = collideEntity->position + (collideEntity->velocity * dt);
+                Vector2 ent_pos = {};
+                ent_pos.x = collideEntity->position.x + collideEntity->velocity.x * dt;
+                ent_pos.y = collideEntity->position.y + collideEntity->velocity.y * dt;
+
+                Vector2 ent_vel = {};
                 if (dim == 0) {
-                    ent_vel = glm::vec2(collideEntity->velocity.x, 0.0f);
+                    ent_vel.x = collideEntity->velocity.x;
                 }
                 else {
-                    ent_vel = glm::vec2(0.0f,collideEntity->velocity.y);
+                    ent_vel.y = collideEntity->velocity.y;
                 }
                 if (player.collidesWith(*collideEntity)) {
                     if (velocity.x > 0) {
@@ -80,7 +82,7 @@ namespace Game {
                 if (player.collidesWith(*collideEntity) && !collideEntity->active) {
                     float pos_y = collideEntity->position.y + collideEntity->size.y - player.size.y;
                     collideEntity->active = true;
-                    level.spawnpoint = glm::vec2(collideEntity->position.x, pos_y);
+                    level.spawnpoint = Vector2{collideEntity->position.x, pos_y};
                 }
             }
             else if (collideEntity->type == ENTITY_TYPE_EXIT) {
@@ -92,7 +94,7 @@ namespace Game {
     }
 
     void World::UpdateActiveTiles(float dt, int connGroup) {
-        for (int entity_idx = 0; entity_idx < entity_count; entity_idx++)
+        for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
         {
             Entity* entity = entities + entity_idx;
             if (entity->type == ENTITY_TYPE_TILE && entity->entity_group == connGroup) {
@@ -102,7 +104,7 @@ namespace Game {
         }
     }
     void World::hitObstacles(Entity &bullet) {
-        for (int entity_idx = 0; entity_idx < entity_count; entity_idx++)
+        for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
         {
             Entity* entity = entities + entity_idx;
             if (entity->type == ENTITY_TYPE_DESTRUCTIBLE_TILE && bullet.collidesWith(*entity) ) {
@@ -117,7 +119,7 @@ namespace Game {
 
     void World::Clear()
     {
-        for (int entity_idx = 0; entity_idx < entity_count; entity_idx++)
+        for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
         {
             Entity* entity = entities + entity_idx;
             entity->type = ENTITY_TYPE_NONE;
@@ -130,7 +132,7 @@ namespace Game {
     {
         level.Update(dt);
 
-        for (int entity_idx = 0; entity_idx < entity_count; entity_idx++)
+        for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
         {
             Entity* entity = entities + entity_idx;
             entity->Update(dt);
@@ -142,10 +144,10 @@ namespace Game {
                 }
                 entity->Control(input,dt);
                 entity->MoveX(dt);
-                CalculateCollisions(*entity,glm::vec2(entity->velocity.x,0.0f), input, dt,0);
+                CalculateCollisions(*entity, Vector2{entity->velocity.x,0.0f}, input, dt,0);
                 entity->on_ground = 0;
                 entity->MoveY(dt);
-                CalculateCollisions(*entity, glm::vec2(0.0f,entity->velocity.y), input, dt,1);
+                CalculateCollisions(*entity, Vector2{0.0f,entity->velocity.y}, input, dt,1);
             }
         }
     }
@@ -154,7 +156,7 @@ namespace Game {
     {
         level.DrawBackground({0,0});
 
-        for (int entity_idx = 0; entity_idx < entity_count; entity_idx++)
+        for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
         {
             Entity *entity = &entities[entity_idx];
             if (entity->type != ENTITY_TYPE_NONE)
@@ -165,7 +167,7 @@ namespace Game {
     EntityReference World::GetFreeEntityReference()
     {
         EntityReference reference = {};
-        for (int i = 1; i < entity_count; i++)
+        for (int i = 1; i < max_entity_count; i++)
         {
             if (entities[i].type == ENTITY_TYPE_NONE)
             {
@@ -180,7 +182,7 @@ namespace Game {
     Entity *World::GetEntityByReference(EntityReference reference)
     {
         Entity *entity = nullptr;
-        if (reference.index > 0 && reference.index < entity_count)
+        if (reference.index > 0 && reference.index < max_entity_count)
         {
             if (entities[reference.index].revision == reference.revision)
                 entity = &entities[reference.index];
@@ -196,9 +198,11 @@ namespace Game {
 
         if (entity)
         {
+            entity_count++;
+
             memset(entity, 0, sizeof(Entity));
             entity->type = type;
-            entity->position = glm::vec2(x, y);
+            entity->position = Vector2{x, y};
             entity->size.x = w;
             entity->size.y = h;
             entity->texture = texture;
@@ -216,17 +220,20 @@ namespace Game {
         {
             if (entity->type != ENTITY_TYPE_NONE)
             {
+                entity_count--;
+
                 entity->type = ENTITY_TYPE_NONE;
                 entity->revision++;
             }
         }
     }
 
-    Entity* World::CreatePlayer(float pos_x, float pos_y,Texture2D texture,Game::PlayerType playertype)
+    AddEntityResult World::CreatePlayer(float pos_x, float pos_y,Texture2D texture,Game::PlayerType playertype)
     {
-        Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_PLAYER, pos_x, pos_y, 16, 24, texture).entity)
+        AddEntityResult result = AddEntity(ENTITY_TYPE_PLAYER, pos_x, pos_y, 16, 24, texture);
+        if (result.entity)
         {
+            Entity *entity = result.entity;
             entity->num_frames = 4;
             entity->max_frame_time = 0.25f;
             entity->collidable = 0;
@@ -257,19 +264,20 @@ namespace Game {
             entity->move_speed = entity->base_speed;
             entity->health = entity->base_health;
         }
-        return entity;
+        return result;
     }
 
-    Entity* World::CreateTile(float pos_x, float pos_y,int conGroup, Texture2D texture)
+    AddEntityResult World::CreateTile(float pos_x, float pos_y,int conGroup, Texture2D texture)
     {
-        Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_TILE, pos_x, pos_y, 16, 16, texture).entity)
+        AddEntityResult result = AddEntity(ENTITY_TYPE_TILE, pos_x, pos_y, 16, 16, texture);
+        if (result.entity)
         {
+            Entity *entity = result.entity;
             entity->entity_group = conGroup;
             entity->collidable = true;
             entity->active = true;
         }
-        return entity;
+        return result;
     }
 
     Entity* World::CreateInteractive(float pos_x, float pos_y,int conGroup, Texture2D texture)
@@ -282,7 +290,7 @@ namespace Game {
         return entity;
     }
 
-    Entity* World::CreateMovingTile(float pos_x, float pos_y, int conGroup, glm::vec2 moveDirection, glm::vec2 border[2], Texture2D texture)
+    Entity* World::CreateMovingTile(float pos_x, float pos_y, int conGroup, Vector2 moveDirection, Vector2 border[2], Texture2D texture)
     {
         Entity* entity = nullptr;
         if (entity = AddEntity(ENTITY_TYPE_MOVING_TILE, pos_x, pos_y, 16, 16, texture).entity)
@@ -291,9 +299,9 @@ namespace Game {
             entity->move_speed = 1.0f;
             entity->entity_group = conGroup;
             entity->active = true;
-            entity->endpoints[0] = border[0];
-            entity->endpoints[1] = border[1];
-            entity->collidable = 1;
+            entity->endpoints[0] = Vector2{border[0].x, border[0].y};
+            entity->endpoints[1] = Vector2{border[1].x, border[1].y};
+            entity->collidable = true;
         }
         return entity;
     }

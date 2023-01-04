@@ -4,6 +4,9 @@
 #include <algorithm>
 #include <cmath>
 
+#include "raylib.h"
+#include "raymath.h"
+
 namespace Game {
 
 
@@ -20,9 +23,10 @@ namespace Game {
         horizontalOffset += naturalScrollSpeed * dt;
     }
 
-    void ParallaxLayer::Draw(glm::vec2 cameraPosition) const {
+    void ParallaxLayer::Draw(Vector2 cameraPosition) const {
 
-        auto displacementFromCamera = glm::vec2(position) - cameraPosition;
+        Vector2 parallax_2d_pos = Vector2{position.x, position.y};
+        Vector2 displacementFromCamera = Vector2Subtract(parallax_2d_pos, cameraPosition);
         displacementFromCamera.x += horizontalOffset;
 
         Rectangle source, dest, visibleArea;
@@ -76,7 +80,7 @@ namespace Game {
         }
     }
 
-    void Level::DrawBackground(glm::vec2 cameraPosition) const {
+    void Level::DrawBackground(Vector2 cameraPosition) const {
         for(auto &layer : parallaxLayers) {
             layer.Draw(cameraPosition);
         }
@@ -86,7 +90,7 @@ namespace Game {
             textures2d.push_back(LoadTexture(s.c_str()));
         }
     }
-    Level::Level(glm::vec2 spawnpoint,
+    Level::Level(Vector2 spawnpoint,
         std::vector<TileData> tiles,
         std::vector<TileData> movingTiles,
         std::vector<TileData> interactiveTiles,
@@ -113,7 +117,7 @@ namespace Game {
         this->connGroup = connGroup;
         this->texture = texture;
     }
-    TileData::TileData(float positionx, float positiony, int connGroup,int texture, glm::vec2 velocity, glm::vec2 border[2]) {
+    TileData::TileData(float positionx, float positiony, int connGroup,int texture, Vector2 velocity, Vector2 border[2]) {
         this->position.x = positionx;
         this->position.y = positiony;
         this->connGroup = connGroup;

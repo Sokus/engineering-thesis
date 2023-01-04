@@ -1,12 +1,13 @@
 #ifndef MATH_VECTOR_H
 #define MATH_VECTOR_H
 
+#if 0
 #include <glm/vec2.hpp>
 
 namespace Game {
 
     /** Attempts to normalize the vector and return the result.
-     * 
+     *
      *  Returns alternative if vector can not be normalized (because length(vector)==0).
      */
     glm::vec2 normalizeOr(const glm::vec2 &vector, const glm::vec2 &alternative);
@@ -27,5 +28,6 @@ namespace Game {
     glm::vec2 polar(float angle, float length = 1);
 
 }
+#endif
 
 #endif

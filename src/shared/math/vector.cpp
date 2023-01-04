@@ -1,5 +1,6 @@
 #include "vector.h"
 
+#if 0
 #include <glm/gtx/norm.hpp>
 #include <cmath>
 
@@ -34,3 +35,4 @@ namespace Game {
     }
 
 }
+#endif

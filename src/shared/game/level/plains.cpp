@@ -1,6 +1,8 @@
 #include "plains.h"
 
 Texture2D plainMovingTile;
+
+
 std::vector<std::string> plainTextures = {
 	RESOURCE_PATH "/tile.png",
 	RESOURCE_PATH "/movingtile.png",
@@ -57,9 +59,9 @@ Game::TileData(1152.0f / 4.0f, 768.0f / 4.0f, 0, PLAINTILE),
 Game::TileData(1216.0f / 4.0f, 768.0f / 4.0f, 0, PLAINTILE),
 
 };
-glm::vec2 border[2] = { glm::vec2(383.0f / 4.0f, 320.0f / 4.0f),glm::vec2(449.0f / 4.0f, 705.0f / 4.0f) };
+Vector2 border[2] = { Vector2{383.0f / 4.0f, 320.0f / 4.0f}, Vector2{449.0f / 4.0f, 705.0f / 4.0f} };
 std::vector<Game::TileData> plainsMovingTiles = {
-	Game::TileData(384.0f / 4.0f, 640.0f / 4.0f, 0, PLAINMOVINGTILE, glm::vec2(0, 100), border)
+	Game::TileData(384.0f / 4.0f, 640.0f / 4.0f, 0, PLAINMOVINGTILE, Vector2{0, 100}, border)
 };
 std::vector<Game::TileData> plainsInteractiveTiles = {
 	Game::TileData(704.0f / 4.0f, 192.0f / 4.0f, 1, PLAININTERACTIVE)
@@ -83,7 +85,7 @@ std::vector<Game::TileData> plainsExit = {
 
 namespace Game {
 	Level plains = Level(
-		glm::vec2(0.0f, 100.0f),
+		Vector2{0.0f, 100.0f},
 		plainsTiles,
 		plainsMovingTiles,
 		plainsInteractiveTiles,

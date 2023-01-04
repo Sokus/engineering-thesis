@@ -1,7 +1,6 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-#include "glm/glm.hpp"
 #include "raylib.h"
 #include "stdint.h"
 
@@ -45,12 +44,12 @@ namespace Game {
         EntityType type;
         uint16_t revision;
         unsigned int current_frame;
-        glm::vec2 endpoints[2]; // ENTITY_TYPE_MOVING_TILE
-        int entity_group; // used to connect tiles with interactibles
-        glm::vec2 size;
-        glm::vec2 position;
+        Vector2 size;
+        Vector2 position;
 
         // NOT SERIALIZED
+        int entity_group; // used to connect tiles with interactibles
+        Vector2 endpoints[2];  // ENTITY_TYPE_MOVING_TILE
         unsigned int num_frames;
         float frame_time;
         float max_frame_time;
@@ -67,6 +66,7 @@ namespace Game {
         float jump_height; // move it out?
         int facing;
         bool ability_reset;
+        float dash_cooldown;
 
         // TODO: Decide what to do with everything below this line
         // most of the things are either:
@@ -74,8 +74,8 @@ namespace Game {
         // - unnecessary/derived from what is above
         // - do not belong to entity structure and should be held outside
 
-        glm::vec2 move_direction;
-        glm::vec2 velocity;
+        Vector2 move_direction;
+        Vector2 velocity;
 
         bool collidable;
         bool active;

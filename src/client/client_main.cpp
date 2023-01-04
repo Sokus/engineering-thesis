@@ -348,7 +348,7 @@ void DoGameScene()
         world.Clear();
         world.SetLevel(Game::ActualLevel);
         Texture2D character = LoadTexture(RESOURCE_PATH "/character.png");
-        player = world.CreatePlayer(Game::ActualLevel.spawnpoint.x, Game::ActualLevel.spawnpoint.y,character,Game::ActualPlayer);
+        player = world.CreatePlayer(Game::ActualLevel.spawnpoint.x, Game::ActualLevel.spawnpoint.y,character,Game::ActualPlayer).entity;
 
         state.game.world_initialised = true;
     }
@@ -389,6 +389,7 @@ void DoGameScene()
     ClearBackground(Color{25, 30, 40});
     world.Draw();
     EndMode2D();
+    DrawText(TextFormat("FPS: %d Entities: %d", GetFPS(), world.entity_count), 0, 0, 24, RED);
 
     if(IsKeyPressed(KEY_ESCAPE))
     {

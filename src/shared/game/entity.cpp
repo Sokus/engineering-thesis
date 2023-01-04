@@ -5,37 +5,15 @@
 #include "input.h"
 
 #include "raylib.h"
+#include "raymath.h"
 
 namespace Game {
 
-    // void BulletData::SetDrag(float dragCoefficient) {
-    //     ln1MinusDragCoefficient = log(1 - dragCoefficient);
-    // }
-    float interpolate(float progress, const std::vector<float>& keyframes) {
-
-        if (keyframes.size() == 1)
-            return keyframes.front();
-
-        if (progress < 0)
-            return keyframes.front();
-
-        if (progress > 1)
-            return keyframes.back();
-
-        int intPart = (int)(progress * (float)(keyframes.size() - 1));
-        float realPart = progress * (keyframes.size() - 1) - intPart;
-
-        if (intPart >= keyframes.size() - 1) {
-            intPart = (int)keyframes.size() - 2;
-            realPart = 1;
-        }
-
-        return glm::mix(keyframes[intPart], keyframes[intPart + 1], realPart);
-    }
     void Entity::setMoveSpeed(Input* input) {
-        if (input->dash && input->cooldown > 90 && ability_reset) {
-            move_speed *= 10;
-            input->cooldown = 0;
+        if (input->dash && dash_cooldown <= 0.0f && ability_reset)
+        {
+            move_speed *= 10.0f;
+            dash_cooldown = 1.5f;
             ability_reset = false;
         }
         else if (move_speed > base_speed) {
@@ -55,7 +33,7 @@ namespace Game {
             if (frame_time > max_frame_time)
             {
                 current_frame = (current_frame + 1) % num_frames;
-                frame_time = 0.0f;
+                frame_time -= max_frame_time;
             }
         }
 
@@ -66,15 +44,23 @@ namespace Game {
                 time_until_state_change_allowed = 0.0f;
         }
 
+        if (dash_cooldown > 0.0f)
+        {
+            dash_cooldown -= dt;
+            if (dash_cooldown < 0.0f)
+                dash_cooldown = 0.0f;
+        }
+
         if (type == ENTITY_TYPE_MOVING_TILE) {
-            glm::vec2 tmp_pos = velocity * dt;
+            Vector2 tmp_pos = Vector2Scale(velocity, dt);
             if (!inBorder(dt)) {
                 move_direction.x = move_direction.x * -1;
                 move_direction.y = move_direction.y * -1;
             }
-            velocity = move_direction * move_speed;
 
-            position += velocity * dt;
+            velocity = Vector2Scale(move_direction, move_speed);
+            Vector2 delta_pos = Vector2Scale(velocity, dt);
+            position = Vector2Add(position, delta_pos);
         }
     }
 
@@ -82,12 +68,12 @@ namespace Game {
     {
         ASSERT(type == ENTITY_TYPE_PLAYER);
         move_direction.x = 0;
-        move_direction.x -= input->move[Input::Direction::LEFT] * 2.0f;
-        move_direction.x += input->move[Input::Direction::RIGHT] * 2.0f;
+        move_direction.x -= input->move[Input::DIRECTION_LEFT] * 2.0f;
+        move_direction.x += input->move[Input::DIRECTION_RIGHT] * 2.0f;
         setMoveSpeed(input);
         if (move_direction.x != 0.0f)
             facing = (int)move_direction.x;
-        if (input->move[Input::Direction::UP] && on_ground)
+        if (input->move[Input::DIRECTION_UP] && on_ground)
             move_direction.y = (float)jump_height * -1.0f;
         if (!on_ground) {
             move_direction.y += 0.125f;
@@ -154,7 +140,9 @@ namespace Game {
         return 0;
     }
     bool Entity::inBorder(float dt) {
-        glm::vec2 tmp_pos = position + (velocity * dt);
+        Vector2 tmp_pos = {};
+        tmp_pos.x = position.x + velocity.x * dt;
+        tmp_pos.y = position.y + velocity.y * dt;
         if (tmp_pos.x + size.x < endpoints[1].x && tmp_pos.x > endpoints[0].x &&
             tmp_pos.y + size.y < endpoints[1].y && tmp_pos.y > endpoints[0].y) {
             return 1;

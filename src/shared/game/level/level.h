@@ -2,37 +2,35 @@
 #define LEVEL_H
 
 #include <raylib.h>
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
 #include <vector>
 #include <string>
 
 namespace Game {
 
-    /// Scrolling background image. Used for achieving a parallax scrolling effect. 
+    /// Scrolling background image. Used for achieving a parallax scrolling effect.
     struct ParallaxLayer
-    {  
+    {
         Texture2D texture;
-        glm::vec3 position;
-        glm::vec2 dimensions;
+        Vector3 position;
+        Vector2 dimensions;
 
         /// How fast the layer scrolls horizontally even when the camera is not moving
         float naturalScrollSpeed = 0;
         bool repeatHorizontally = true;
 
         void Update(float dt);
-        void Draw(glm::vec2 cameraPosition) const;
+        void Draw(Vector2 cameraPosition) const;
 
         private:
         float horizontalOffset = 0;
     };
     struct TileData {
         TileData(float positionx, float positiony, int connGroup, int text);
-        TileData(float positionx, float positiony, int connGroup, int text, glm::vec2 velocity, glm::vec2 border[2]);
-        glm::vec2 position;
+        TileData(float positionx, float positiony, int connGroup, int text, Vector2 velocity, Vector2 border[2]);
+        Vector2 position;
         int connGroup;
-        glm::vec2 border[2];
-        glm::vec2 velocity;
+        Vector2 border[2];
+        Vector2 velocity;
         int texture;
     };
 
@@ -48,7 +46,7 @@ namespace Game {
         Level() {
 
         };
-        Level(glm::vec2 spawnpoint, 
+        Level(Vector2 spawnpoint,
             std::vector<TileData> tiles,
             std::vector<TileData> movingTiles,
             std::vector<TileData> interactiveTiles,
@@ -62,8 +60,8 @@ namespace Game {
         void AddParallaxLayer(const ParallaxLayer &layer);
         void LoadTextures();
         void Update(float dt);
-        void DrawBackground(glm::vec2 cameraPosition) const;
-        glm::vec2 spawnpoint;
+        void DrawBackground(Vector2 cameraPosition) const;
+        Vector2 spawnpoint;
         std::vector<TileData> tiles;
         std::vector<TileData> movingTiles;
         std::vector<TileData> interactiveTiles;
