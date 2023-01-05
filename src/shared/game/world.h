@@ -8,9 +8,6 @@
 
 namespace Game {
 
-    extern Level ActualLevel;
-    extern PlayerType ActualPlayer;
-
     struct AddEntityResult
     {
         EntityReference reference;
@@ -30,9 +27,9 @@ namespace Game {
         bool initialised;
 
         void Clear();
-        void Update(Input *input,float dt);
+        void Update(Input *input, float dt);
         void Draw();
-        void CalculateCollisions(Entity& player, Vector2 velocity,Input * input, float dt, bool dim);
+        void CalculateCollisions(Entity &player, Vector2 velocity, Input *input, float dt, bool dim);
         void UpdateActiveTiles(float dt, int connectionGroup);
 
         EntityReference GetFreeEntityReference();
@@ -50,11 +47,10 @@ namespace Game {
         Entity* CreateCheckpoint(float pos_x, float pos_y, float width, float height, Texture2D texture);
         Entity* CreateExit(float pos_x, float pos_y, float width, float height, Texture2D texture);
         void LoadTextures();
-        void SetLevel(Level &level);
+        void SetLevel(Level *level);
         void ClearLevel();
-        void hitObstacles(Entity& bullet);
+        void hitObstacles(Entity &bullet);
     };
-
 }
 
 #endif

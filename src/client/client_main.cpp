@@ -29,15 +29,15 @@ void DoPauseMenu()
     UI::End();
 
     if(options_button.IsReleased())
-        game_state.current_menu = GM_OPTIONS_MENU;
+        game_state.current_menu = GAME_MENU_OPTIONS;
 
     if(return_button.IsReleased())
-        game_state.current_menu = GM_NONE;
+        game_state.current_menu = GAME_MENU_NONE;
 
     if(exit_button.IsReleased())
     {
-        game_state.current_scene = GS_TITLE_SCREEN;
-        game_state.current_menu = GM_NONE;
+        game_state.current_scene = GAME_SCENE_TITLE_SCREEN;
+        game_state.current_menu = GAME_MENU_NONE;
     }
 
     options_button.Draw();
@@ -47,24 +47,23 @@ void DoPauseMenu()
 
 void DoGameScene()
 {
-    static Game::World world;
-
     static Game::Entity *player;
-    if(!world.initialised)
+    if(!game_state.world.initialised)
     {
-        world.Clear();
-        world.SetLevel(Game::ActualLevel);
+        game_state.world.Clear();
+        game_state.world.SetLevel(game_state.level_selected);
         Texture2D character = LoadTexture(RESOURCE_PATH "/character.png");
-        player = world.CreatePlayer(Game::ActualLevel.spawnpoint.x, Game::ActualLevel.spawnpoint.y,character,Game::ActualPlayer).entity;
+        Vector2 spawnpoint = game_state.level_selected->spawnpoint;
+        player = game_state.world.CreatePlayer(spawnpoint.x, spawnpoint.y, character, game_state.player_type_selected).entity;
 
-        world.initialised = true;
+        game_state.world.initialised = true;
     }
 
     float expected_delta_time = 1.0f / (float)GetFPS();
     float delta_time = GetFrameTime() > expected_delta_time ? expected_delta_time : GetFrameTime();
 
     Game::Input input = Game::GetInput();
-    world.Update(&input, delta_time);
+    game_state.world.Update(&input, delta_time);
 
     Camera2D camera = {};
     camera.offset = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
@@ -75,18 +74,18 @@ void DoGameScene()
 
     BeginMode2D(camera);
     ClearBackground(Color{25, 30, 40});
-    world.Draw();
+    game_state.world.Draw();
     EndMode2D();
 
     if(IsKeyPressed(KEY_ESCAPE))
     {
-        if(game_state.current_menu == GM_NONE)
-            game_state.current_menu = GM_MAIN_MENU;
+        if(game_state.current_menu == GAME_MENU_NONE)
+            game_state.current_menu = GAME_MENU_MAIN;
         else
-            game_state.current_menu = GM_NONE;
+            game_state.current_menu = GAME_MENU_NONE;
     }
 
-    if(game_state.current_menu != GM_NONE)
+    if(game_state.current_menu != GAME_MENU_NONE)
     {
         DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Color{0, 0, 0, 150});
 
@@ -95,8 +94,8 @@ void DoGameScene()
 
         switch(game_state.current_menu)
         {
-            case GM_MAIN_MENU: DoPauseMenu(); break;
-            case GM_OPTIONS_MENU: DoOptionsMenu(); break;
+            case GAME_MENU_MAIN: DoPauseMenu(); break;
+            case GAME_MENU_OPTIONS: DoOptionsMenu(); break;
             default: break;
         }
     }
@@ -113,6 +112,11 @@ int main(int, char**)
     Game::InitGameContent();
     UI::Init();
 
+    game_state.last_scene = GAME_SCENE_INVALID;
+    game_state.current_scene = GAME_SCENE_TITLE_SCREEN;
+    game_state.last_menu = GAME_MENU_NONE;
+    game_state.current_menu = GAME_MENU_MAIN;
+
     while(!game_state.should_quit)
     {
         game_state.scene_changed = (game_state.current_scene != game_state.last_scene);
@@ -123,8 +127,8 @@ int main(int, char**)
         BeginDrawing();
         switch(game_state.current_scene)
         {
-            case GS_TITLE_SCREEN: DoTitleScreenScene(); break;
-            case GS_GAME: DoGameScene(); break;
+            case GAME_SCENE_TITLE_SCREEN: DoTitleScreenScene(); break;
+            case GAME_SCENE_GAME: DoGameScene(); break;
             default: game_state.should_quit = true; break;
         }
         EndDrawing();

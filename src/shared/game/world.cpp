@@ -6,8 +6,6 @@
 #include <string.h>
 
 namespace Game {
-    Level ActualLevel;
-    PlayerType ActualPlayer;
 
     void World::CalculateCollisions(Entity& player, Vector2 velocity, Input* input, float dt,bool dim) {
         for (int collide_idx = 0; collide_idx < max_entity_count; collide_idx++)
@@ -28,7 +26,7 @@ namespace Game {
                     ent_vel.y = collideEntity->velocity.y;
                 }
                 if (player.collidesWith(*collideEntity)) {
-                    //player.calculateCollisionSide(*collideEntity); 
+                    //player.calculateCollisionSide(*collideEntity);
                     if (velocity.x > 0) {
                         player.velocity.x = 0;
                         player.position.x = ent_pos.x - player.size.x;
@@ -368,31 +366,31 @@ namespace Game {
     }
 
 
-    void World::SetLevel(Level &level) {
-        this->level = level;
+    void World::SetLevel(Level *level) {
+        this->level = *level;
         this->level.LoadTextures();
-        for (auto& tile : level.tiles) {
+        for (auto& tile : level->tiles) {
             this->CreateTile(tile.position.x, tile.position.y,tile.size.x,tile.size.y, tile.connGroup, this->level.textures2d.at(tile.texture));
         }
-        for (auto& tile : level.movingTiles) {
+        for (auto& tile : level->movingTiles) {
             this->CreateMovingTile(tile.position.x, tile.position.y,tile.size.x,tile.size.y, tile.connGroup,tile.velocity,tile.border, this->level.textures2d.at(tile.texture));
         }
-        for (auto& tile : level.interactiveTiles) {
+        for (auto& tile : level->interactiveTiles) {
             this->CreateInteractive(tile.position.x, tile.position.y, tile.size.x, tile.size.y, tile.connGroup, this->level.textures2d.at(tile.texture));
         }
-        for (auto& tile : level.collectibles) {
+        for (auto& tile : level->collectibles) {
             this->CreateCollectible(tile.position.x, tile.position.y,tile.size.x,tile.size.y, tile.connGroup, this->level.textures2d.at(tile.texture));
         }
-        for (auto& tile : level.damagingTiles) {
+        for (auto& tile : level->damagingTiles) {
             this->CreateDamagingTile(tile.position.x, tile.position.y, tile.size.x, tile.size.y, tile.connGroup, this->level.textures2d.at(tile.texture));
         }
-        for (auto& tile : level.destroyTiles) {
+        for (auto& tile : level->destroyTiles) {
             this->CreateDestroyTile(tile.position.x, tile.position.y, tile.size.x, tile.size.y, tile.connGroup, this->level.textures2d.at(tile.texture));
         }
-        for (auto& tile : level.checkpoints) {
+        for (auto& tile : level->checkpoints) {
             this->CreateCheckpoint(tile.position.x, tile.position.y, tile.size.x, tile.size.y, this->level.textures2d.at(tile.texture));
         }
-        for (auto& tile : level.levelExits) {
+        for (auto& tile : level->levelExits) {
             this->CreateExit(tile.position.x, tile.position.y, tile.size.x, tile.size.y, this->level.textures2d.at(tile.texture));
         }
         this->level.finished = 0;

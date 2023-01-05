@@ -6,7 +6,7 @@ void DoJoinMenu();
 void DoConnectingMenu();
 void DoHostMenu();
 void DoLevelMenu();
-void DoPlayerMenu();
+void DoPlayerSelectionMenu();
 void DoOptionsMenu();
 void DoTitleScreenScene();
 
