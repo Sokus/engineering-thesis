@@ -64,16 +64,16 @@ namespace Game {
         }
     }
 
-    void Entity::Control(Input* input,float dt)
+    void Entity::Control(Input* input, float dt)
     {
         ASSERT(type == ENTITY_TYPE_PLAYER);
         move_direction.x = 0;
-        move_direction.x -= input->move[Input::DIRECTION_LEFT] * 2.0f;
-        move_direction.x += input->move[Input::DIRECTION_RIGHT] * 2.0f;
+        move_direction.x -= input->move[DIRECTION_LEFT] * 2.0f;
+        move_direction.x += input->move[DIRECTION_RIGHT] * 2.0f;
         setMoveSpeed(input);
         if (move_direction.x != 0.0f)
             facing = (int)move_direction.x;
-        if (input->move[Input::DIRECTION_UP] && on_ground)
+        if (input->move[DIRECTION_UP] && on_ground)
             move_direction.y = (float)jump_height * -1.0f;
         if (!on_ground) {
             move_direction.y += 0.75f;

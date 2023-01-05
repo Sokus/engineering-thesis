@@ -1,21 +1,12 @@
 project(shared)
 
-file(GLOB SHARED_SRC *.cpp)
-file(GLOB SHARED_SERIALIZATION_SRC serialization/*.cpp)
-file(GLOB SHARED_DATA_STRUCTURES_SRC data_structures/*.cpp)
-file(GLOB SHARED_GAME_SRC game/*.cpp)
-file(GLOB SHARED_LEVEL_SRC game/level/*.cpp)
-file(GLOB SHARED_MATH_SRC math/*.cpp )
+file(GLOB_RECURSE SHARED_CPP_SRC *.cpp)
+file(GLOB_RECURSE SHARED_C_SRC *.c)
 
 add_library(shared STATIC
-    ${SHARED_SRC}
-    ${SHARED_SERIALIZATION_SRC}
-    ${SHARED_DATA_STRUCTURES_SRC}
-    ${SHARED_GAME_SRC}
-    ${SHARED_LEVEL_SRC}
-    ${SHARED_MATH_SRC}
- "game/world.cpp"
- "game/level/level.cpp" "game/level/plains.cpp")
+    ${SHARED_CPP_SRC}
+    ${SHARED_C_SRC}
+)
 
 target_include_directories(shared
     PRIVATE

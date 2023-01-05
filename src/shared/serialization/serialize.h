@@ -1,43 +1,96 @@
-#ifndef PI_SERIALIZE_H
-#define PI_SERIALIZE_H
+#ifndef SERIALIZE_H
+#define SERIALIZE_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
-#include "macros.h"
+struct BitStream;
 
-struct BitPacker;
-bool SerializeInteger(BitPacker *bit_packer, int32_t *value, int32_t min, int32_t max);
-
-#define SERIALIZE_BITS(bit_packer_ptr, type, value_ptr, bits)\
-    do {\
-        ASSERT((bits) > 0);\
-        ASSERT((bits) <= 32);\
-        if(WouldOverflow((bit_packer_ptr), (bits)))\
-        { return false; }\
-        uint32_t _u;\
-        if((bit_packer_ptr)->mode == BIT_WRITER)\
-        {\
-            _u = (uint32_t)(*(value_ptr));\
-            WriteBits((bit_packer_ptr), &_u, (bits));\
-        }\
-        if((bit_packer_ptr)->mode == BIT_READER)\
-        {\
-            ReadBits((bit_packer_ptr), &_u, (bits));\
-            *value_ptr = (type)_u;\
-        }\
-        return true;\
+#define SERIALIZE_INT(stream_ptr, value, min, max) \
+    do { \
+        ASSERT((int32_t)(min) < (int32_t)(max)); \
+        int32_t int32_value; \
+        if ((stream_ptr)->mode == WRITE_STREAM) \
+        { \
+            ASSERT((int32_t)(value) >= (int32_t)(min)); \
+            ASSERT((int32_t)(value) <= (int32_t)(max)); \
+            int32_value = (value); \
+        } \
+        if (!BitStream_SerializeInteger((stream_ptr), &int32_value, (min), (max))) \
+            return false; \
+        if ((stream_ptr)->mode == READ_STREAM) \
+        { \
+            (value) = int32_value; \
+            if ((value) < (min) || (value) > (max)) \
+                return false; \
+        } \
     } while (0)
 
-#define SERIALIZE_INT32(bit_packer_ptr, value_ptr) SERIALIZE_BITS((bit_packer_ptr), int32_t, (value_ptr), 32)
-#define SERIALIZE_INT16(bit_packer_ptr, value_ptr) SERIALIZE_BITS((bit_packer_ptr), int16_t, (value_ptr), 16)
-#define SERIALIZE_UINT32(bit_packer_ptr, value_ptr) SERIALIZE_BITS((bit_packer_ptr), uint32_t, (value_ptr), 32)
-#define SERIALIZE_UINT16(bit_packer_ptr, value_ptr) SERIALIZE_BITS((bit_packer_ptr), uint16_t, (value_ptr), 16)
-#define SERIALIZE_BOOL(bit_packer_ptr, value_ptr) SERIALIZE_BITS((bit_packer_ptr), bool, (value_ptr), 1)
+#define SERIALIZE_BITS(stream_ptr, value, bits) \
+    do { \
+        uint32_t uint32_value; \
+        if ((stream_ptr)->mode == WRITE_STREAM) \
+            uint32_value = (uint32_t)value; \
+        if (!BitStream_SerializeBits((stream_ptr), &uint32_value, bits)) \
+            return false; \
+        if ((stream_ptr)->mode == READ_STREAM) \
+            value = uint32_value; \
+    } while (0)
 
-#define SERIALIZE_INT(bit_packer_ptr, value_ptr, min, max)\
-    do {\
-        if(!SerializeInteger(bit_packer_ptr, value_ptr, min, max))\
-            return false;\
-    } while(0)
+#define SERIALIZE_BOOL(stream_ptr, value) \
+    do { \
+        uint32_t uint32_bool_value; \
+        if ((stream_ptr)->mode == WRITE_STREAM) \
+            uint32_bool_value = (value) ? 1 : 0; \
+        if (!BitStream_SerializeBits((stream_ptr), &uint32_bool_value, 1)) \
+            return false; \
+        if ((stream_ptr)->mode == READ_STREAM) \
+            value = (uint32_bool_value != 0) ? true : false; \
+    } while (0)
 
-#endif // PI_SERIALIZE_H
+#define SERIALIZE_ENUM(stream_ptr, value, type, num_entries) \
+    do { \
+        int32_t int32_value; \
+        if ((stream_ptr)->mode == WRITE_STREAM) \
+            int32_value = (int32_t)value; \
+        if (!BitStream_SerializeInteger((stream_ptr), &int32_value, 0, (num_entries) - 1)) \
+            return false; \
+        if ((stream_ptr)->mode == READ_STREAM) \
+            value = (type)int32_value; \
+    } while (0)
+
+bool SerializeFloat(struct BitStream *stream, float *value);
+
+#define SERIALIZE_FLOAT(stream_ptr, value) \
+    do { \
+        if (!SerializeFloat((stream_ptr), &value)) \
+            return false; \
+    } while (0)
+
+#define SERIALIZE_BYTES(stream_ptr, data_ptr, bytes) \
+    do { \
+        if (!BitStream_SerializeBytes((stream_ptr), (data_ptr), (bytes))) \
+            return false; \
+    } while (0)
+
+bool SerializeString(struct BitStream *stream, char *string, int buffer_size);
+
+#define SERIALIZE_STRING(stream_ptr, string, buffer_size) \
+    do { \
+        if (!SerializeString((stream_ptr), (string), (buffer_size))) \
+            return false; \
+    } while (0)
+
+#define SERIALIZE_ALIGN(stream_ptr) \
+    do { \
+        if (!BitStream_SerializeAlign((stream_ptr))) \
+            return false; \
+    } while (0)
+
+#define SERIALIZE_CHECK(stream_ptr, string) \
+    do { \
+        if (!BitStream_SerializeCheck((stream_ptr), (string))) \
+            return false; \
+    } while (0)
+
+#endif // SERIALIZE_H

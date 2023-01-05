@@ -1,5 +1,5 @@
 #include "log.h"
-#include "pi_time.h"
+#include "system/pi_time.h"
 
 #include <stddef.h>
 #include <stdio.h>
@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
     SetLogPrefix("SERVER: ");
 
-    Time::Setup();
+    InitializeTime();
 
     unsigned int port = 25565;
 
@@ -35,8 +35,6 @@ int main(int argc, char *argv[])
     }
 
     Log(LOG_INFO, "Starting on port %u", port);
-
-    //Net::ShutdownSockets();
 
     return 0;
 }

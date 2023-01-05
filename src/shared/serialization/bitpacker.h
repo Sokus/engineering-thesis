@@ -1,7 +1,8 @@
-#ifndef PI_BITPACKER_H
-#define PI_BITPACKER_H
+#ifndef PE_BITPACKER_H
+#define PE_BITPACKER_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef enum BitPackerMode
 {
@@ -13,35 +14,42 @@ typedef enum BitPackerMode
 typedef struct BitPacker
 {
     BitPackerMode mode;
+    uint32_t *data;
     uint64_t scratch;
+    int num_bits;
+    int num_words;
+    int word_index;
     int scratch_bits;
-    uint32_t *buffer;
-    int word_count;
 
-    // BIT_WRITER
-    int word_capacity;
-
-    // BIT_READER
-    int bits_read;
+    int bits_written; // BitWriter only
+    int bits_read;    // BitReader only
+    int num_bytes;    // BitReader only
 } BitPacker;
 
-// BIT_WRITER
-BitPacker BitWriter(void *buffer, int bytes);
-int BitsWritten(BitPacker *bit_writer);
-int BytesWritten(BitPacker *bit_writer);
-void WriteBits(BitPacker *bit_writer, uint32_t *value, int bits);
-void Flush(BitPacker *bit_writer);
+typedef BitPacker BitWriter;
+BitWriter BitWriter_Create(void *data, int bytes);
+void BitWriter_WriteBits(BitWriter *bit_writer, uint32_t value, int bits);
+void BitWriter_WriteAlign(BitWriter *bit_writer);
+void BitWriter_WriteBytes(BitWriter *bit_writer, uint8_t *data, int bytes);
+void BitWriter_FlushBits(BitWriter *bit_writer);
+int BitWriter_GetAlignBits(BitWriter *bit_packer);
+int BitWriter_GetBitsWritten(BitWriter *bit_writer);
+int BitWriter_BitsAvailable(BitWriter *bit_writer);
+int BitWriter_GetBytesWritten(BitWriter *bit_writer);
+int BitWriter_GetTotalBytes(BitWriter *bit_packer);
 
-// BIT_READER
-BitPacker BitReader(void *buffer, int bytes);
-int BitsRead(BitPacker *bit_reader);
-int BytesRead(BitPacker *bit_reader);
-void ReadBits(BitPacker *bit_reader, uint32_t *value, int bits);
-void Rewind(BitPacker *bit_reader, int position);
+typedef BitPacker BitReader;
+BitReader BitReader_Create(void *data, int bytes);
+bool BitReader_WouldOverflow(BitReader *bit_reader, int bits);
+uint32_t BitReader_ReadBits(BitReader *bit_reader, int bits);
+bool BitReader_Align(BitReader *bit_reader);
+void BitReader_ReadBytes(BitReader *bit_reader, uint8_t *data, int bytes);
+int BitReader_GetAlignBits(BitReader *bit_packer);
+int BitReader_BitsRead(BitReader *bit_reader);
+int BitReader_GetBytesRead(BitReader *bit_reader);
+int BitReader_GetBitsRemaining(BitReader *bit_reader);
+int BitReader_BytesRemaining(BitReader *bit_reader);
+int BitReader_GetTotalBits(BitReader *bit_reader);
+int BitReader_GetTotalBytes(BitReader *bit_packer);
 
-// General
-bool WouldOverflow(BitPacker *bit_packer, int bits);
-bool Align(BitPacker *bit_packer);
-void Reset(BitPacker *bit_packer);
-
-#endif // PI_BITPACKER_H
+#endif // PE_BITPACKER_H

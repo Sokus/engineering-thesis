@@ -1,5 +1,5 @@
 #include "log.h"
-#include "pi_time.h"
+#include "system/pi_time.h"
 
 #include <stddef.h>
 #include <stdio.h>
@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     SetLogLevel(LOG_INFO);
 
     //Net::InitializeSockets();
-    Time::Setup();
+    InitializeTime();
 
     unsigned int port = 25565;
 

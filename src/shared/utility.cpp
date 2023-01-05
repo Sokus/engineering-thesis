@@ -1,6 +1,8 @@
 #include "utility.h"
 #include "macros.h"
 
+#include <stdio.h>
+
 /**
  * Converts 64-bit unsigned int to 32-bit while making sure
  * there won't be any value change.

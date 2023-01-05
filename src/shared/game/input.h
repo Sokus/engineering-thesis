@@ -3,25 +3,25 @@
 
 namespace Game {
 
+enum InputDirection
+{
+    DIRECTION_UP    = 0,
+    DIRECTION_LEFT  = 1,
+    DIRECTION_DOWN  = 2,
+    DIRECTION_RIGHT = 3,
+    DIRECTION_COUNT = 4
+};
+
 struct Input
 {
-    enum Direction
-    {
-        DIRECTION_UP    = 0,
-        DIRECTION_LEFT  = 1,
-        DIRECTION_DOWN  = 2,
-        DIRECTION_RIGHT = 3,
-        DIRECTION_COUNT = 4
-    };
-
     bool move[DIRECTION_COUNT];
     bool jump;
     bool shoot;
     bool interact;
     bool dash;
-
-    void Update();
 };
+
+Input GetInput();
 
 struct BitPacker;
 bool SerializeInput(BitPacker *bit_packer, Input *input);

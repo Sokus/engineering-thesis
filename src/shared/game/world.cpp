@@ -127,12 +127,7 @@ namespace Game {
 
     void World::Clear()
     {
-        for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
-        {
-            Entity* entity = entities + entity_idx;
-            entity->type = ENTITY_TYPE_NONE;
-        }
-        memset(entities, 0, sizeof(entities));
+        memset(entities, 0, sizeof(max_entity_count * sizeof(Entity)));
         level = {};
     }
 
@@ -212,8 +207,6 @@ namespace Game {
 
         if (entity)
         {
-            entity_count++;
-
             memset(entity, 0, sizeof(Entity));
             entity->type = type;
             entity->position = Vector2{x, y};
@@ -234,8 +227,6 @@ namespace Game {
         {
             if (entity->type != ENTITY_TYPE_NONE)
             {
-                entity_count--;
-
                 entity->type = ENTITY_TYPE_NONE;
                 entity->revision++;
             }

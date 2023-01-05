@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 #include "log.h"
-#include "pi_time.h"
+#include "system/pi_time.h"
 
 #include "system.h"
 #include "macros.h"
@@ -50,9 +50,8 @@ int main(int argc, char *argv[])
     }
 
     //Net::InitializeSockets();
-    Time::Setup();
-
-    Time::SleepMs(50);
+    InitializeTime();
+    Time_Sleep(50);
 
     //Net::Socket socket = Net::Socket(false);
     //Net::Address server_address = Net::Address(127, 0, 0, 1, server_port);

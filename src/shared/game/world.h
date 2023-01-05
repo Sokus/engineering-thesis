@@ -26,9 +26,9 @@ namespace Game {
         Entity entities[max_entity_count] = {};
         Level level;
 
-
     public:
-        int entity_count = 1;
+        bool initialised;
+
         void Clear();
         void Update(Input *input,float dt);
         void Draw();

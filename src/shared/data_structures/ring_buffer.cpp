@@ -4,6 +4,7 @@
 #include <stdlib.h> // malloc/free
 #include <string.h> // memcpy
 #include <stdint.h> // uint8_t
+#include <stdio.h>
 
 RingBuffer::RingBuffer()
 : free_on_destroy(false) { }
