@@ -22,6 +22,7 @@ namespace Game {
         ENTITY_TYPE_DESTRUCTIBLE_TILE,
         ENTITY_TYPE_CHECKPOINT,
         ENTITY_TYPE_ENEMY,
+        ENTITY_TYPE_BULLET,
         ENTITY_TYPE_EXIT
     };
 
@@ -56,6 +57,7 @@ namespace Game {
         float frame_time;
         float max_frame_time;
         float time_until_state_change_allowed;
+        float shot_cooldown;
         Texture2D texture; // move it out?
         int health;
         int base_health; // move it out?

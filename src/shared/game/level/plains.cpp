@@ -13,7 +13,7 @@ std::vector<std::string> plainTextures = {
 };
 
 std::vector<Game::TileData> plainsTiles = {
-Game::TileData(   0.0f, 192.0f,352.0f,16.0f, 0, PLAINTILE),
+Game::TileData(   0.0f, 192.0f,464.0f,16.0f, 0, PLAINTILE),
 
 Game::TileData( 64.0f, 160.0f,16.0f,32.0f, 0, PLAINTILE),
 
@@ -22,6 +22,10 @@ Game::TileData( 112.0f, 64.0f,96.0f,16.0f, 0, PLAINTILE),
 Game::TileData( 208.0f, 0.0f,16.0f,160.0f, 0, PLAINTILE),
 
 Game::TileData( 208.0f, 160.0f,16.0f,32.0f, 1, PLAINTILE),
+
+Game::TileData(336.0f, 176.0f,16.0f,16.0f, 0,PLAINTILE),
+
+Game::TileData(400.0f, 176.0f,16.0f,16.0f, 0,PLAINTILE),
 
 };
 Vector2 border[2] = { Vector2{95.0f, 80.0f}, Vector2{129.0f, 177.0f} };
@@ -45,7 +49,7 @@ std::vector<Game::TileData> plainsCheckpoints = {
 	Game::TileData(144.0f, 176.0f,16.0f,16.0f, 0, PLAINCHECKPOINT)
 };
 std::vector<Game::TileData> plainsExit = {
-	Game::TileData(320.0f, 160.0f,32.0f,32.0f, 0, PLAINEXIT)
+	Game::TileData(432.0f, 160.0f,32.0f,32.0f, 0, PLAINEXIT)
 };
 std::vector<Game::TileData> plainsEnemies = {
 	Game::TileData(352.0f, 176.0f,16.0f,16.0f, 0,PLAINENEMY),

@@ -30,7 +30,10 @@ namespace Game {
         void Clear();
         void Update(Input *input, float dt);
         void Draw();
-        void CalculateCollisions(Entity& player, Vector2 velocity,Input * input, float dt, bool dim);
+        void MoveEnemy(Entity& enemy, float dt);
+        void MovePlayer(Entity& player,Input* input, float dt);
+        void CheckPlayerShot(Entity& player, Input* input, float dt);
+        void CalculateCollisions(Entity& player, Vector2 velocity, Input* input, float dt, bool dim);
         void UpdateActiveTiles(float dt, int connectionGroup);
 
         EntityReference GetFreeEntityReference();
@@ -48,6 +51,7 @@ namespace Game {
         Entity* CreateCheckpoint(float pos_x, float pos_y, float width, float height, Texture2D texture);
         Entity* CreateExit(float pos_x, float pos_y, float width, float height, Texture2D texture);
         Entity* CreateEnemy(float pos_x, float pos_y, float width, float height, Texture2D texture);
+        Entity* World::CreateBullet(float pos_x, float pos_y, float width, float height,float vel_x,float vel_y, Texture2D texture);
         void LoadTextures();
         void SetLevel(Level *level);
         void ClearLevel();

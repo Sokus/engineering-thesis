@@ -5,6 +5,7 @@
 #include "raymath.h"
 
 #include <string.h>
+#include <macros.h>
 
 namespace Game {
 
@@ -102,9 +103,9 @@ namespace Game {
             }
             else if (collideEntity->type == ENTITY_TYPE_DAMAGING_TILE) {
                 if (player.collidesWith(*collideEntity)
-                    && collideEntity->time_until_state_change_allowed <= 0.0f) {
+                    && player.time_until_state_change_allowed <= 0.0f) {
                     player.health -= collideEntity->damage;
-                    collideEntity->time_until_state_change_allowed = 1.5f; //hurts every 1.5 of sec
+                    player.time_until_state_change_allowed = 1.5f; //hurts every 1.5 of sec
                 }
             }
             else if (collideEntity->type == ENTITY_TYPE_CHECKPOINT) {
@@ -117,6 +118,13 @@ namespace Game {
             else if (collideEntity->type == ENTITY_TYPE_EXIT) {
                 if (player.collidesWith(*collideEntity)) {
                     level.finished = 1;
+                }
+            }
+            else if (collideEntity->type == ENTITY_TYPE_ENEMY) {
+                if (player.collidesWith(*collideEntity)
+                    && player.time_until_state_change_allowed <= 0.0f) {
+                    player.health -= collideEntity->damage;
+                    player.time_until_state_change_allowed = 1.5f;
                 }
             }
         }
@@ -139,9 +147,9 @@ namespace Game {
             if (entity->type == ENTITY_TYPE_DESTRUCTIBLE_TILE && bullet.collidesWith(*entity) ) {
                 entity->health -= bullet.damage;
                 if (entity->health <= 0) {
-                    entity->type = ENTITY_TYPE_NONE;
+                    FreeEntity(entity);
                 }
-                bullet.type = ENTITY_TYPE_NONE;
+                FreeEntity(&bullet);
             }
         }
     }
@@ -150,6 +158,38 @@ namespace Game {
     {
         memset(entities, 0, sizeof(max_entity_count * sizeof(Entity)));
         level = {};
+    }
+    void World::CheckPlayerShot(Entity& player, Input* input, float dt) {
+        if (input->shoot && player.shot_cooldown <= 0.0f) {
+            float x_vel = 100 * player.facing;
+            float y_vel = player.velocity.y * !player.on_ground * 0.5f;
+            CreateBullet(player.position.x,player.position.y,16,16,x_vel,y_vel,Game::bulletTexture);
+            player.shot_cooldown = 0.75f;
+        }
+    }
+
+    void World::MovePlayer(Entity&entity,Input* input, float dt) {
+        
+        ASSERT(entity.type == ENTITY_TYPE_PLAYER);
+        if (entity.health <= 0) {
+            entity.position = level.spawnpoint; //Add some death animation
+            entity.health = entity.base_health;
+            return;
+        }
+        entity.Control(input, dt);
+        CheckPlayerShot(entity,input,dt);
+
+        entity.MoveX(dt);
+        CalculateCollisions(entity, Vector2{ entity.velocity.x,0.0f }, input, dt, 0);
+        entity.on_ground = 0;
+        entity.MoveY(dt);
+        CalculateCollisions(entity, Vector2{ 0.0f,entity.velocity.y }, input, dt, 1);
+        if ((entity.on_ground && entity.collideTop) || (entity.collideLeft && entity.collideRight)) {
+            entity.health = 0;
+        }
+        entity.collideLeft = 0;
+        entity.collideRight = 0;
+        entity.collideTop = 0;
     }
 
     void World::Update(Input *input, float dt)
@@ -161,26 +201,16 @@ namespace Game {
             Entity* entity = entities + entity_idx;
             entity->Update(dt);
             if (entity->type == ENTITY_TYPE_PLAYER) {
-                if (entity->health <= 0) {
-                    entity->position = level.spawnpoint; //Add some death animation
-                    entity->health = entity->base_health;
-                    break;
-                }
-                entity->Control(input,dt);
-                entity->MoveX(dt);
-                CalculateCollisions(*entity, Vector2{entity->velocity.x,0.0f}, input, dt,0);
-                entity->on_ground = 0;
-                entity->MoveY(dt);
-                CalculateCollisions(*entity, Vector2{0.0f,entity->velocity.y}, input, dt,1);
-                if ((entity->on_ground && entity->collideTop) || (entity->collideLeft && entity->collideRight)) {
-                    entity->health = 0;
-                }
-                entity->collideLeft = 0;
-                entity->collideRight = 0;
-                entity->collideTop = 0;
+                MovePlayer(*entity,input, dt);
             }
             else if (entity->type == ENTITY_TYPE_ENEMY) {
                 MoveEnemy(*entity,dt);
+            }
+            else if (entity->type == ENTITY_TYPE_BULLET) {
+                hitObstacles(*entity);
+                if (entity->time_until_state_change_allowed <= 0) {
+                    FreeEntity(entity);
+                }
             }
 
         }
@@ -327,7 +357,7 @@ namespace Game {
         {
             entity->move_direction.x = (pos_x - endpoint.x)*-1;
             entity->move_direction.y = (pos_y - endpoint.y)*-1;
-            entity->move_speed = 1.0f;
+            entity->move_speed = 20.0f;
             entity->entity_group = conGroup;
             entity->active = true;
             entity->endpoints[1] = Vector2{pos_x, pos_y};
@@ -398,6 +428,20 @@ namespace Game {
         if (entity = AddEntity(ENTITY_TYPE_ENEMY, pos_x, pos_y, width, height, texture).entity)
         {
             entity->velocity.x = 10.0f;
+            entity->damage = 15;
+        }
+        return entity;
+    }
+    Entity* World::CreateBullet(float pos_x, float pos_y, float width, float height,float x_vel,float y_vel, Texture2D texture)
+    {
+        Entity* entity = nullptr;
+        if (entity = AddEntity(ENTITY_TYPE_BULLET, pos_x, pos_y, width, height, texture).entity)
+        {
+            entity->velocity.x = x_vel;
+            entity->velocity.y = y_vel;
+            entity->damage = 15;
+            entity->active = true;
+            entity->time_until_state_change_allowed = 2.0f;
         }
         return entity;
     }

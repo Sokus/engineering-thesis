@@ -43,6 +43,12 @@ namespace Game {
             if (time_until_state_change_allowed < 0.0f)
                 time_until_state_change_allowed = 0.0f;
         }
+        if (shot_cooldown > 0.0f)
+        {
+            shot_cooldown -= dt;
+            if (shot_cooldown < 0.0f)
+                shot_cooldown = 0.0f;
+        }
 
         if (dash_cooldown > 0.0f)
         {
@@ -53,8 +59,18 @@ namespace Game {
 
         if (type == ENTITY_TYPE_MOVING_TILE) {
             Vector2 tmp_pos = Vector2Scale(velocity, dt);
-            move_direction.x = (position.x - endpoints[target].x)*-1;
-            move_direction.y = (position.y - endpoints[target].y)*-1;
+            float dirx = 1;
+            float diry = 1;
+            move_direction.x = 0;
+            move_direction.y = 0;
+            if (position.x != endpoints[target].x) {
+                dirx = (position.x - endpoints[target].x) / abs(position.x - endpoints[target].x);
+                move_direction.x = log10(abs(position.x - endpoints[target].x)+5) * dirx * -1;
+            }
+            if (position.y != endpoints[target].y) {
+                diry = (position.y - endpoints[target].y) / abs(position.y - endpoints[target].y);
+                move_direction.y = log10(abs(position.y - endpoints[target].y)+5) * diry * -1;
+            }
             if (reachedEndpoint(endpoints[target], dt)) {
                 target = !target;
                 move_direction.x = move_direction.x * -1;
@@ -66,7 +82,12 @@ namespace Game {
             position = Vector2Add(position, delta_pos);
         }
         if (type == ENTITY_TYPE_ENEMY) {
-            position = Vector2Scale( velocity,dt);
+            Vector2 delta_pos = Vector2Scale(velocity, dt);
+            position = Vector2Add( position,delta_pos);
+        }
+        if (type == ENTITY_TYPE_BULLET) {
+            Vector2 delta_pos = Vector2Scale(velocity, dt);
+            position = Vector2Add(position, delta_pos);
         }
     }
 
@@ -167,7 +188,7 @@ namespace Game {
         }
         if (endpoints[0].y == endpoints[1].y) {
             float distance1 = sqrt(pow(abs(position.x - target.x), 2));
-            if ((distance1 < 0.1)) {
+            if ((distance1 < 0.05)) {
                 return 1;
             }
         }
@@ -179,4 +200,5 @@ namespace Game {
         }
         return 0;
     }
+
 }
