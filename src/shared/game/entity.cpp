@@ -65,16 +65,16 @@ namespace Game {
             move_direction.y = 0;
             if (position.x != endpoints[target].x) {
                 dirx = (position.x - endpoints[target].x) / abs(position.x - endpoints[target].x);
-                move_direction.x = log10(abs(position.x - endpoints[target].x)+5) * dirx * -1;
+                move_direction.x = log10f(abs(position.x - endpoints[target].x)+5) * dirx * -1.0f;
             }
             if (position.y != endpoints[target].y) {
                 diry = (position.y - endpoints[target].y) / abs(position.y - endpoints[target].y);
-                move_direction.y = log10(abs(position.y - endpoints[target].y)+5) * diry * -1;
+                move_direction.y = log10f(abs(position.y - endpoints[target].y)+5) * diry * -1.0f;
             }
             if (reachedEndpoint(endpoints[target], dt)) {
                 target = !target;
-                move_direction.x = move_direction.x * -1;
-                move_direction.y = move_direction.y * -1;
+                move_direction.x = move_direction.x * -1.0f;
+                move_direction.y = move_direction.y * -1.0f;
             }
 
             velocity = Vector2Scale(move_direction, move_speed);
@@ -179,21 +179,21 @@ namespace Game {
     }
 
     bool Entity::reachedEndpoint(Vector2 target,float dt) {
-        
+
         if (endpoints[0].x == endpoints[1].x) {
-            float distance1 = sqrt(pow(abs(position.y - target.y), 2));
+            float distance1 = sqrtf(powf(abs(position.y - target.y), 2));
             if ((distance1 < 0.1)) {
                 return 1;
             }
         }
         if (endpoints[0].y == endpoints[1].y) {
-            float distance1 = sqrt(pow(abs(position.x - target.x), 2));
+            float distance1 = sqrtf(powf(abs(position.x - target.x), 2));
             if ((distance1 < 0.05)) {
                 return 1;
             }
         }
         else {
-            float distance1 = sqrt(pow(abs(position.y - target.y), 2) + pow(abs(position.x - target.x), 2));
+            float distance1 = sqrtf(powf(abs(position.y - target.y), 2) + powf(abs(position.x - target.x), 2));
             if ((distance1 < 0.1)) {
                 return 1;
             }

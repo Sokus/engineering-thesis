@@ -4,8 +4,6 @@
 #include "raylib.h"
 #include "stdint.h"
 
-#include <vector>
-
 namespace Game {
 
     struct Input;
