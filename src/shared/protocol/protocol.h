@@ -4,6 +4,11 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
+
+#include "serialization/bitstream.h"
+#include "serialization/serialize.h"
+#include "macros.h"
 
 #define MAX_PACKET_SIZE 1200
 #define MAX_CLIENTS 16
@@ -15,7 +20,7 @@
 #define CONNECTION_KEEP_ALIVE_TIME_OUT 10.0
 #define CONNECTION_CONFIRM_SEND_RATE 0.1
 
-typedef enum PacketType
+enum PacketType
 {
     PACKET_CONNECTION_REQUEST,
     PACKET_CONNECTION_ACCEPTED,
@@ -24,71 +29,113 @@ typedef enum PacketType
     PACKET_CONNECTION_DISCONNECT,
     PACKET_WORLD_STATE,
     PACKET_TYPE_COUNT,
-} PacketType;
+};
 
-int GetPacketType(void *packet);
-void SetPacketType(void *packet, PacketType type);
-void *CreatePacket(PacketType type);
-void DestroyPacket(void *packet);
-struct BitStream;
-bool SerializePacket(struct BitStream *stream, void *packet);
+class Packet
+{
+public:
+    int type;
+
+    Packet(int type) : type(type) {}
+
+    virtual ~Packet() {}
+    virtual bool Serialize(BitStream *stream) = 0;
+
+private:
+    Packet(const Packet &other);
+};
+
+Packet *CreatePacket(int type);
+void DestroyPacket(Packet *packet);
 
 struct Socket;
 struct Address;
-void SendPacket(struct Socket socket, struct Address address, void *packet);
-void *ReceivePacket(struct Socket socket, struct Address *address);
+void SendPacket(struct Socket socket, struct Address address, Packet *packet);
+Packet *ReceivePacket(struct Socket socket, struct Address *address);
 
-typedef struct PacketInfo
+struct PacketInfo
 {
     uint32_t protocol_id;
-} PacketInfo;
+};
 
-int WritePacket(PacketInfo info, void *packet, uint8_t *buffer, int buffer_size);
-void *ReadPacket(PacketInfo info, uint8_t *buffer, int buffer_size);
+int WritePacket(PacketInfo info, Packet *packet, uint8_t *buffer, int buffer_size);
+Packet *ReadPacket(PacketInfo info, uint8_t *buffer, int buffer_size);
 
-typedef struct ConnectionRequestPacket
+struct ConnectionRequestPacket : public Packet
 {
-    int32_t type;
     uint8_t data[256];
-} ConnectionRequestPacket;
 
-bool SerializeConnectionRequestPacket(struct BitStream *stream, ConnectionRequestPacket *packet);
+    ConnectionRequestPacket() : Packet(PACKET_CONNECTION_REQUEST)
+    {
+        memset(data, 0, sizeof(data));
+    }
 
-typedef struct ConnectionAcceptedPacket
+    bool Serialize(BitStream *stream)
+    {
+        if (stream->mode == READ_STREAM && BitStream_GetBitsRemaining(stream) < 256 * 8)
+            return false;
+        SERIALIZE_BYTES(stream, data, sizeof(data));
+        return true;
+    }
+};
+
+struct ConnectionAcceptedPacket : public Packet
 {
-    int32_t type;
     int client_index;
-} ConnectionAcceptedPacket;
 
-bool SerializeConnectionAcceptedPacket(struct BitStream *stream, ConnectionAcceptedPacket *packet);
+    ConnectionAcceptedPacket() : Packet(PACKET_CONNECTION_ACCEPTED)
+    {
+        client_index = 0;
+    }
 
-typedef enum ConnectionDeniedReason
+    bool Serialize(BitStream *stream)
+    {
+        SERIALIZE_INT(stream, client_index, 0, MAX_CLIENTS - 1);
+        return true;
+    }
+};
+
+enum ConnectionDeniedReason
 {
     CONNECTION_DENIED_SERVER_FULL,
     CONNECTION_DENIED_ALREADY_CONNECTED,
     CONNECTION_DENIED_REASON_COUNT,
-} ConnectionDeniedReason;
+};
 
-typedef struct ConnectionDeniedPacket
+struct ConnectionDeniedPacket : public Packet
 {
-    int32_t type;
     ConnectionDeniedReason reason;
-} ConnectionDeniedPacket;
 
-bool SerializeConnectionDeniedPacket(struct BitStream *stream, ConnectionDeniedPacket *packet);
+    ConnectionDeniedPacket() : Packet(PACKET_CONNECTION_DENIED)
+    {
+        reason = CONNECTION_DENIED_SERVER_FULL;
+    }
 
-typedef struct ConnectionKeepAlivePacket
+    bool Serialize(BitStream *stream)
+    {
+        SERIALIZE_ENUM(stream, reason, ConnectionDeniedReason, CONNECTION_DENIED_REASON_COUNT - 1);
+        return true;
+    }
+};
+
+struct ConnectionKeepAlivePacket : public Packet
 {
-    int32_t type;
-} ConnectionKeepAlivePacket;
+    ConnectionKeepAlivePacket() : Packet(PACKET_CONNECTION_KEEP_ALIVE) {}
 
-bool SerializeConnectionKeepAlivePacket(struct BitStream *stream, ConnectionKeepAlivePacket *packet);
+    bool Serialize(BitStream *stream)
+    {
+        return true;
+    }
+};
 
-typedef struct ConnectionDisconnectPacket
+struct ConnectionDisconnectPacket : public Packet
 {
-    int32_t type;
-} ConnectionDisconnectPacket;
+    ConnectionDisconnectPacket() : Packet(PACKET_CONNECTION_DISCONNECT) {}
 
-bool SerializeConnectionDisconnectPacket(struct BitStream *stream, ConnectionDisconnectPacket *packet);
+    bool Serialize(BitStream *stream)
+    {
+        return true;
+    }
+};
 
 #endif // PROTOCOL_H

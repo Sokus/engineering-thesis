@@ -1,7 +1,9 @@
 project(server)
 
+file(GLOB SERVER_SRC *.cpp)
+
 add_executable(server
-    server_main.cpp
+    ${SERVER_SRC}
 )
 
 target_include_directories(server

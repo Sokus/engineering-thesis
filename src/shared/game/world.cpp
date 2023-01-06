@@ -161,7 +161,7 @@ namespace Game {
     }
     void World::CheckPlayerShot(Entity& player, Input* input, float dt) {
         if (input->shoot && player.shot_cooldown <= 0.0f) {
-            float x_vel = 100 * player.facing;
+            float x_vel = (float)(100 * player.facing);
             float y_vel = player.velocity.y * !player.on_ground * 0.5f;
             CreateBullet(player.position.x,player.position.y,16,16,x_vel,y_vel,Game::bulletTexture);
             player.shot_cooldown = 0.75f;
@@ -169,7 +169,7 @@ namespace Game {
     }
 
     void World::MovePlayer(Entity&entity,Input* input, float dt) {
-        
+
         ASSERT(entity.type == ENTITY_TYPE_PLAYER);
         if (entity.health <= 0) {
             entity.position = level.spawnpoint; //Add some death animation
@@ -453,7 +453,7 @@ namespace Game {
         for (auto& tile : level->tiles) {
             this->CreateTile(tile.position.x, tile.position.y,tile.size.x,tile.size.y, tile.connGroup, this->level.textures2d.at(tile.texture));
         }
-        for (auto& tile : level.movingTiles) {
+        for (auto& tile : level->movingTiles) {
             this->CreateMovingTile(tile.position.x, tile.position.y,tile.size.x,tile.size.y, tile.connGroup,tile.velocity,tile.endpoint, this->level.textures2d.at(tile.texture));
         }
         for (auto& tile : level->interactiveTiles) {
@@ -474,7 +474,7 @@ namespace Game {
         for (auto& tile : level->levelExits) {
             this->CreateExit(tile.position.x, tile.position.y, tile.size.x, tile.size.y, this->level.textures2d.at(tile.texture));
         }
-        for (auto& tile : level.enemies) {
+        for (auto& tile : level->enemies) {
             this->CreateEnemy(tile.position.x, tile.position.y, tile.size.x, tile.size.y, this->level.textures2d.at(tile.texture));
         }
         this->level.finished = 0;

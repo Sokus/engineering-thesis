@@ -1,4 +1,3 @@
-#include "log.h"
 #include "system/pi_time.h"
 
 #include <stddef.h>
@@ -8,8 +7,6 @@
 
 int main(int argc, char *argv[])
 {
-    SetLogPrefix("SERVER: ");
-
     InitializeTime();
 
     unsigned int port = 25565;
@@ -34,7 +31,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    Log(LOG_INFO, "Starting on port %u", port);
+    printf("Starting on port %u\n", port);
 
     return 0;
 }

@@ -1,45 +1,64 @@
-#include "log.h"
-#include "system/pi_time.h"
+#include "server.h"
 
 #include <stddef.h>
 #include <stdio.h>
 
+#include "system/pi_time.h"
+#include "system/network.h"
+
 #include "parg.h"
 
+unsigned int port = 60000;
 
-int main(int argc, char *argv[])
+enum PargError
 {
-    SetLogPrefix("SERVER: ");
-    SetLogLevel(LOG_INFO);
+    PARG_SUCCESS = 0,
+    PARG_ERROR_INVALID_PORT = -1,
+    PARG_ERROR_MISSING_PORT = -2,
+    PARG_ERROR_UNKNOWN_OPTION = -3,
+    PARG_ERROR_UNKNOWN_ERROR = -4,
+};
 
-    //Net::InitializeSockets();
-    InitializeTime();
-
-    unsigned int port = 25565;
-
+int ProcessArguments(int argc, char *argv[])
+{
     parg_state parg;
-    int parg_opt;
     parg_init(&parg);
-    while((parg_opt = parg_getopt(&parg, argc, argv, "hp:")) != -1)
+    int parg_opt;
+    while ((parg_opt = parg_getopt(&parg, argc, argv, "hp:")) != -1)
     {
-        switch(parg_opt)
+        switch (parg_opt)
         {
-            case 'h': printf("Usage: example_server [-h] [-p PORT]\n"); return 0; break;
-            case 'p': if(sscanf(parg.optarg, "%u", &port) <= 0) return -1; break;
-            case '?':
-                switch(parg.optopt)
-                {
-                    case 'p': printf("option -p required a port number\n"); return -1; break;
-                    default: return -1; break;
+            case 'h': printf("Usage: server [-h] [-p PORT]\n"); break;
+            case 'p':
+                if (sscanf(parg.optarg, "%u", &port) <= 0) {
+                    printf("invalid port (%s)", parg.optarg);
+                    return PARG_ERROR_INVALID_PORT;
                 }
-                break;
-            default: printf("error: unhandled option: -%c\n", parg_opt); return -1; break;
+            case '?':
+                switch (parg.optopt)
+                {
+                    case 'p':
+                        printf("option -p required a port number\n");
+                        return PARG_ERROR_MISSING_PORT;
+                    default: return PARG_ERROR_UNKNOWN_ERROR;
+                }
+            default:
+                printf("unhandled option: -%c\n", parg_opt);
+                return PARG_ERROR_UNKNOWN_OPTION;
         }
     }
 
-    Log(LOG_INFO, "Starting on port %u", port);
+    return PARG_SUCCESS;
+}
 
-    //Net::ShutdownSockets();
+int main(int argc, char *argv[])
+{
+    InitializeTime();
+    InitializeNetwork();
+
+    ProcessArguments(argc, argv);
+
+    ShutdownNetwork();
 
     return 0;
 }

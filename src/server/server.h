@@ -1,0 +1,40 @@
+#ifndef SERVER_H
+#define SERVER_H
+
+#include <stdint.h>
+
+#include "system/network.h"
+#include "protocol/protocol.h"
+
+struct ServerClientData
+{
+    uint64_t connect_time;
+    uint64_t last_packet_send_time;
+    uint64_t last_packet_receive_time;
+};
+
+struct Server
+{
+    Socket socket;
+    int num_connected_clients;
+    bool client_connected[MAX_CLIENTS];
+    Address client_address[MAX_CLIENTS];
+    ServerClientData client_data[MAX_CLIENTS];
+
+    void Init(Socket socket);
+    void ResetClientState(int client_index);
+    void SendPackets();
+    void ReceivePackets();
+    void SendPacketToConnectedClient(int client_index, Packet *packet);
+    int FindFreeClientIndex();
+    int FindExistingClientIndex(Address address);
+    void ConnectClient(int client_index, Address address);
+    void DisconnectClient(int client_index);
+    void CheckForTimeOut();
+
+    void ProcessConnectionRequestPacket(ConnectionRequestPacket *packet, Address address);
+    void ProcessConnectionDisconnectPacket(ConnectionDisconnectPacket *packet, Address address);
+    void ProcessConnectionKeepAlivePacket(ConnectionKeepAlivePacket *packet, Address address);
+};
+
+#endif // SERVER_H

@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "log.h"
 #include "system/pi_time.h"
 
 #include "system.h"
@@ -11,8 +10,6 @@
 
 int main(int argc, char *argv[])
 {
-    SetLogPrefix("CLIENT: ");
-
     unsigned short server_port = 25565;
 
     ProcessHandle *process;
