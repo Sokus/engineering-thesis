@@ -3,6 +3,10 @@
 #include "config.h"
 #include "game/level/content.h"
 #include "input.h"
+#include "serialization/bitstream.h"
+#include "serialization/serialize.h"
+#include "serialization/serialize_extra.h"
+#include "protocol/protocol.h"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -201,4 +205,17 @@ namespace Game {
         return 0;
     }
 
+    bool Entity::Serialize(BitStream *stream)
+    {
+        SERIALIZE_ENUM(stream, type, EntityType, ENTITY_TYPE_COUNT - 1);
+        SERIALIZE_BITS(stream, revision, 16);
+        if (type != ENTITY_TYPE_NONE)
+        {
+            SERIALIZE_INT(stream, owner, 0, MAX_CLIENTS - 1);
+            SERIALIZE_INT(stream, current_frame, 0, 7);
+            SERIALIZE_VECTOR2(stream, size);
+            SERIALIZE_VECTOR2(stream, position);
+        }
+        return true;
+    }
 }

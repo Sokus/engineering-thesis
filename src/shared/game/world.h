@@ -6,7 +6,10 @@
 #include "entity.h"
 #include "level/content.h"
 
+struct BitStream;
+
 namespace Game {
+    const int max_entity_count = 1024;
 
     struct AddEntityResult
     {
@@ -19,7 +22,6 @@ namespace Game {
     private:
         static float gravity;
         static float gravity_speed;
-        static const int max_entity_count = 1024;
         Entity entities[max_entity_count] = {};
 
     public:
@@ -28,7 +30,8 @@ namespace Game {
         int entity_count = 1;
 
         void Clear();
-        void Update(Input *input, float dt);
+        void Update(Input *inputs, int num_inputs, float dt);
+
         void Draw();
         void MoveEnemy(Entity& enemy, float dt);
         void MovePlayer(Entity& player,Input* input, float dt);
@@ -42,6 +45,7 @@ namespace Game {
         Entity *GetEntityByReference(EntityReference reference);
         AddEntityResult World::AddEntity(EntityType type, int owner, float x, float y, float w, float h, Texture2D texture);
         void World::FreeEntity(Entity *entity);
+
 
         AddEntityResult CreatePlayer(int owner, float pos_x, float pos_y,Texture2D texture, Game::PlayerType playertype);
         AddEntityResult CreateTile(float pos_x, float pos_y,float width,float height, int conGroup, Texture2D texture);

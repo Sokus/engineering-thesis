@@ -4,6 +4,8 @@
 #include "raylib.h"
 #include "stdint.h"
 
+struct BitStream;
+
 namespace Game {
 
     struct Input;
@@ -21,7 +23,9 @@ namespace Game {
         ENTITY_TYPE_CHECKPOINT,
         ENTITY_TYPE_ENEMY,
         ENTITY_TYPE_BULLET,
-        ENTITY_TYPE_EXIT
+        ENTITY_TYPE_EXIT,
+
+        ENTITY_TYPE_COUNT, // ALWAYS LAST
     };
 
     enum PlayerType
@@ -94,6 +98,8 @@ namespace Game {
         void MoveX(float dt);
         void MoveY(float dt);
         bool reachedEndpoint(Vector2 target, float dt);
+
+        bool Serialize(BitStream *stream);
     };
 
     struct EntityReference

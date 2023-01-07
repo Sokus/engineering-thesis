@@ -193,27 +193,36 @@ namespace Game {
         entity.collideTop = 0;
     }
 
-    void World::Update(Input *input, float dt)
+    void World::Update(Input *inputs, int num_inputs, float dt)
     {
         level.Update(dt);
 
-        for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
+        for (int i = 0; i < max_entity_count; i++)
         {
-            Entity* entity = entities + entity_idx;
+            Entity* entity = &entities[i];
             entity->Update(dt);
-            if (entity->type == ENTITY_TYPE_PLAYER) {
-                MovePlayer(*entity,input, dt);
-            }
-            else if (entity->type == ENTITY_TYPE_ENEMY) {
-                MoveEnemy(*entity,dt);
-            }
-            else if (entity->type == ENTITY_TYPE_BULLET) {
-                hitObstacles(*entity);
-                if (entity->time_until_state_change_allowed <= 0) {
-                    FreeEntity(entity);
-                }
-            }
 
+            switch (entity->type)
+            {
+                case ENTITY_TYPE_PLAYER:
+                {
+                    ASSERT(entity->owner >= 0);
+                    ASSERT(entity->owner < num_inputs);
+                    if (entity->owner >= 0 && entity->owner < num_inputs)
+                        MovePlayer(*entity, &inputs[entity->owner], dt);
+                } break;
+
+                case ENTITY_TYPE_ENEMY:
+                    MoveEnemy(*entity, dt);
+                    break;
+
+                case ENTITY_TYPE_BULLET:
+                {
+                    hitObstacles(*entity);
+                    if (entity->time_until_state_change_allowed <= 0)
+                        FreeEntity(entity);
+                } break;
+            }
         }
     }
 
@@ -517,5 +526,4 @@ namespace Game {
     void World::ClearLevel() {
         this->level = Level();
     }
-
 }

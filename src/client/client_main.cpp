@@ -57,20 +57,22 @@ void DoGameScene(float dt)
         game_data.world.SetLevel(app_state.level_selected);
         Texture2D character_texture = LoadTexture(RESOURCE_PATH "/character.png");
         Vector2 spawnpoint = app_state.level_selected->spawnpoint;
-        player_reference = game_data.world.CreatePlayer(0, spawnpoint.x, spawnpoint.y, character_texture, app_state.player_type_selected).reference;
+        player_reference = game_data.world.CreatePlayer(1, spawnpoint.x, spawnpoint.y, character_texture, app_state.player_type_selected).reference;
 
         game_data.world.initialised = true;
     }
 
-    Game::Input input = Game::GetInput();
-    game_data.world.Update(&input, dt);
+    Game::Input inputs[2] = {};
+    inputs[1] = Game::GetInput();
+
+    game_data.world.Update(inputs, ARRAY_SIZE(inputs), dt);
 
     Camera2D camera = {};
     camera.offset = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
     camera.zoom = 4.0f;
 
     if (!game_data.world.EntityReferenceIsValid(player_reference))
-        player_reference = game_data.world.GetOwnedEntityReference(Game::ENTITY_TYPE_PLAYER, 0, 0);
+        player_reference = game_data.world.GetOwnedEntityReference(Game::ENTITY_TYPE_PLAYER, 1, 0);
 
     Game::Entity *player = game_data.world.GetEntityByReference(player_reference);
     if (player)

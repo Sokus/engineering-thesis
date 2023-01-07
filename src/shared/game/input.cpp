@@ -1,8 +1,10 @@
 #include "input.h"
+#include "serialization/bitstream.h"
+#include "serialization/serialize.h"
 
-#include "raylib.h"
 #include <stdio.h>
 
+#include "raylib.h"
 
 namespace Game {
 
@@ -17,6 +19,17 @@ Input GetInput()
     input.interact = IsKeyDown(KEY_I);
     input.shoot = IsKeyDown(KEY_SPACE);
     return input;
+}
+
+bool Input::Serialize(BitStream *stream)
+{
+    for (int i = 0; i < DIRECTION_COUNT; i++)
+        SERIALIZE_BOOL(stream, move[i]);
+    SERIALIZE_BOOL(stream, jump);
+    SERIALIZE_BOOL(stream, shoot);
+    SERIALIZE_BOOL(stream, interact);
+    SERIALIZE_BOOL(stream, dash);
+    return true;
 }
 
 } // namespace Game

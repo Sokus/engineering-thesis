@@ -1,6 +1,8 @@
 #ifndef INPUT_H
 #define INPUT_H
 
+struct BitStream;
+
 namespace Game {
 
 enum InputDirection
@@ -12,6 +14,7 @@ enum InputDirection
     DIRECTION_COUNT = 4
 };
 
+
 struct Input
 {
     bool move[DIRECTION_COUNT];
@@ -19,12 +22,12 @@ struct Input
     bool shoot;
     bool interact;
     bool dash;
+
+    bool Serialize(BitStream *stream);
 };
 
 Input GetInput();
 
-struct BitPacker;
-bool SerializeInput(BitPacker *bit_packer, Input *input);
 
 } // namespace Game
 #endif

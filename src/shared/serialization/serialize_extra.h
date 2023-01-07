@@ -8,7 +8,7 @@ struct BitStream;
 struct Vector2;
 bool SerializeVector2(struct BitStream *stream, struct Vector2 *vector2_ptr);
 
-#define PE_SERIALIZE_VECTOR2(stream_ptr, value) \
+#define SERIALIZE_VECTOR2(stream_ptr, value) \
     do { \
         if (!SerializeVector2((stream_ptr), &value)) \
             return false; \
@@ -17,7 +17,7 @@ bool SerializeVector2(struct BitStream *stream, struct Vector2 *vector2_ptr);
 struct Vector3;
 bool SerializeVector3(struct BitStream *stream, struct Vector3 *vector3_ptr);
 
-#define PE_SERIALIZE_VECTOR3(stream_ptr, value) \
+#define SERIALIZE_VECTOR3(stream_ptr, value) \
     do { \
         if (!SerializeVector3((stream_ptr), &value)) \
             return false; \

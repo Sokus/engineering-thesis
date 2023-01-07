@@ -9,6 +9,9 @@
 #include "serialization/bitstream.h"
 #include "serialization/serialize.h"
 #include "macros.h"
+#include "game/input.h"
+#include "game/entity.h"
+#include "game/world.h"
 
 #define MAX_PACKET_SIZE 1200
 #define MAX_CLIENTS 16
@@ -27,6 +30,7 @@ enum PacketType
     PACKET_CONNECTION_DENIED,
     PACKET_CONNECTION_KEEP_ALIVE,
     PACKET_CONNECTION_DISCONNECT,
+    PACKET_INPUT,
     PACKET_WORLD_STATE,
     PACKET_TYPE_COUNT,
 };
@@ -134,6 +138,47 @@ struct ConnectionDisconnectPacket : public Packet
 
     bool Serialize(BitStream *stream)
     {
+        return true;
+    }
+};
+
+struct InputPacket : public Packet
+{
+    Game::Input input;
+
+    InputPacket() : Packet(PACKET_INPUT)
+    {
+        input = Game::Input{};
+    }
+
+    bool Serialize(BitStream *stream)
+    {
+        return input.Serialize(stream);
+    }
+};
+
+struct WorldStatePacket : public Packet
+{
+    int start_index;
+    int entity_count;
+    Game::Entity entities[256];
+
+    WorldStatePacket() : Packet(PACKET_WORLD_STATE)
+    {
+        start_index = 0;
+        entity_count = 0;
+        memset(entities, 0, sizeof(entities));
+    }
+
+    bool Serialize(BitStream *stream)
+    {
+        SERIALIZE_INT(stream, start_index, 0, Game::max_entity_count);
+        SERIALIZE_INT(stream, entity_count, 0, ARRAY_SIZE(entities));
+        for (int i = 0; i < entity_count; i++)
+        {
+            if (!entities[i].Serialize(stream))
+                return false;
+        }
         return true;
     }
 };
