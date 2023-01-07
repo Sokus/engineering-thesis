@@ -161,7 +161,7 @@ struct WorldStatePacket : public Packet
 {
     int start_index;
     int entity_count;
-    Game::Entity entities[256];
+    Game::Entity entities[Game::max_entity_count];
 
     WorldStatePacket() : Packet(PACKET_WORLD_STATE)
     {

@@ -19,6 +19,8 @@ Packet *CreatePacket(int type)
         case PACKET_CONNECTION_DENIED: return new ConnectionDeniedPacket();
         case PACKET_CONNECTION_KEEP_ALIVE: return new ConnectionKeepAlivePacket();
         case PACKET_CONNECTION_DISCONNECT: return new ConnectionDisconnectPacket();
+        case PACKET_INPUT: return new InputPacket();
+        case PACKET_WORLD_STATE: return new WorldStatePacket();
         default: return nullptr;
     }
 }

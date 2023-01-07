@@ -24,6 +24,7 @@ MeasureStream MeasureStream_Create(void *buffer, int bytes)
 {
     MeasureStream measure_stream = { 0 };
     measure_stream.mode = MEASURE_STREAM;
+    measure_stream.total_bytes = bytes;
     return measure_stream;
 }
 

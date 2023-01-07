@@ -4,6 +4,7 @@
 
 #include "macros.h"
 #include "system/pi_time.h"
+#include "game/level/content.h"
 
 void Server::Init(Socket socket)
 {
@@ -11,6 +12,8 @@ void Server::Init(Socket socket)
     this->socket = socket;
     for (int i = 1; i < MAX_CLIENTS; i++)
         ResetClientState(i);
+    world.Clear();
+    world.SetLevel(&Game::levels[0]);
 }
 
 void Server::ResetClientState(int client_index)
@@ -22,6 +25,7 @@ void Server::ResetClientState(int client_index)
     client_connected[client_index] = false;
     client_address[client_index] = Address{};
     client_data[client_index] = ServerClientData{};
+    client_input[client_index] = Game::Input{};
 }
 
 void Server::SendPackets()
@@ -63,6 +67,10 @@ void Server::ReceivePackets()
                 ProcessConnectionKeepAlivePacket((ConnectionKeepAlivePacket *)packet, address);
                 break;
 
+            case PACKET_INPUT:
+                ProcessInputPacket((InputPacket *)packet, address);
+                break;
+
             default: break;
         }
 
@@ -79,6 +87,15 @@ void Server::SendPacketToConnectedClient(int client_index, Packet *packet)
     ASSERT(client_connected[client_index]);
     SendPacket(socket, client_address[client_index], packet);
     client_data[client_index].last_packet_send_time = Time_Now();
+}
+
+void Server::BroadcastPacketToConnectedClients(Packet *packet)
+{
+    for (int i = 1; i < MAX_CLIENTS; i++)
+    {
+        if (client_connected[i])
+            SendPacketToConnectedClient(i, packet);
+    }
 }
 
 int Server::FindFreeClientIndex()
@@ -166,6 +183,38 @@ void Server::CheckForTimeOut()
     }
 }
 
+void Server::SendWorldState()
+{
+    if (!num_connected_clients)
+        return;
+
+    WorldStatePacket *packet = (WorldStatePacket *)CreatePacket(PACKET_WORLD_STATE);
+
+    BitStream stream = MeasureStream_Create(nullptr, MAX_PACKET_SIZE);
+    for (int i = 0; i < Game::max_entity_count; i++)
+    {
+        world.entities[i].Serialize(&stream);
+        if (BitStream_GetBitsRemaining(&stream) < 0)
+        {
+            BroadcastPacketToConnectedClients(packet);
+
+            stream = MeasureStream_Create(nullptr, MAX_PACKET_SIZE);
+            world.entities[i].Serialize(&stream);
+            ASSERT(BitStream_GetBitsRemaining(&stream) >= 0);
+
+            packet->start_index = i;
+            packet->entity_count = 0;
+        }
+
+        memcpy(&packet->entities[packet->entity_count], &world.entities[i], sizeof(Game::Entity));
+        packet->entity_count++;
+    }
+
+    ASSERT(packet->entity_count > 0);
+    BroadcastPacketToConnectedClients(packet);
+    DestroyPacket(packet);
+}
+
 void Server::ProcessConnectionRequestPacket(ConnectionRequestPacket *packet, Address address)
 {
     int existing_client_index = FindExistingClientIndex(address);
@@ -223,11 +272,23 @@ void Server::ProcessConnectionDisconnectPacket(ConnectionDisconnectPacket *packe
 void Server::ProcessConnectionKeepAlivePacket(ConnectionKeepAlivePacket *packet, Address address)
 {
     int client_index = FindExistingClientIndex(address);
-    if (client_index)
+    if (!client_index)
         return;
 
     ASSERT(client_index >= 0);
     ASSERT(client_index < MAX_CLIENTS);
 
     client_data[client_index].last_packet_receive_time = Time_Now();
+}
+
+void Server::ProcessInputPacket(InputPacket *packet, Address address)
+{
+    int client_index = FindExistingClientIndex(address);
+    if (!client_index)
+        return;
+
+    ASSERT(client_index >= 0);
+    ASSERT(client_index < MAX_CLIENTS);
+
+    client_input[client_index] = packet->input;
 }

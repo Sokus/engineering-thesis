@@ -56,7 +56,30 @@ int main(int argc, char *argv[])
     InitializeTime();
     InitializeNetwork();
 
-    ProcessArguments(argc, argv);
+    if (!ProcessArguments(argc, argv))
+        return -1;
+
+    Server server = {};
+    printf("server starting on port %u\n", port);
+    server.Init(SocketCreate(SOCKET_IPV4, port));
+
+    float hz = 30.0f; // refresh rate
+    float dt = 1.0f / hz;
+    uint64_t last_time = Time_Now();
+    while (true)
+    {
+        server.ReceivePackets();
+        server.world.Update(server.client_input, MAX_CLIENTS, dt);
+        server.SendPackets();
+        server.SendWorldState();
+        server.CheckForTimeOut();
+
+        uint64_t laptime = Time_Laptime(&last_time);
+        double laptime_ms = Time_Ms(laptime);
+        double sleeptime_ms = (double)dt - laptime_ms;
+        if (sleeptime_ms >= 1.0)
+            Time_Sleep((unsigned long)sleeptime_ms);
+    }
 
     ShutdownNetwork();
 

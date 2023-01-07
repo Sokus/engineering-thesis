@@ -17,14 +17,12 @@ namespace Game {
         Entity *entity;
     };
 
-    class World
+    struct World
     {
-    private:
-        static float gravity;
-        static float gravity_speed;
+        static const float gravity;
+        static const float gravity_speed;
         Entity entities[max_entity_count] = {};
 
-    public:
         bool initialised;
         Level level;
         int entity_count = 1;
