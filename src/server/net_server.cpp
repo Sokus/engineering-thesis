@@ -9,7 +9,7 @@ void Server::Init(Socket socket)
 {
     memset(this, 0, sizeof(Server));
     this->socket = socket;
-    for (int i = 0; i < MAX_CLIENTS; i++)
+    for (int i = 1; i < MAX_CLIENTS; i++)
         ResetClientState(i);
 }
 
@@ -17,6 +17,8 @@ void Server::ResetClientState(int client_index)
 {
     ASSERT(client_index >= 0);
     ASSERT(client_index < MAX_CLIENTS);
+    if (!client_index) return;
+
     client_connected[client_index] = false;
     client_address[client_index] = Address{};
     client_data[client_index] = ServerClientData{};
@@ -24,7 +26,7 @@ void Server::ResetClientState(int client_index)
 
 void Server::SendPackets()
 {
-    for (int i = 0; i < MAX_CLIENTS; i++)
+    for (int i = 1; i < MAX_CLIENTS; i++)
     {
         if (!client_connected[i])
             continue;
@@ -70,9 +72,10 @@ void Server::ReceivePackets()
 
 void Server::SendPacketToConnectedClient(int client_index, Packet *packet)
 {
+    ASSERT(packet);
     ASSERT(client_index >= 0);
     ASSERT(client_index < MAX_CLIENTS);
-    ASSERT(packet);
+    if (!client_index) return;
     ASSERT(client_connected[client_index]);
     SendPacket(socket, client_address[client_index], packet);
     client_data[client_index].last_packet_send_time = Time_Now();
@@ -80,22 +83,22 @@ void Server::SendPacketToConnectedClient(int client_index, Packet *packet)
 
 int Server::FindFreeClientIndex()
 {
-    for (int i = 0; i < MAX_CLIENTS; i++)
+    for (int i = 1; i < MAX_CLIENTS; i++)
     {
         if (!client_connected[i])
             return i;
     }
-    return -1;
+    return 0;
 }
 
 int Server::FindExistingClientIndex(Address address)
 {
-    for (int i = 0; i < MAX_CLIENTS; i++)
+    for (int i = 1; i < MAX_CLIENTS; i++)
     {
         if (client_connected[i] && AddressCompare(client_address[i], address))
             return i;
     }
-    return -1;
+    return 0;
 }
 
 void Server::ConnectClient(int client_index, Address address)
@@ -103,7 +106,8 @@ void Server::ConnectClient(int client_index, Address address)
     ASSERT(client_index >= 0);
     ASSERT(client_index < MAX_CLIENTS);
     ASSERT(num_connected_clients >= 0);
-    ASSERT(num_connected_clients < MAX_CLIENTS - 1);
+    ASSERT(num_connected_clients < MAX_CLIENTS - 2);
+    if (!client_index) return;
     ASSERT(!client_connected[client_index]);
 
     num_connected_clients++;
@@ -129,6 +133,7 @@ void Server::DisconnectClient(int client_index)
     ASSERT(client_index >= 0);
     ASSERT(client_index < MAX_CLIENTS);
     ASSERT(num_connected_clients > 0);
+    if (!client_index) return;
     ASSERT(client_connected[client_index]);
 
     char buffer[256];
@@ -145,7 +150,7 @@ void Server::DisconnectClient(int client_index)
 
 void Server::CheckForTimeOut()
 {
-    for (int i = 0; i < MAX_CLIENTS; i++)
+    for (int i = 1; i < MAX_CLIENTS; i++)
     {
         if (!client_connected[i])
             continue;
@@ -164,7 +169,7 @@ void Server::CheckForTimeOut()
 void Server::ProcessConnectionRequestPacket(ConnectionRequestPacket *packet, Address address)
 {
     int existing_client_index = FindExistingClientIndex(address);
-    if (existing_client_index != -1)
+    if (existing_client_index)
     {
         ASSERT(existing_client_index >= 0);
         ASSERT(existing_client_index < MAX_CLIENTS);
@@ -196,8 +201,8 @@ void Server::ProcessConnectionRequestPacket(ConnectionRequestPacket *packet, Add
 
     int client_index = FindFreeClientIndex();
 
-    ASSERT(client_index != -1);
-    if (client_index == -1)
+    ASSERT(client_index);
+    if (!client_index)
         return;
 
     ConnectClient(client_index, address);
@@ -206,12 +211,11 @@ void Server::ProcessConnectionRequestPacket(ConnectionRequestPacket *packet, Add
 void Server::ProcessConnectionDisconnectPacket(ConnectionDisconnectPacket *packet, Address address)
 {
     int client_index = FindExistingClientIndex(address);
-    if (client_index == -1)
+    if (!client_index)
         return;
 
     ASSERT(client_index >= 0);
     ASSERT(client_index < MAX_CLIENTS);
-
 
     DisconnectClient(client_index);
 }
@@ -219,7 +223,7 @@ void Server::ProcessConnectionDisconnectPacket(ConnectionDisconnectPacket *packe
 void Server::ProcessConnectionKeepAlivePacket(ConnectionKeepAlivePacket *packet, Address address)
 {
     int client_index = FindExistingClientIndex(address);
-    if (client_index == -1)
+    if (client_index)
         return;
 
     ASSERT(client_index >= 0);

@@ -37,11 +37,13 @@ namespace Game {
         void UpdateActiveTiles(float dt, int connectionGroup);
 
         EntityReference GetFreeEntityReference();
+        EntityReference GetOwnedEntityReference(EntityType type, int owner, int start_index);
+        bool EntityReferenceIsValid(EntityReference reference);
         Entity *GetEntityByReference(EntityReference reference);
-        AddEntityResult World::AddEntity(EntityType type, float x, float y, float w, float h, Texture2D texture);
+        AddEntityResult World::AddEntity(EntityType type, int owner, float x, float y, float w, float h, Texture2D texture);
         void World::FreeEntity(Entity *entity);
 
-        AddEntityResult CreatePlayer(float pos_x, float pos_y,Texture2D texture, Game::PlayerType playertype);
+        AddEntityResult CreatePlayer(int owner, float pos_x, float pos_y,Texture2D texture, Game::PlayerType playertype);
         AddEntityResult CreateTile(float pos_x, float pos_y,float width,float height, int conGroup, Texture2D texture);
         Entity* CreateMovingTile(float pos_x, float pos_y, float width, float height, int conGroup, Vector2 moveDirection, Vector2 endpoint, Texture2D texture);
         Entity* CreateInteractive(float pos_x, float pos_y, float width, float height, int conGroup, Texture2D texture);

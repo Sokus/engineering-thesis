@@ -159,6 +159,7 @@ namespace Game {
         memset(entities, 0, sizeof(max_entity_count * sizeof(Entity)));
         level = {};
     }
+
     void World::CheckPlayerShot(Entity& player, Input* input, float dt) {
         if (input->shoot && player.shot_cooldown <= 0.0f) {
             float x_vel = (float)(100 * player.facing);
@@ -243,6 +244,37 @@ namespace Game {
         return reference;
     }
 
+    EntityReference World::GetOwnedEntityReference(EntityType type, int owner, int start_index)
+    {
+        ASSERT(start_index >= 0);
+
+        EntityReference reference = {};
+
+        for (int i = MAX(1, start_index); i < max_entity_count; i++)
+        {
+            Entity *entity = &entities[i];
+            if (entity->owner != owner)
+                continue;
+
+            if (type == ENTITY_TYPE_NONE || type == entity->type)
+            {
+                reference.index = i;
+                reference.revision = entity->revision;
+                break;
+            }
+        }
+
+        return reference;
+    }
+
+    bool World::EntityReferenceIsValid(EntityReference reference)
+    {
+        bool result = false;
+        if (reference.index > 0 && reference.index < max_entity_count)
+            result = entities[reference.index].revision == reference.revision;
+        return result;
+    }
+
     Entity *World::GetEntityByReference(EntityReference reference)
     {
         Entity *entity = nullptr;
@@ -254,7 +286,7 @@ namespace Game {
         return entity;
     }
 
-    AddEntityResult World::AddEntity(EntityType type, float x, float y, float w, float h, Texture2D texture)
+    AddEntityResult World::AddEntity(EntityType type, int owner, float x, float y, float w, float h, Texture2D texture)
     {
         AddEntityResult result = {};
         EntityReference reference = GetFreeEntityReference();
@@ -264,6 +296,7 @@ namespace Game {
         {
             memset(entity, 0, sizeof(Entity));
             entity->type = type;
+            entity->owner = owner;
             entity->position = Vector2{x, y};
             entity->size.x = w;
             entity->size.y = h;
@@ -288,9 +321,9 @@ namespace Game {
         }
     }
 
-    AddEntityResult World::CreatePlayer(float pos_x, float pos_y,Texture2D texture,Game::PlayerType playertype)
+    AddEntityResult World::CreatePlayer(int owner, float pos_x, float pos_y, Texture2D texture, Game::PlayerType playertype)
     {
-        AddEntityResult result = AddEntity(ENTITY_TYPE_PLAYER, pos_x, pos_y, 16, 24, texture);
+        AddEntityResult result = AddEntity(ENTITY_TYPE_PLAYER, owner, pos_x, pos_y, 16, 24, texture);
         if (result.entity)
         {
             Entity *entity = result.entity;
@@ -329,7 +362,7 @@ namespace Game {
 
     AddEntityResult World::CreateTile(float pos_x, float pos_y, float width,float height,int conGroup, Texture2D texture)
     {
-        AddEntityResult result = AddEntity(ENTITY_TYPE_TILE, pos_x, pos_y, width, height, texture);
+        AddEntityResult result = AddEntity(ENTITY_TYPE_TILE, 0, pos_x, pos_y, width, height, texture);
         if (result.entity)
         {
             Entity *entity = result.entity;
@@ -343,7 +376,7 @@ namespace Game {
     Entity* World::CreateInteractive(float pos_x, float pos_y,float width,float height,int conGroup, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_INTERACTIVE, pos_x, pos_y, width,height, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_INTERACTIVE, 0, pos_x, pos_y, width,height, texture).entity)
         {
             entity->entity_group = conGroup;
         }
@@ -353,7 +386,7 @@ namespace Game {
     Entity* World::CreateMovingTile(float pos_x, float pos_y,float width,float height, int conGroup, Vector2 moveDirection, Vector2 endpoint, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_MOVING_TILE, pos_x, pos_y, width,height, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_MOVING_TILE, 0, pos_x, pos_y, width,height, texture).entity)
         {
             entity->move_direction.x = (pos_x - endpoint.x)*-1;
             entity->move_direction.y = (pos_y - endpoint.y)*-1;
@@ -370,7 +403,7 @@ namespace Game {
     Entity* World::CreateCollectible(float pos_x, float pos_y, float width, float height, int conGroup, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_COLLECTIBLE, pos_x, pos_y, width, height, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_COLLECTIBLE, 0, pos_x, pos_y, width, height, texture).entity)
         {
             entity->entity_group = conGroup;
             entity->active = true;
@@ -381,7 +414,7 @@ namespace Game {
     Entity* World::CreateDamagingTile(float pos_x, float pos_y, float width, float height, int conGroup, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_DAMAGING_TILE, pos_x, pos_y, width,height, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_DAMAGING_TILE, 0, pos_x, pos_y, width,height, texture).entity)
         {
             entity->entity_group = conGroup;
             entity->active = true;
@@ -393,7 +426,7 @@ namespace Game {
     Entity* World::CreateDestroyTile(float pos_x, float pos_y, float width, float height, int conGroup, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_DESTRUCTIBLE_TILE, pos_x, pos_y, width,height, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_DESTRUCTIBLE_TILE, 0, pos_x, pos_y, width,height, texture).entity)
         {
             entity->entity_group = conGroup;
             entity->active = true;
@@ -406,7 +439,7 @@ namespace Game {
     Entity* World::CreateCheckpoint(float pos_x, float pos_y, float width, float height, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_CHECKPOINT, pos_x, pos_y, width,height, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_CHECKPOINT, 0, pos_x, pos_y, width,height, texture).entity)
         {
 
         }
@@ -416,26 +449,28 @@ namespace Game {
     Entity* World::CreateExit(float pos_x, float pos_y, float width, float height, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_EXIT, pos_x, pos_y, width,height, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_EXIT, 0, pos_x, pos_y, width,height, texture).entity)
         {
 
         }
         return entity;
     }
+
     Entity* World::CreateEnemy(float pos_x, float pos_y, float width, float height, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_ENEMY, pos_x, pos_y, width, height, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_ENEMY, 0, pos_x, pos_y, width, height, texture).entity)
         {
             entity->velocity.x = 10.0f;
             entity->damage = 15;
         }
         return entity;
     }
+
     Entity* World::CreateBullet(float pos_x, float pos_y, float width, float height,float x_vel,float y_vel, Texture2D texture)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_BULLET, pos_x, pos_y, width, height, texture).entity)
+        if (entity = AddEntity(ENTITY_TYPE_BULLET, 0, pos_x, pos_y, width, height, texture).entity)
         {
             entity->velocity.x = x_vel;
             entity->velocity.y = y_vel;
@@ -445,7 +480,6 @@ namespace Game {
         }
         return entity;
     }
-
 
     void World::SetLevel(Level *level) {
         this->level = *level;

@@ -43,6 +43,7 @@ namespace Game {
         // SERIALIZED
         EntityType type;
         uint16_t revision;
+        int owner;
         unsigned int current_frame;
         Vector2 size;
         Vector2 position;

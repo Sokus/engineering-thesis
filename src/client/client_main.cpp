@@ -47,36 +47,37 @@ void DoPauseMenu()
     exit_button.Draw();
 }
 
-void DoGameScene()
+void DoGameScene(float dt)
 {
-    static Game::Entity *player;
+    static Game::EntityReference player_reference;
+
     if(!game_data.world.initialised)
     {
         game_data.world.Clear();
         game_data.world.SetLevel(app_state.level_selected);
-        Texture2D character = LoadTexture(RESOURCE_PATH "/character.png");
+        Texture2D character_texture = LoadTexture(RESOURCE_PATH "/character.png");
         Vector2 spawnpoint = app_state.level_selected->spawnpoint;
-        player = game_data.world.CreatePlayer(spawnpoint.x, spawnpoint.y, character, app_state.player_type_selected).entity;
+        player_reference = game_data.world.CreatePlayer(0, spawnpoint.x, spawnpoint.y, character_texture, app_state.player_type_selected).reference;
 
         game_data.world.initialised = true;
     }
-    if (game_data.world.level.finished) {
-        game_data.world.Clear();
-        app_state.current_menu = GAME_MENU_WON;
-    }
-
-    float expected_delta_time = 1.0f / (float)GetFPS();
-    float delta_time = GetFrameTime() > expected_delta_time ? expected_delta_time : GetFrameTime();
 
     Game::Input input = Game::GetInput();
-    game_data.world.Update(&input, delta_time);
+    game_data.world.Update(&input, dt);
 
     Camera2D camera = {};
     camera.offset = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
-    camera.zoom = 3.0f;
-    camera.target.x = player->position.x;
-    camera.target.y = player->position.y;
     camera.zoom = 4.0f;
+
+    if (!game_data.world.EntityReferenceIsValid(player_reference))
+        player_reference = game_data.world.GetOwnedEntityReference(Game::ENTITY_TYPE_PLAYER, 0, 0);
+
+    Game::Entity *player = game_data.world.GetEntityByReference(player_reference);
+    if (player)
+    {
+        camera.target.x = player->position.x;
+        camera.target.y = player->position.y;
+    }
 
     BeginMode2D(camera);
     ClearBackground(Color{25, 30, 40});
@@ -89,6 +90,12 @@ void DoGameScene()
             app_state.current_menu = GAME_MENU_MAIN;
         else
             app_state.current_menu = GAME_MENU_NONE;
+    }
+
+    if (game_data.world.level.finished)
+    {
+        game_data.world.Clear();
+        app_state.current_menu = GAME_MENU_WON;
     }
 
     if(app_state.current_menu != GAME_MENU_NONE)
@@ -130,11 +137,14 @@ int main(int, char**)
         app_state.menu_changed = (app_state.current_menu != app_state.last_menu);
         app_state.last_menu = app_state.current_menu;
 
+        float expected_delta_time = 1.0f / (float)GetFPS();
+        float dt = GetFrameTime() > expected_delta_time ? expected_delta_time : GetFrameTime();
+
         BeginDrawing();
         switch(app_state.current_scene)
         {
             case GAME_SCENE_TITLE_SCREEN: DoTitleScreenScene(); break;
-            case GAME_SCENE_GAME: DoGameScene(); break;
+            case GAME_SCENE_GAME: DoGameScene(dt); break;
             default: app_state.should_quit = true; break;
         }
         EndDrawing();
