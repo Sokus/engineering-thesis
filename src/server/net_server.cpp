@@ -4,7 +4,7 @@
 
 #include "macros.h"
 #include "system/pi_time.h"
-#include "game/level/content.h"
+#include "game/level.h"
 
 void Server::Init(Socket socket)
 {
@@ -13,7 +13,7 @@ void Server::Init(Socket socket)
     for (int i = 1; i < MAX_CLIENTS; i++)
         ResetClientState(i);
     world.Clear();
-    world.SetLevel(&Game::levels[0]);
+    Game::InitLevel(&world, Game::LEVEL_PLAINS);
 }
 
 void Server::ResetClientState(int client_index)
@@ -143,6 +143,9 @@ void Server::ConnectClient(int client_index, Address address)
     packet->client_index = client_index;
     SendPacketToConnectedClient(client_index, packet);
     DestroyPacket(packet);
+
+    // TODO: Remove hardcoded spawnpoint
+    world.CreatePlayer(client_index, 0.0f, 100.0f, Game::PLAYER_TYPE_ROUGE);
 }
 
 void Server::DisconnectClient(int client_index)
@@ -160,6 +163,8 @@ void Server::DisconnectClient(int client_index)
     ConnectionDisconnectPacket *packet = (ConnectionDisconnectPacket *)CreatePacket(PACKET_CONNECTION_DISCONNECT);
     SendPacketToConnectedClient(client_index, packet);
     DestroyPacket(packet);
+
+    world.FreeOwnedEntities(client_index);
 
     ResetClientState(client_index);
     num_connected_clients--;

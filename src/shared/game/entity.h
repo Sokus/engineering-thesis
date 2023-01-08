@@ -28,6 +28,9 @@ namespace Game {
         ENTITY_TYPE_COUNT, // ALWAYS LAST
     };
 
+    void LoadEntityTextures();
+    Texture GetEntityTexture(EntityType type);
+
     enum PlayerType
     {
         PLAYER_TYPE_ROUGE,
@@ -61,7 +64,6 @@ namespace Game {
         float max_frame_time;
         float time_until_state_change_allowed;
         float shot_cooldown;
-        Texture2D texture; // move it out?
         int health;
         int base_health; // move it out?
         float move_speed;

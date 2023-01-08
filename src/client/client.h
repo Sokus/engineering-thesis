@@ -3,6 +3,7 @@
 
 #include "game/world.h"
 #include "system/network.h"
+#include "game/level.h"
 #include "protocol/protocol.h"
 
 enum GameScene
@@ -30,14 +31,22 @@ enum ClientState
     CLIENT_DISCONNECTED,
     CLIENT_SENDING_CONNECTION_REQUEST,
     CLIENT_CONNECTED,
-    CLIENT_CONNECTION_REQUEST_TIMED_OUT,
-    CLIENT_KEEP_ALIVE_TIMED_OUT,
-    CLIENT_CONNECTION_DENIED_FULL,
+    CLIENT_ERROR,
+};
+
+enum ClientError
+{
+    CLIENT_ERROR_NONE,
+    CLIENT_ERROR_CONNECTION_REQUEST_TIMED_OUT,
+    CLIENT_ERROR_KEEP_ALIVE_TIMED_OUT,
+    CLIENT_ERROR_GAME_ALREADY_IN_PROGRESS,
+    CLIENT_ERROR_UNKNOWN,
 };
 
 struct Client
 {
     ClientState state;
+    ClientError error;
     Socket socket;
     Address server_address;
     int client_index;
@@ -57,11 +66,13 @@ struct Client
     void ProcessConnectionDeniedPacket(ConnectionDeniedPacket *packet, Address address);
     void ProcessConnectionDisconnectPacket(ConnectionDisconnectPacket *packet, Address address);
     void ProcessConnectionKeepAlivePacket(ConnectionKeepAlivePacket *packet, Address address);
+    void ProcessWorldStatePacket(WorldStatePacket *packet, Address address);
 };
 
 struct GameData
 {
     Game::World world;
+    Game::Input input;
 };
 
 struct AppData
@@ -77,8 +88,10 @@ struct AppData
     char join_ip_field[16];
     char join_port_field[6];
     char host_port_field[6];
+
     Game::PlayerType player_type_selected;
-    Game::Level *level_selected;
+    Game::LevelType level_type_selected;
+    bool multiplayer;
 };
 
 #endif // CLIENT_H

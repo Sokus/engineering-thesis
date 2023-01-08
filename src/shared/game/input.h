@@ -14,7 +14,6 @@ enum InputDirection
     DIRECTION_COUNT = 4
 };
 
-
 struct Input
 {
     bool move[DIRECTION_COUNT];

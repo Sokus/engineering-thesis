@@ -5,6 +5,8 @@
 #include "system/pi_time.h"
 #include "macros.h"
 
+extern GameData game_data;
+
 void Client::Init(Socket socket)
 {
     memset(this, 0, sizeof(Client));
@@ -74,10 +76,8 @@ void Client::SendPackets()
 
         case CLIENT_CONNECTED:
         {
-            if (time_since_last_packet_sent < CONNECTION_KEEP_ALIVE_SEND_RATE)
-                return;
-
-            ConnectionKeepAlivePacket *packet = (ConnectionKeepAlivePacket *)CreatePacket(PACKET_CONNECTION_KEEP_ALIVE);
+            InputPacket *packet = (InputPacket *)CreatePacket(PACKET_INPUT);
+            packet->input = game_data.input;
             SendPacketToServer(packet);
             DestroyPacket(packet);
         } break;
@@ -112,6 +112,10 @@ void Client::ReceivePackets()
                 ProcessConnectionKeepAlivePacket((ConnectionKeepAlivePacket *)packet, address);
                 break;
 
+            case PACKET_WORLD_STATE:
+                ProcessWorldStatePacket((WorldStatePacket *)packet, address);
+                break;
+
             default: break;
         }
 
@@ -130,7 +134,8 @@ void Client::CheckForTimeOut()
             if (time_since_last_packet_received > CONNECTION_REQUEST_TIME_OUT)
             {
                 printf("connection request to server timed out\n");
-                state = CLIENT_CONNECTION_REQUEST_TIMED_OUT;
+                state = CLIENT_ERROR;
+                error = CLIENT_ERROR_CONNECTION_REQUEST_TIMED_OUT;
                 return;
             }
         } break;
@@ -140,7 +145,8 @@ void Client::CheckForTimeOut()
             if (time_since_last_packet_received > CONNECTION_KEEP_ALIVE_TIME_OUT)
             {
                 printf("keep alive timed out\n");
-                state = CLIENT_KEEP_ALIVE_TIMED_OUT;
+                state = CLIENT_ERROR;
+                error = CLIENT_ERROR_KEEP_ALIVE_TIMED_OUT;
                 Disconnect();
                 return;
             }
@@ -164,6 +170,7 @@ void Client::ProcessConnectionAcceptedPacket(ConnectionAcceptedPacket *packet, A
     printf("client is now connected to server: %s (client index = %d)\n", address_string, packet->client_index);
     state = CLIENT_CONNECTED;
     client_index = packet->client_index;
+    last_packet_receive_time = Time_Now();
 }
 
 void Client::ProcessConnectionDeniedPacket(ConnectionDeniedPacket *packet, Address address)
@@ -178,8 +185,9 @@ void Client::ProcessConnectionDeniedPacket(ConnectionDeniedPacket *packet, Addre
     char *address_string = AddressToString(address, buffer, sizeof(buffer));
     if (packet->reason == CONNECTION_DENIED_SERVER_FULL)
     {
-        printf("client received connection denied from server: %s (server is full)\n", address_string);
-        state = CLIENT_CONNECTION_DENIED_FULL;
+        printf("client received connection denied from server: %s\n", address_string);
+        state = CLIENT_ERROR;
+        error = CLIENT_ERROR_UNKNOWN;
     }
 }
 
@@ -201,6 +209,25 @@ void Client::ProcessConnectionKeepAlivePacket(ConnectionKeepAlivePacket *packet,
 
     if (!AddressCompare(server_address, address))
         return;
+
+    last_packet_receive_time = Time_Now();
+}
+
+void Client::ProcessWorldStatePacket(WorldStatePacket *packet, Address address)
+{
+    if (state != CLIENT_CONNECTED)
+        return;
+
+    if (!AddressCompare(server_address, address))
+        return;
+
+    ASSERT(packet->start_index >= 0);
+    ASSERT(packet->start_index < Game::max_entity_count);
+    ASSERT(packet->entity_count >= 0);
+    ASSERT(packet->start_index + packet->entity_count <= Game::max_entity_count);
+
+    size_t entity_data_size = packet->entity_count * sizeof(Game::Entity);
+    memcpy(&game_data.world.entities[packet->start_index], packet->entities, entity_data_size);
 
     last_packet_receive_time = Time_Now();
 }

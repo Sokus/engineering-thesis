@@ -1,7 +1,6 @@
 #include "entity.h"
 #include "macros.h"
 #include "config.h"
-#include "game/level/content.h"
 #include "input.h"
 #include "serialization/bitstream.h"
 #include "serialization/serialize.h"
@@ -12,6 +11,43 @@
 #include "raymath.h"
 
 namespace Game {
+
+    Texture entity_textures[ENTITY_TYPE_COUNT];
+    bool entity_textures_loaded = false;
+
+    void LoadEntityTextures()
+    {
+        ASSERT(!entity_textures_loaded);
+        if (!entity_textures_loaded)
+        {
+            // TODO: stub texture
+            // entity_textures[ENTITY_TYPE_NONE] = LoadTexture(RESOURCE_PATH "");
+            entity_textures[ENTITY_TYPE_PLAYER] = LoadTexture(RESOURCE_PATH "/character.png");
+            entity_textures[ENTITY_TYPE_TILE] = LoadTexture(RESOURCE_PATH "/tile.png");
+            entity_textures[ENTITY_TYPE_INTERACTIVE] = LoadTexture(RESOURCE_PATH "/interactive.png");
+            entity_textures[ENTITY_TYPE_MOVING_TILE] = LoadTexture(RESOURCE_PATH "/movingtile.png");
+            entity_textures[ENTITY_TYPE_COLLECTIBLE] = LoadTexture(RESOURCE_PATH "/collectible.png");
+            entity_textures[ENTITY_TYPE_DAMAGING_TILE] = LoadTexture(RESOURCE_PATH "/dmgtile.png");
+            entity_textures[ENTITY_TYPE_DESTRUCTIBLE_TILE] = LoadTexture(RESOURCE_PATH "/destroytile.png");
+            entity_textures[ENTITY_TYPE_CHECKPOINT] = LoadTexture(RESOURCE_PATH "/checkpoint.png");
+            entity_textures[ENTITY_TYPE_ENEMY] = LoadTexture(RESOURCE_PATH "/enemy.png");
+            entity_textures[ENTITY_TYPE_BULLET] = LoadTexture(RESOURCE_PATH "/ballLightning.2x2.png");
+            entity_textures[ENTITY_TYPE_EXIT] = LoadTexture(RESOURCE_PATH "/exit.png");
+            entity_textures_loaded = true;
+        }
+    }
+
+    Texture GetEntityTexture(EntityType type)
+    {
+        ASSERT(entity_textures_loaded);
+        ASSERT(type >= 0);
+        ASSERT(type < ENTITY_TYPE_COUNT);
+        if (type >= 0 && type < ENTITY_TYPE_COUNT)
+        {
+            return entity_textures[type];
+        }
+        return entity_textures[ENTITY_TYPE_NONE];
+    }
 
     void Entity::setMoveSpeed(Input* input) {
         if (input->dash && dash_cooldown <= 0.0f && ability_reset)
@@ -151,6 +187,11 @@ namespace Game {
                     return;
             } break;
 
+            case ENTITY_TYPE_NONE:
+            {
+                return;
+            } break;
+
             default: break;
         }
 
@@ -160,6 +201,7 @@ namespace Game {
         destination.width = size.x;
         destination.height = size.y;
 
+        Texture texture = GetEntityTexture(type);
         DrawTexturePro(texture, source, destination, Vector2{}, 0.0f, WHITE);
     }
 

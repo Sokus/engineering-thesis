@@ -9,6 +9,7 @@
 #include "game/input.h"
 #include "client.h"
 #include "title_screen.h"
+#include "game/entity.h"
 
 #include "raylib.h"
 
@@ -54,10 +55,8 @@ void DoGameScene(float dt)
     if(!game_data.world.initialised)
     {
         game_data.world.Clear();
-        game_data.world.SetLevel(app_state.level_selected);
-        Texture2D character_texture = LoadTexture(RESOURCE_PATH "/character.png");
-        Vector2 spawnpoint = app_state.level_selected->spawnpoint;
-        player_reference = game_data.world.CreatePlayer(1, spawnpoint.x, spawnpoint.y, character_texture, app_state.player_type_selected).reference;
+        Game::InitLevel(&game_data.world, app_state.level_type_selected);
+        player_reference = game_data.world.CreatePlayer(1, game_data.world.spawnpoint.x, game_data.world.spawnpoint.y, app_state.player_type_selected).reference;
 
         game_data.world.initialised = true;
     }
@@ -77,8 +76,7 @@ void DoGameScene(float dt)
     Game::Entity *player = game_data.world.GetEntityByReference(player_reference);
     if (player)
     {
-        camera.target.x = player->position.x;
-        camera.target.y = player->position.y;
+        camera.target = player->position;
     }
 
     BeginMode2D(camera);
@@ -94,7 +92,7 @@ void DoGameScene(float dt)
             app_state.current_menu = GAME_MENU_NONE;
     }
 
-    if (game_data.world.level.finished)
+    if (game_data.world.finished)
     {
         game_data.world.Clear();
         app_state.current_menu = GAME_MENU_WON;
@@ -124,7 +122,9 @@ int main(int, char**)
     SetTargetFPS(60);
     SetExitKey(KEY_END);
 
-    Game::InitGameContent();
+    InitializeNetwork();
+    InitializeTime();
+    Game::LoadEntityTextures();
     UI::Init();
 
     app_state.last_scene = GAME_SCENE_INVALID;

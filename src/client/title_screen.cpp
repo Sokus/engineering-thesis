@@ -83,8 +83,6 @@ void DoJoinMenu()
     if(close_button.IsReleased())
         app_state.current_menu = GAME_MENU_MAIN;
 
-
-
     ip_field.Draw();
     port_field.Draw();
     join_button.Draw();
@@ -139,38 +137,33 @@ void DoHostMenu()
 
 void DoLevelMenu()
 {
-    UI::Button lvl1_button = UI::Button("Level 1");
-    UI::Button lvl2_button = UI::Button("Level 2");
-    UI::Button lvl3_button = UI::Button("Level 3");
+    struct ButtonTypePair { UI::Button button; Game::LevelType level_type; };
+    ButtonTypePair buttons[] = {
+        { UI::Button("Level 1"), Game::LEVEL_PLAINS },
+        { UI::Button("Level 2"), Game::LEVEL_PLAINS },
+        { UI::Button("Level 3"), Game::LEVEL_PLAINS }};
     UI::Button close_button = UI::Button("Close");
 
     UI::Begin();
     {
-        UI::Add(&lvl1_button.base);
-        UI::Add(&lvl2_button.base);
-        UI::Add(&lvl3_button.base); UI::EndRow();
+        for (int i = 0; i < ARRAY_SIZE(buttons); i++)
+            UI::Add(&buttons[i].button.base);
+        UI::EndRow();
         UI::Add(&close_button.base); UI::EndRow();
     }
     UI::End();
 
     if (close_button.IsReleased())
-        app_state.current_menu = GAME_MENU_MAIN;
-    if (lvl1_button.IsReleased()) {
-        app_state.level_selected = &Game::plains;
-        app_state.current_menu = GAME_MENU_PLAYER_SELECTION;
-    }
-    if (lvl2_button.IsReleased()) {
-        app_state.level_selected = &Game::plains;
-        app_state.current_menu = GAME_MENU_PLAYER_SELECTION;
-    }
-    if (lvl3_button.IsReleased()) {
-        app_state.level_selected = &Game::plains;
-        app_state.current_menu = GAME_MENU_PLAYER_SELECTION;
+        app_state.current_menu = GAME_MENU_LEVEL;
+
+    for (int i = 0; i < ARRAY_SIZE(buttons); i++) {
+        if (buttons[i].button.IsReleased()) {
+            app_state.level_type_selected = buttons[i].level_type;
+            app_state.current_menu = GAME_MENU_PLAYER_SELECTION;
+        }
+        buttons[i].button.Draw();
     }
 
-    lvl1_button.Draw();
-    lvl2_button.Draw();
-    lvl3_button.Draw();
     close_button.Draw();
 }
 
