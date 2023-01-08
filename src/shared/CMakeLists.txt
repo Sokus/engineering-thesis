@@ -6,7 +6,7 @@ file(GLOB_RECURSE SHARED_C_SRC *.c)
 add_library(shared STATIC
     ${SHARED_CPP_SRC}
     ${SHARED_C_SRC}
-)
+  "game/constans/constans.cpp")
 
 target_include_directories(shared
     PRIVATE

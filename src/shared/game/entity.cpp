@@ -7,7 +7,6 @@
 #include "serialization/serialize_extra.h"
 #include "protocol/protocol.h"
 
-#include "raylib.h"
 #include "raymath.h"
 
 namespace Game {
@@ -52,12 +51,12 @@ namespace Game {
     void Entity::setMoveSpeed(Input* input) {
         if (input->dash && dash_cooldown <= 0.0f && ability_reset)
         {
-            move_speed *= 10.0f;
-            dash_cooldown = 1.5f;
+            move_speed *= Const::PLAYER.DASH_SPEED;
+            dash_cooldown = Const::PLAYER.DASH_COOLDOWN;
             ability_reset = false;
         }
         else if (move_speed > base_speed) {
-            move_speed -= 100.0f;
+            move_speed -= Const::PLAYER.DASH_BRAKESPEED;
         }
         else {
             move_speed = base_speed;
@@ -135,18 +134,18 @@ namespace Game {
     {
         ASSERT(type == ENTITY_TYPE_PLAYER);
         move_direction.x = 0;
-        move_direction.x -= input->move[DIRECTION_LEFT] * 2.0f;
-        move_direction.x += input->move[DIRECTION_RIGHT] * 2.0f;
         setMoveSpeed(input);
-        if (move_direction.x != 0.0f)
+        move_direction.x -= input->move[DIRECTION_LEFT];
+        move_direction.x += input->move[DIRECTION_RIGHT];
+        if (move_direction.x != 0.0f) //move to Update
             facing = (int)move_direction.x;
         if (input->move[DIRECTION_UP] && on_ground)
-            move_direction.y = (float)jump_height * -1.0f;
-        if (!on_ground) {
+            move_direction.y = (float)jump_height * -1.0f; 
+        if (!on_ground) { //move to Update
             move_direction.y += 0.75f;
         }
         velocity.x = move_direction.x * move_speed;
-        velocity.y = move_direction.y * 30.0f;
+        velocity.y = move_direction.y * Const::PLAYER.FALL_SPEED;
     }
     void Entity::MoveX(float dt) {
         ASSERT(type == ENTITY_TYPE_PLAYER);
@@ -213,13 +212,8 @@ namespace Game {
         return 0;
     }
     void Entity::calculateCollisionSide(Entity ent) {
-        if ((position.x+size.x/2) - (ent.position.x+ent.size.x/2) > 0) {
-            collideLeft = true;
-        }
-        if ((position.x + size.x / 2) - (ent.position.x + ent.size.x / 2) < 0) {
-            collideRight = true;
-        }
-        if ((position.y + size.y / 2) - (ent.position.y + ent.size.y / 2) > 0) {
+        if ((position.x + size.x > ent.position.x && position.x < ent.position.x + ent.size.x) &&
+            (position.y + size.y / 2) > (ent.position.y + ent.size.y / 2)) {
             collideTop = true;
         }
     }
@@ -228,19 +222,19 @@ namespace Game {
 
         if (endpoints[0].x == endpoints[1].x) {
             float distance1 = sqrtf(powf(abs(position.y - target.y), 2));
-            if ((distance1 < 0.1)) {
+            if ((distance1 < 0.3)) {
                 return 1;
             }
         }
         if (endpoints[0].y == endpoints[1].y) {
             float distance1 = sqrtf(powf(abs(position.x - target.x), 2));
-            if ((distance1 < 0.05)) {
+            if ((distance1 < 0.3)) {
                 return 1;
             }
         }
         else {
             float distance1 = sqrtf(powf(abs(position.y - target.y), 2) + powf(abs(position.x - target.x), 2));
-            if ((distance1 < 0.1)) {
+            if ((distance1 < 0.3)) {
                 return 1;
             }
         }

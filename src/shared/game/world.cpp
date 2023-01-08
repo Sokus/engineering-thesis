@@ -9,13 +9,13 @@
 
 namespace Game {
 
-    void World::MoveEnemy(Entity& enemy,float dt) {
+    void World::MoveEnemy(Entity& enemy, float dt) {
         Vector2 ent_pos;
         for (int collide_idx = 0; collide_idx < max_entity_count; collide_idx++)
         {
             Entity* collideEntity = entities + collide_idx;
             if (collideEntity->type != ENTITY_TYPE_NONE && collideEntity->collidable) {
-                ent_pos = Vector2Add(collideEntity->position ,(Vector2Scale(collideEntity->velocity,dt)));
+                ent_pos = Vector2Add(collideEntity->position, (Vector2Scale(collideEntity->velocity, dt)));
                 if (enemy.collidesWith(*collideEntity)) {
                     if (enemy.velocity.x > 0) {
                         enemy.velocity.x = enemy.velocity.x * -1;
@@ -31,11 +31,11 @@ namespace Game {
         }
     }
 
-    void World::CalculateCollisions(Entity& player, Vector2 velocity, Input* input, float dt,bool dim) {
+    void World::CalculateCollisions(Entity& player, Vector2 velocity, Input* input, float dt, bool dim) {
         for (int collide_idx = 0; collide_idx < max_entity_count; collide_idx++)
         {
             Entity* collideEntity = entities + collide_idx; //TODO add reaction to squishing - dmg, teleport?
-            if (collideEntity->type!= ENTITY_TYPE_NONE && collideEntity->collidable) {
+            if (collideEntity->type != ENTITY_TYPE_NONE && collideEntity->collidable) {
                 Vector2 ent_pos = {};
                 ent_pos.x = collideEntity->position.x + collideEntity->velocity.x * dt;
                 ent_pos.y = collideEntity->position.y + collideEntity->velocity.y * dt;
@@ -92,7 +92,7 @@ namespace Game {
                     && collideEntity->time_until_state_change_allowed <= 0.0f) {
                     collideEntity->active = !collideEntity->active;
                     UpdateActiveTiles(dt, collideEntity->entity_group);
-                    collideEntity->time_until_state_change_allowed = 0.25f; // change if state is the same longer then 1/4 of sec
+                    collideEntity->time_until_state_change_allowed = Const::ENTITY.INTERACTIVE_STATE_COOLDOWN; // change if state is the same longer then 1/4 of sec
                 }
             }
             else if (collideEntity->type == ENTITY_TYPE_COLLECTIBLE) {
@@ -105,14 +105,14 @@ namespace Game {
                 if (player.collidesWith(*collideEntity)
                     && player.time_until_state_change_allowed <= 0.0f) {
                     player.health -= collideEntity->damage;
-                    player.time_until_state_change_allowed = 1.5f; //hurts every 1.5 of sec
+                    player.time_until_state_change_allowed = Const::PLAYER.DAMAGE_COOLDOWN; //hurts every 1.5 of sec
                 }
             }
             else if (collideEntity->type == ENTITY_TYPE_CHECKPOINT) {
                 if (player.collidesWith(*collideEntity) && !collideEntity->active) {
                     float pos_y = collideEntity->position.y + collideEntity->size.y - player.size.y;
                     collideEntity->active = true;
-                    spawnpoint = Vector2{collideEntity->position.x, pos_y};
+                    spawnpoint = Vector2{ collideEntity->position.x, pos_y };
                 }
             }
             else if (collideEntity->type == ENTITY_TYPE_EXIT) {
@@ -124,10 +124,11 @@ namespace Game {
                 if (player.collidesWith(*collideEntity)
                     && player.time_until_state_change_allowed <= 0.0f) {
                     player.health -= collideEntity->damage;
-                    player.time_until_state_change_allowed = 1.5f;
+                    player.time_until_state_change_allowed = Const::PLAYER.DAMAGE_COOLDOWN;
                 }
             }
         }
+        //printf("L:%d,R:%d,T:%d,D:%d\n", player.collideLeft, player.collideRight, player.collideTop, player.on_ground);
     }
 
     void World::UpdateActiveTiles(float dt, int connGroup) {
@@ -140,15 +141,19 @@ namespace Game {
             }
         }
     }
-    void World::hitObstacles(Entity &bullet) {
+    void World::hitObstacles(Entity& bullet) {
         for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
         {
             Entity* entity = entities + entity_idx;
-            if (entity->type == ENTITY_TYPE_DESTRUCTIBLE_TILE && bullet.collidesWith(*entity) ) {
+            if ((entity->type == ENTITY_TYPE_DESTRUCTIBLE_TILE || entity->type == ENTITY_TYPE_ENEMY) && bullet.collidesWith(*entity)) {
                 entity->health -= bullet.damage;
                 if (entity->health <= 0) {
+
                     FreeEntity(entity);
                 }
+                FreeEntity(&bullet);
+            }
+            if (entity->type != ENTITY_TYPE_NONE && entity->collidable && bullet.collidesWith(*entity)) {
                 FreeEntity(&bullet);
             }
         }
@@ -157,20 +162,23 @@ namespace Game {
     void World::Clear()
     {
         memset(entities, 0, sizeof(max_entity_count * sizeof(Entity)));
-
+        for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
+        {
+            Entity* entity = entities + entity_idx;
+            entity->type = ENTITY_TYPE_NONE;
+        }
         parallax_background.Clear();
     }
-
-    void World::CheckPlayerShot(Entity& player, Input* input, float dt) {
+    void World::CheckPlayerShot(Entity& player, Input* input, float dt) { //Add to check which player shoot
         if (input->shoot && player.shot_cooldown <= 0.0f) {
-            float x_vel = (float)(100 * player.facing);
+            float x_vel = Const::ENTITY.BULLET_VELOCITY_X * player.facing;
             float y_vel = player.velocity.y * !player.on_ground * 0.5f;
-            CreateBullet(player.position.x,player.position.y,16,16,x_vel,y_vel);
-            player.shot_cooldown = 0.75f;
+            CreateBullet(player.position.x, player.position.y, 16, 16, x_vel, y_vel);
+            player.shot_cooldown = Const::PLAYER.SHOT_COOLDOWN;
         }
     }
 
-    void World::MovePlayer(Entity&entity,Input* input, float dt) {
+    void World::MovePlayer(Entity& entity, Input* input, float dt) {
 
         ASSERT(entity.type == ENTITY_TYPE_PLAYER);
         if (entity.health <= 0) {
@@ -179,7 +187,7 @@ namespace Game {
             return;
         }
         entity.Control(input, dt);
-        CheckPlayerShot(entity,input,dt);
+        CheckPlayerShot(entity, input, dt);
 
         entity.MoveX(dt);
         CalculateCollisions(entity, Vector2{ entity.velocity.x,0.0f }, input, dt, 0);
@@ -189,12 +197,12 @@ namespace Game {
         if ((entity.on_ground && entity.collideTop) || (entity.collideLeft && entity.collideRight)) {
             entity.health = 0;
         }
-        entity.collideLeft = 0;
-        entity.collideRight = 0;
-        entity.collideTop = 0;
+        entity.collideLeft = false;
+        entity.collideRight = false;
+        entity.collideTop = false;
     }
 
-    void World::Update(Input *inputs, int num_inputs, float dt)
+    void World::Update(Input* inputs, int num_inputs, float dt)
     {
         parallax_background.Update(dt);
 
@@ -205,24 +213,24 @@ namespace Game {
 
             switch (entity->type)
             {
-                case ENTITY_TYPE_PLAYER:
-                {
-                    ASSERT(entity->owner >= 0);
-                    ASSERT(entity->owner < num_inputs);
-                    if (entity->owner >= 0 && entity->owner < num_inputs)
-                        MovePlayer(*entity, &inputs[entity->owner], dt);
-                } break;
+            case ENTITY_TYPE_PLAYER:
+            {
+                ASSERT(entity->owner >= 0);
+                ASSERT(entity->owner < num_inputs);
+                if (entity->owner >= 0 && entity->owner < num_inputs)
+                    MovePlayer(*entity, &inputs[entity->owner], dt);
+            } break;
 
-                case ENTITY_TYPE_ENEMY:
-                    MoveEnemy(*entity, dt);
-                    break;
+            case ENTITY_TYPE_ENEMY:
+                MoveEnemy(*entity, dt);
+                break;
 
-                case ENTITY_TYPE_BULLET:
-                {
-                    hitObstacles(*entity);
-                    if (entity->time_until_state_change_allowed <= 0)
-                        FreeEntity(entity);
-                } break;
+            case ENTITY_TYPE_BULLET:
+            {
+                hitObstacles(*entity);
+                if (entity->time_until_state_change_allowed <= 0)
+                    FreeEntity(entity);
+            } break;
             }
         }
     }
@@ -230,11 +238,11 @@ namespace Game {
     void World::Draw()
     {
         // TODO(sokus): Fix this
-        parallax_background.Draw({0, 0});
+        parallax_background.Draw({ 0, 0 });
 
         for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
         {
-            Entity *entity = &entities[entity_idx];
+            Entity* entity = &entities[entity_idx];
             if (entity->type != ENTITY_TYPE_NONE)
                 entity->Draw();
         }
@@ -263,7 +271,7 @@ namespace Game {
 
         for (int i = MAX(1, start_index); i < max_entity_count; i++)
         {
-            Entity *entity = &entities[i];
+            Entity* entity = &entities[i];
             if (entity->owner != owner)
                 continue;
 
@@ -286,9 +294,9 @@ namespace Game {
         return result;
     }
 
-    Entity *World::GetEntityByReference(EntityReference reference)
+    Entity* World::GetEntityByReference(EntityReference reference)
     {
-        Entity *entity = nullptr;
+        Entity* entity = nullptr;
         if (reference.index > 0 && reference.index < max_entity_count)
         {
             if (entities[reference.index].revision == reference.revision)
@@ -301,14 +309,14 @@ namespace Game {
     {
         AddEntityResult result = {};
         EntityReference reference = GetFreeEntityReference();
-        Entity *entity = GetEntityByReference(reference);
+        Entity* entity = GetEntityByReference(reference);
 
         if (entity)
         {
             memset(entity, 0, sizeof(Entity));
             entity->type = type;
             entity->owner = owner;
-            entity->position = Vector2{x, y};
+            entity->position = Vector2{ x, y };
             entity->size.x = w;
             entity->size.y = h;
 
@@ -319,7 +327,7 @@ namespace Game {
         return result;
     }
 
-    void World::FreeEntity(Entity *entity)
+    void World::FreeEntity(Entity* entity)
     {
         if (entity)
         {
@@ -346,31 +354,31 @@ namespace Game {
         AddEntityResult result = AddEntity(ENTITY_TYPE_PLAYER, owner, pos_x, pos_y, 16, 24);
         if (result.entity)
         {
-            Entity *entity = result.entity;
+            Entity* entity = result.entity;
             entity->num_frames = 4;
-            entity->max_frame_time = 0.25f;
+            entity->max_frame_time = Const::ENTITY.MAX_FRAME_TIME;
             entity->collidable = 0;
             switch (playertype)
             {
             case PLAYER_TYPE_ROUGE:
-                entity->base_health = 80;
-                entity->base_speed = 55.0f;
-                entity->jump_height = 10.0f;
+                entity->base_health = Const::PLAYER.ROUGE.BASE_HEALTH;
+                entity->base_speed = Const::PLAYER.ROUGE.BASE_SPEED;
+                entity->jump_height = Const::PLAYER.ROUGE.JUMP_HEIGHT;
                 break;
             case PLAYER_TYPE_SNIPER:
-                entity->base_health = 70;
-                entity->base_speed = 50.0f;
-                entity->jump_height = 3.0f;
+                entity->base_health = Const::PLAYER.SNIPER.BASE_HEALTH;
+                entity->base_speed = Const::PLAYER.SNIPER.BASE_SPEED;
+                entity->jump_height = Const::PLAYER.SNIPER.JUMP_HEIGHT;
                 break;
             case PLAYER_TYPE_HEALER:
-                entity->base_health = 100;
-                entity->base_speed = 45.0f;
-                entity->jump_height = 5.0f;
+                entity->base_health = Const::PLAYER.HEALER.BASE_HEALTH;
+                entity->base_speed = Const::PLAYER.HEALER.BASE_SPEED;
+                entity->jump_height = Const::PLAYER.HEALER.JUMP_HEIGHT;
                 break;
             case PLAYER_TYPE_WARRIOR:
-                entity->base_health = 120;
-                entity->base_speed = 37.5f;
-                entity->jump_height = 2.25f;
+                entity->base_health = Const::PLAYER.HEALER.BASE_HEALTH;
+                entity->base_speed = Const::PLAYER.HEALER.BASE_SPEED;
+                entity->jump_height = Const::PLAYER.WARRIOR.JUMP_HEIGHT;
                 break;
             default: break;
             }
@@ -380,12 +388,12 @@ namespace Game {
         return result;
     }
 
-    AddEntityResult World::CreateTile(float pos_x, float pos_y, float width,float height,int conGroup)
+    AddEntityResult World::CreateTile(float pos_x, float pos_y, float width, float height, int conGroup)
     {
         AddEntityResult result = AddEntity(ENTITY_TYPE_TILE, 0, pos_x, pos_y, width, height);
         if (result.entity)
         {
-            Entity *entity = result.entity;
+            Entity* entity = result.entity;
             entity->entity_group = conGroup;
             entity->collidable = true;
             entity->active = true;
@@ -393,7 +401,7 @@ namespace Game {
         return result;
     }
 
-    Entity* World::CreateInteractive(float pos_x, float pos_y,float width,float height,int conGroup)
+    Entity* World::CreateInteractive(float pos_x, float pos_y, float width, float height, int conGroup)
     {
         Entity* entity = nullptr;
         if (entity = AddEntity(ENTITY_TYPE_INTERACTIVE, 0, pos_x, pos_y, width, height).entity)
@@ -403,17 +411,17 @@ namespace Game {
         return entity;
     }
 
-    Entity* World::CreateMovingTile(float pos_x, float pos_y,float width,float height, int conGroup, Vector2 moveDirection, Vector2 endpoint)
+    Entity* World::CreateMovingTile(float pos_x, float pos_y, float width, float height, int conGroup, Vector2 moveDirection, Vector2 endpoint)
     {
         Entity* entity = nullptr;
         if (entity = AddEntity(ENTITY_TYPE_MOVING_TILE, 0, pos_x, pos_y, width, height).entity)
         {
-            entity->move_direction.x = (pos_x - endpoint.x)*-1;
-            entity->move_direction.y = (pos_y - endpoint.y)*-1;
-            entity->move_speed = 20.0f;
+            entity->move_direction.x = (pos_x - endpoint.x) * -1;
+            entity->move_direction.y = (pos_y - endpoint.y) * -1;
+            entity->move_speed = Const::ENTITY.MOVING_TILE_MOVE_SPEED;
             entity->entity_group = conGroup;
             entity->active = true;
-            entity->endpoints[1] = Vector2{pos_x, pos_y};
+            entity->endpoints[1] = Vector2{ pos_x, pos_y };
             entity->endpoints[0] = Vector2{ endpoint.x, endpoint.y };
             entity->collidable = true;
         }
@@ -434,11 +442,11 @@ namespace Game {
     Entity* World::CreateDamagingTile(float pos_x, float pos_y, float width, float height, int conGroup)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_DAMAGING_TILE, 0, pos_x, pos_y, width,height).entity)
+        if (entity = AddEntity(ENTITY_TYPE_DAMAGING_TILE, 0, pos_x, pos_y, width, height).entity)
         {
             entity->entity_group = conGroup;
             entity->active = true;
-            entity->damage = 10;
+            entity->damage = Const::ENTITY.DAMAGING_TILE_DAMAGE;
         }
         return entity;
     }
@@ -450,7 +458,7 @@ namespace Game {
         {
             entity->entity_group = conGroup;
             entity->active = true;
-            entity->health = 15;
+            entity->health = Const::ENTITY.DESTROY_TILE_HEALTH;
             entity->collidable = 1;
         }
         return entity;
@@ -459,7 +467,7 @@ namespace Game {
     Entity* World::CreateCheckpoint(float pos_x, float pos_y, float width, float height)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_CHECKPOINT, 0, pos_x, pos_y, width,height).entity)
+        if (entity = AddEntity(ENTITY_TYPE_CHECKPOINT, 0, pos_x, pos_y, width, height).entity)
         {
 
         }
@@ -469,7 +477,7 @@ namespace Game {
     Entity* World::CreateExit(float pos_x, float pos_y, float width, float height)
     {
         Entity* entity = nullptr;
-        if (entity = AddEntity(ENTITY_TYPE_EXIT, 0, pos_x, pos_y, width,height).entity)
+        if (entity = AddEntity(ENTITY_TYPE_EXIT, 0, pos_x, pos_y, width, height).entity)
         {
 
         }
@@ -481,23 +489,24 @@ namespace Game {
         Entity* entity = nullptr;
         if (entity = AddEntity(ENTITY_TYPE_ENEMY, 0, pos_x, pos_y, width, height).entity)
         {
-            entity->velocity.x = 10.0f;
-            entity->damage = 15;
+            entity->velocity.x = Const::ENEMY.VELOCITY_X;
+            entity->damage = Const::ENEMY.DAMAGE;
         }
         return entity;
     }
 
-    Entity* World::CreateBullet(float pos_x, float pos_y, float width, float height,float x_vel,float y_vel)
+    Entity* World::CreateBullet(float pos_x, float pos_y, float width, float height, float x_vel, float y_vel)
     {
         Entity* entity = nullptr;
         if (entity = AddEntity(ENTITY_TYPE_BULLET, 0, pos_x, pos_y, width, height).entity)
         {
             entity->velocity.x = x_vel;
             entity->velocity.y = y_vel;
-            entity->damage = 15;
+            entity->damage = Const::ENTITY.BULLET_DAMAGE;
             entity->active = true;
-            entity->time_until_state_change_allowed = 2.0f;
+            entity->time_until_state_change_allowed = Const::ENTITY.BULLET_LIFETIME;
         }
         return entity;
     }
+
 }

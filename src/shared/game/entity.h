@@ -3,6 +3,7 @@
 
 #include "raylib.h"
 #include "stdint.h"
+#include "constans/constans.h"
 
 struct BitStream;
 

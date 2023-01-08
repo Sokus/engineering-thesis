@@ -95,7 +95,10 @@ void DoGameScene(float dt)
     if (game_data.world.finished)
     {
         game_data.world.Clear();
+        game_data.world.initialised = false;
+        game_data.world.finished = false;
         app_state.current_menu = GAME_MENU_WON;
+        app_state.current_scene = GAME_SCENE_TITLE_SCREEN;
     }
 
     if(app_state.current_menu != GAME_MENU_NONE)
@@ -109,6 +112,7 @@ void DoGameScene(float dt)
         {
             case GAME_MENU_MAIN: DoPauseMenu(); break;
             case GAME_MENU_OPTIONS: DoOptionsMenu(); break;
+            case GAME_MENU_WON: DoLevelMenu(); break;
             default: break;
         }
     }

@@ -15,7 +15,7 @@ void InitPlains(World *world)
     world->CreateTile(64.0f, 160.0f, 16.0f, 32.0f, 0);
     world->CreateTile(112.0f, 64.0f, 96.0f, 16.0f, 0);
     world->CreateTile(208.0f, 0.0f, 16.0f, 160.0f, 0);
-    world->CreateTile(208.0f, 160.0f, 16.0f, 32.0f, 1);
+    //world->CreateTile(208.0f, 160.0f, 16.0f, 32.0f, 1);
     world->CreateTile(336.0f, 176.0f, 16.0f, 16.0f, 0);
     world->CreateTile(400.0f, 176.0f, 16.0f, 16.0f, 0);
 

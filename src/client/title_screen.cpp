@@ -235,6 +235,7 @@ void DoTitleScreenScene()
         case GAME_MENU_LEVEL: DoLevelMenu(); break;
         case GAME_MENU_OPTIONS: DoOptionsMenu(); break;
         case GAME_MENU_PLAYER_SELECTION: DoPlayerSelectionMenu(); break;
+        case GAME_MENU_WON: DoLevelMenu(); break;
         default: break;
     }
 }
