@@ -44,13 +44,19 @@ namespace Const {
 		int DAMAGING_TILE_DAMAGE = 10;
 		int DESTROY_TILE_HEALTH = 20;
 		float BULLET_LIFETIME = 2.0f;
-		int BULLET_DAMAGE = 15;
+		int BULLET_DAMAGE = 50;
 		float BULLET_VELOCITY_X = 100.0f;
+		float BULLET_VELOCITY_Y = -100.0f;
 		float INTERACTIVE_STATE_COOLDOWN = 0.25f;
 	};
 	struct Enemy_Data {
 		float VELOCITY_X = 10.0f;
 		int DAMAGE = 15;
+		float SHOT_COOLDOWN = 2.0f;
+		float JUMP_HEIGHT = 10.0f;
+		float JUMP_COOLDOWN = 4.0f;
+		float MOVE_SPEED = 50.0f;
+		float FALL_SPEED = 30.0f;
 	};
 	extern Player_Data PLAYER;
 	extern Entity_Data ENTITY;

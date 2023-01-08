@@ -32,10 +32,12 @@ namespace Game {
         void Update(Input *inputs, int num_inputs, float dt);
 
         void Draw();
-        void MoveEnemy(Entity& enemy, float dt);
+        void ControlEnemy(Entity& enemy, float dt);
         void MovePlayer(Entity& player,Input* input, float dt);
         void CheckPlayerShot(Entity& player, Input* input, float dt);
-        void CalculateCollisions(Entity& player, Vector2 velocity, Input* input, float dt, bool dim);
+        void CalculateCollisions(Entity& player, Vector2 velocity, float dt, bool dim);
+        void CalculateEnemyCollisions(Entity& player, Vector2 velocity, float dt, bool dim);
+        void CheckStates(Entity& player, Vector2 velocity, Input* input, float dt);
         void UpdateActiveTiles(float dt, int connectionGroup);
 
         EntityReference GetFreeEntityReference();
@@ -55,8 +57,8 @@ namespace Game {
         Entity* CreateDestroyTile(float pos_x, float pos_y, float width, float height, int conGroup);
         Entity* CreateCheckpoint(float pos_x, float pos_y, float width, float height);
         Entity* CreateExit(float pos_x, float pos_y, float width, float height);
-        Entity* CreateEnemy(float pos_x, float pos_y, float width, float height);
-        Entity* World::CreateBullet(float pos_x, float pos_y, float width, float height,float vel_x,float vel_y);
+        Entity* CreateEnemy(float pos_x, float pos_y, float width, float height,int32_t property);
+        Entity* World::CreateBullet(float pos_x, float pos_y, float width, float height,float vel_x,float vel_y,int owner);
         void LoadTextures();
         void hitObstacles(Entity &bullet);
     };

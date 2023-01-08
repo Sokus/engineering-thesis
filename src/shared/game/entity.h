@@ -28,6 +28,14 @@ namespace Game {
 
         ENTITY_TYPE_COUNT, // ALWAYS LAST
     };
+    enum EntityVariant {
+        ENEMY_MOVE = 1,
+        ENEMY_SHOOT_TOP = 2,
+        ENEMY_SHOOT_SIDE = 4,
+        ENEMY_FOLLOW = 8,
+        ENEMY_JUMP = 16,
+        ENEMY_BYTES = 0xF
+    };
 
     void LoadEntityTextures();
     Texture GetEntityTexture(EntityType type);
@@ -57,6 +65,7 @@ namespace Game {
         Vector2 position;
 
         // NOT SERIALIZED
+        int32_t variant;
         int entity_group; // used to connect tiles with interactibles
         Vector2 endpoints[2]; // ENTITY_TYPE_MOVING_TILE
         bool target;
@@ -93,10 +102,13 @@ namespace Game {
         bool active;
 
         void Update(float dt);
+        void UpdateMovingTile(float dt);
         void setMoveSpeed(Input* input);
         void Draw();
         bool collidesWith(Entity ent);
         void calculateCollisionSide(Entity ent);
+        void correctPositionsWithStatic(Entity ent,Vector2 velocity,float dt);
+        void correctPositionsWithMoving(Entity ent,Vector2 velocity,Vector2 ent_vel,float dt,float dim);
         void Control(Input* input,float dt);
         void MoveX(float dt);
         void MoveY(float dt);

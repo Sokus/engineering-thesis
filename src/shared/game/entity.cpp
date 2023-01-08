@@ -96,38 +96,31 @@ namespace Game {
                 dash_cooldown = 0.0f;
         }
 
-        if (type == ENTITY_TYPE_MOVING_TILE) {
-            Vector2 tmp_pos = Vector2Scale(velocity, dt);
-            float dirx = 1;
-            float diry = 1;
-            move_direction.x = 0;
-            move_direction.y = 0;
-            if (position.x != endpoints[target].x) {
-                dirx = (position.x - endpoints[target].x) / abs(position.x - endpoints[target].x);
-                move_direction.x = log10f(abs(position.x - endpoints[target].x)+5) * dirx * -1.0f;
-            }
-            if (position.y != endpoints[target].y) {
-                diry = (position.y - endpoints[target].y) / abs(position.y - endpoints[target].y);
-                move_direction.y = log10f(abs(position.y - endpoints[target].y)+5) * diry * -1.0f;
-            }
-            if (reachedEndpoint(endpoints[target], dt)) {
-                target = !target;
-                move_direction.x = move_direction.x * -1.0f;
-                move_direction.y = move_direction.y * -1.0f;
-            }
+    }
+    void Entity::UpdateMovingTile(float dt) {
+        Vector2 tmp_pos = Vector2Scale(velocity, dt);
+        float dirx = 1;
+        float diry = 1;
+        move_direction.x = 0;
+        move_direction.y = 0;
+        if (position.x != endpoints[target].x) {
+            dirx = (position.x - endpoints[target].x) / abs(position.x - endpoints[target].x);
+            move_direction.x = log10f(abs(position.x - endpoints[target].x) + 5) * dirx * -1.0f;
+        }
+        if (position.y != endpoints[target].y) {
+            diry = (position.y - endpoints[target].y) / abs(position.y - endpoints[target].y);
+            move_direction.y = log10f(abs(position.y - endpoints[target].y) + 5) * diry * -1.0f;
+        }
+        if (reachedEndpoint(endpoints[target], dt)) {
+            target = !target;
+            move_direction.x = move_direction.x * -1.0f;
+            move_direction.y = move_direction.y * -1.0f;
+        }
 
-            velocity = Vector2Scale(move_direction, move_speed);
-            Vector2 delta_pos = Vector2Scale(velocity, dt);
-            position = Vector2Add(position, delta_pos);
-        }
-        if (type == ENTITY_TYPE_ENEMY) {
-            Vector2 delta_pos = Vector2Scale(velocity, dt);
-            position = Vector2Add( position,delta_pos);
-        }
-        if (type == ENTITY_TYPE_BULLET) {
-            Vector2 delta_pos = Vector2Scale(velocity, dt);
-            position = Vector2Add(position, delta_pos);
-        }
+        velocity = Vector2Scale(move_direction, move_speed);
+        Vector2 delta_pos = Vector2Scale(velocity, dt);
+        position = Vector2Add(position, delta_pos);
+
     }
 
     void Entity::Control(Input* input, float dt)
@@ -148,11 +141,11 @@ namespace Game {
         velocity.y = move_direction.y * Const::PLAYER.FALL_SPEED;
     }
     void Entity::MoveX(float dt) {
-        ASSERT(type == ENTITY_TYPE_PLAYER);
+        ASSERT(type == ENTITY_TYPE_PLAYER || type == ENTITY_TYPE_ENEMY);
         position.x += velocity.x * dt;
     }
     void Entity::MoveY(float dt) {
-        ASSERT(type == ENTITY_TYPE_PLAYER);
+        ASSERT(type == ENTITY_TYPE_PLAYER || type == ENTITY_TYPE_ENEMY);
         position.y += velocity.y * dt;
     }
 
@@ -253,5 +246,83 @@ namespace Game {
             SERIALIZE_VECTOR2(stream, position);
         }
         return true;
+    }
+
+    void Entity::correctPositionsWithStatic(Entity ent,Vector2 velo,float dt) {
+        if (velo.x > 0) {
+            velocity.x = 0;
+            position.x = ent.position.x - size.x;
+        }
+        if (velo.x < 0) {
+            velocity.x = 0;
+            position.x = ent.position.x + ent.size.x;
+        }
+        if (velo.y < 0) {
+            position.y = ent.position.y + ent.size.y;
+            velocity.y = 0;
+            move_direction.y = 0;
+        }
+        if (velo.y > 0) {
+            position.y = ent.position.y - size.y;
+            on_ground = true;
+            ability_reset = true;
+            velocity.y = 0; 
+        }
+    }
+
+    void Entity::correctPositionsWithMoving(Entity ent, Vector2 velo, Vector2 ent_vel,float dt,float dim) {
+        Vector2 ent_pos = {}; //FIX - when moving horizontal and platform is changing direction from down to up
+        ent_pos.x = ent.position.x + ent.velocity.x * dt;
+        ent_pos.y = ent.position.y + ent.velocity.y * dt;
+        if (ent_vel.y < 0) {
+            if (velo.y > 0) {
+                float offset = ent_pos.y - ent.position.y;
+                position.y = ent.position.y - size.y + offset;
+                velocity.x = ent.velocity.x; //moves with platform player is standing on
+                position.x += velocity.x * dt;
+            }
+            if (velo.y < 0) {
+                position.y = ent.position.y + ent.size.y;
+                velocity.y = 0;
+                move_direction.y = 0;
+            }
+        }
+        if (ent_vel.y > 0) {
+            if (velo.y < 0) {
+                float offset = ent_pos.y - ent.position.y;
+                position.y = ent.position.y + size.y + offset;
+                velocity.y = 0;
+                move_direction.y = 0;
+            }
+            if (velo.y > 0) {
+                position.y = ent.position.y - size.y;
+            }
+        }
+        if (ent_vel.x > 0) {
+            position.x = ent.position.x + ent.size.x;
+            if (velo.x < 0) {
+                velocity.x = 0;
+                collideLeft = true;
+            }
+            if (velo.x > 0) {
+                printf("Hit from back ->\n");
+                velocity.x = 0;
+                position.x = ent.position.x-size.x;
+                collideRight = true;
+            }
+        }
+        if (ent_vel.x < 0) {
+            position.x = ent.position.x - size.x;
+            if (velo.x > 0) {
+                velocity.x = 0;
+                collideRight = true;
+            }
+            if (velo.x < 0) {
+                printf("Hit from back <-\n");
+                collideLeft = true;
+                velocity.x = 0;
+                position.x = ent.position.x + ent.size.x;
+            }
+        }
     }
 }

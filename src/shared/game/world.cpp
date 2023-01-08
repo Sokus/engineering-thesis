@@ -9,29 +9,59 @@
 
 namespace Game {
 
-    void World::MoveEnemy(Entity& enemy, float dt) {
+    void World::ControlEnemy(Entity& enemy, float dt) {
         Vector2 ent_pos;
-        for (int collide_idx = 0; collide_idx < max_entity_count; collide_idx++)
-        {
-            Entity* collideEntity = entities + collide_idx;
-            if (collideEntity->type != ENTITY_TYPE_NONE && collideEntity->collidable) {
-                ent_pos = Vector2Add(collideEntity->position, (Vector2Scale(collideEntity->velocity, dt)));
-                if (enemy.collidesWith(*collideEntity)) {
-                    if (enemy.velocity.x > 0) {
-                        enemy.velocity.x = enemy.velocity.x * -1;
-                        enemy.position.x = ent_pos.x - enemy.size.x;
-                    }
-                    else if (enemy.velocity.x < 0) {
-                        enemy.velocity.x = enemy.velocity.x * -1;
-                        enemy.position.x = ent_pos.x + collideEntity->size.x;
-                    }
-                }
+        float shot_cooldown = 0.0f;
+        if (enemy.variant&(ENEMY_SHOOT_TOP)) {
+            if (enemy.shot_cooldown <= 0) { //center out shot
+                CreateBullet(enemy.position.x, enemy.position.y, 16, 16, 0, Const::ENTITY.BULLET_VELOCITY_Y,0);
+                shot_cooldown = Const::ENEMY.SHOT_COOLDOWN;
+                enemy.shot_cooldown = shot_cooldown;
             }
-
+        }
+        if (enemy.variant&(ENEMY_SHOOT_SIDE)) {
+            if (enemy.shot_cooldown <= 0) { //center out shot
+                CreateBullet(enemy.position.x, enemy.position.y, 16, 16, Const::ENTITY.BULLET_VELOCITY_X*enemy.facing, 0, 0);
+                shot_cooldown = Const::ENEMY.SHOT_COOLDOWN;
+                enemy.shot_cooldown = shot_cooldown;
+            }
+        }
+        if (enemy.variant&(ENEMY_JUMP)) {
+            if (enemy.time_until_state_change_allowed <= 0){
+                enemy.move_direction.y = enemy.jump_height * -1.0f;
+                enemy.time_until_state_change_allowed = Const::ENEMY.JUMP_COOLDOWN;
+            }
         }
     }
 
-    void World::CalculateCollisions(Entity& player, Vector2 velocity, Input* input, float dt, bool dim) {
+
+    void World::CalculateCollisions(Entity& player, Vector2 velocity, float dt, bool dim) {
+        for (int collide_idx = 0; collide_idx < max_entity_count; collide_idx++)
+        {
+            Entity* collideEntity = entities + collide_idx; //TODO add reaction to squishing - dmg, teleport?
+            if (collideEntity->type != ENTITY_TYPE_NONE && collideEntity->collidable) {
+                Vector2 ent_pos = {};
+                ent_pos.x = collideEntity->position.x + collideEntity->velocity.x * dt;
+                ent_pos.y = collideEntity->position.y + collideEntity->velocity.y * dt;
+
+                Vector2 ent_vel = {};
+                if (dim == 0) {
+                    ent_vel.x = collideEntity->velocity.x;
+                    ent_vel.y = 0;
+                }
+                else {
+                    ent_vel.x = 0;
+                    ent_vel.y = collideEntity->velocity.y;
+                }
+                if (player.collidesWith(*collideEntity)) {
+                    //player.calculateCollisionSide(*collideEntity);
+                    player.correctPositionsWithStatic(*collideEntity,velocity,dt);
+                    player.correctPositionsWithMoving(*collideEntity,velocity,ent_vel,dt,dim);
+                }
+            }
+        }
+    }
+    void World::CalculateEnemyCollisions(Entity& player, Vector2 velocity, float dt, bool dim) {
         for (int collide_idx = 0; collide_idx < max_entity_count; collide_idx++)
         {
             Entity* collideEntity = entities + collide_idx; //TODO add reaction to squishing - dmg, teleport?
@@ -52,11 +82,11 @@ namespace Game {
                 if (player.collidesWith(*collideEntity)) {
                     //player.calculateCollisionSide(*collideEntity);
                     if (velocity.x > 0) {
-                        player.velocity.x = 0;
+                        player.velocity.x = player.velocity.x*-1;
                         player.position.x = ent_pos.x - player.size.x;
                     }
                     if (velocity.x < 0) {
-                        player.velocity.x = 0;
+                        player.velocity.x = player.velocity.x * -1;
                         player.position.x = ent_pos.x + collideEntity->size.x;
                     }
                     if (velocity.y < 0) {
@@ -87,7 +117,13 @@ namespace Game {
                     }
                 }
             }
-            else if (collideEntity->type == ENTITY_TYPE_INTERACTIVE) {
+        }
+    }
+    void World::CheckStates(Entity& player, Vector2 velocity, Input* input, float dt) {
+        for (int collide_idx = 0; collide_idx < max_entity_count; collide_idx++)
+        {
+            Entity* collideEntity = entities + collide_idx; //TODO add reaction to squishing - dmg, teleport?
+            if (collideEntity->type == ENTITY_TYPE_INTERACTIVE) {
                 if (player.collidesWith(*collideEntity) && input->interact
                     && collideEntity->time_until_state_change_allowed <= 0.0f) {
                     collideEntity->active = !collideEntity->active;
@@ -127,6 +163,14 @@ namespace Game {
                     player.time_until_state_change_allowed = Const::PLAYER.DAMAGE_COOLDOWN;
                 }
             }
+            else if (collideEntity->type == ENTITY_TYPE_BULLET && collideEntity->owner == 0) {
+                if (player.collidesWith(*collideEntity)
+                    && player.time_until_state_change_allowed <= 0.0f) {
+                    player.health -= collideEntity->damage;
+                    player.time_until_state_change_allowed = Const::PLAYER.DAMAGE_COOLDOWN;
+                    FreeEntity(collideEntity);
+                }
+            }
         }
         //printf("L:%d,R:%d,T:%d,D:%d\n", player.collideLeft, player.collideRight, player.collideTop, player.on_ground);
     }
@@ -145,7 +189,9 @@ namespace Game {
         for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
         {
             Entity* entity = entities + entity_idx;
-            if ((entity->type == ENTITY_TYPE_DESTRUCTIBLE_TILE || entity->type == ENTITY_TYPE_ENEMY) && bullet.collidesWith(*entity)) {
+            if ((entity->type == ENTITY_TYPE_DESTRUCTIBLE_TILE || entity->type == ENTITY_TYPE_ENEMY)
+                && bullet.collidesWith(*entity)
+                && bullet.owner != entity->owner) {
                 entity->health -= bullet.damage;
                 if (entity->health <= 0) {
 
@@ -173,7 +219,7 @@ namespace Game {
         if (input->shoot && player.shot_cooldown <= 0.0f) {
             float x_vel = Const::ENTITY.BULLET_VELOCITY_X * player.facing;
             float y_vel = player.velocity.y * !player.on_ground * 0.5f;
-            CreateBullet(player.position.x, player.position.y, 16, 16, x_vel, y_vel);
+            CreateBullet(player.position.x, player.position.y, 16, 16, x_vel, y_vel,player.owner);
             player.shot_cooldown = Const::PLAYER.SHOT_COOLDOWN;
         }
     }
@@ -190,10 +236,11 @@ namespace Game {
         CheckPlayerShot(entity, input, dt);
 
         entity.MoveX(dt);
-        CalculateCollisions(entity, Vector2{ entity.velocity.x,0.0f }, input, dt, 0);
+        CalculateCollisions(entity, Vector2{ entity.velocity.x,0.0f }, dt, 0);
         entity.on_ground = 0;
         entity.MoveY(dt);
-        CalculateCollisions(entity, Vector2{ 0.0f,entity.velocity.y }, input, dt, 1);
+        CalculateCollisions(entity, Vector2{ 0.0f,entity.velocity.y }, dt, 1);
+        CheckStates(entity, Vector2{ entity.velocity.x,entity.velocity.y }, input, dt);
         if ((entity.on_ground && entity.collideTop) || (entity.collideLeft && entity.collideRight)) {
             entity.health = 0;
         }
@@ -221,16 +268,34 @@ namespace Game {
                     MovePlayer(*entity, &inputs[entity->owner], dt);
             } break;
 
+            case ENTITY_TYPE_MOVING_TILE:
+            {
+                entity->UpdateMovingTile(dt);
+            } break;
+
             case ENTITY_TYPE_ENEMY:
-                MoveEnemy(*entity, dt);
+                entity->facing = (int)entity->velocity.x / 10;
+                ControlEnemy(*entity, dt);
+                entity->MoveX(dt);
+                CalculateEnemyCollisions(*entity, Vector2{ entity->velocity.x,0.0f }, dt,0);
+                entity->on_ground = 0;
+                entity->velocity.y = entity->move_direction.y * Const::ENEMY.FALL_SPEED;
+                entity->MoveY(dt);
+                CalculateEnemyCollisions(*entity, Vector2{ 0.0f,entity->velocity.y }, dt, 1);
+                if (!entity->on_ground) {
+                    entity->move_direction.y += 0.75f;
+                }
                 break;
 
             case ENTITY_TYPE_BULLET:
             {
+                Vector2 delta_pos = Vector2Scale(entity->velocity, dt);
+                entity->position = Vector2Add(entity->position, delta_pos);
                 hitObstacles(*entity);
                 if (entity->time_until_state_change_allowed <= 0)
                     FreeEntity(entity);
-            } break;
+                } 
+                break;
             }
         }
     }
@@ -484,18 +549,22 @@ namespace Game {
         return entity;
     }
 
-    Entity* World::CreateEnemy(float pos_x, float pos_y, float width, float height)
+    Entity* World::CreateEnemy(float pos_x, float pos_y, float width, float height,int32_t property)
     {
         Entity* entity = nullptr;
         if (entity = AddEntity(ENTITY_TYPE_ENEMY, 0, pos_x, pos_y, width, height).entity)
         {
             entity->velocity.x = Const::ENEMY.VELOCITY_X;
             entity->damage = Const::ENEMY.DAMAGE;
+            entity->variant = property;
+            entity->owner = 0;
+            entity->move_speed = Const::ENEMY.MOVE_SPEED;
+            entity->jump_height = Const::ENEMY.JUMP_HEIGHT;
         }
         return entity;
     }
 
-    Entity* World::CreateBullet(float pos_x, float pos_y, float width, float height, float x_vel, float y_vel)
+    Entity* World::CreateBullet(float pos_x, float pos_y, float width, float height, float x_vel, float y_vel,int owner)
     {
         Entity* entity = nullptr;
         if (entity = AddEntity(ENTITY_TYPE_BULLET, 0, pos_x, pos_y, width, height).entity)
@@ -505,6 +574,7 @@ namespace Game {
             entity->damage = Const::ENTITY.BULLET_DAMAGE;
             entity->active = true;
             entity->time_until_state_change_allowed = Const::ENTITY.BULLET_LIFETIME;
+            entity->owner = owner;
         }
         return entity;
     }

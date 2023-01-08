@@ -140,8 +140,8 @@ void DoLevelMenu()
     struct ButtonTypePair { UI::Button button; Game::LevelType level_type; };
     ButtonTypePair buttons[] = {
         { UI::Button("Level 1"), Game::LEVEL_PLAINS },
-        { UI::Button("Level 2"), Game::LEVEL_PLAINS },
-        { UI::Button("Level 3"), Game::LEVEL_PLAINS }};
+        { UI::Button("Level 2"), Game::LEVEL_LAKE },
+        { UI::Button("Level 3"), Game::LEVEL_CLOUDS }};
     UI::Button close_button = UI::Button("Close");
 
     UI::Begin();
