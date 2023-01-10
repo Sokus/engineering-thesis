@@ -34,8 +34,9 @@ namespace Game {
         void Draw();
         void ControlEnemy(Entity& enemy, float dt);
         void MovePlayer(Entity& player,Input* input, float dt);
+        void MoveEnemy(Entity& player, float dt);
         void CheckPlayerShot(Entity& player, Input* input, float dt);
-        void CalculateCollisions(Entity& player, Vector2 velocity, float dt, bool dim);
+        void CalculateCollisions(Entity& player, float dt, bool dim);
         void CalculateEnemyCollisions(Entity& player, Vector2 velocity, float dt, bool dim);
         void CheckStates(Entity& player, Vector2 velocity, Input* input, float dt);
         void UpdateActiveTiles(float dt, int connectionGroup);
@@ -49,15 +50,15 @@ namespace Game {
         void FreeOwnedEntities(int owner);
 
         AddEntityResult CreatePlayer(int owner, float pos_x, float pos_y, Game::PlayerType playertype);
-        AddEntityResult CreateTile(float pos_x, float pos_y,float width,float height, int conGroup);
-        Entity* CreateMovingTile(float pos_x, float pos_y, float width, float height, int conGroup, Vector2 moveDirection, Vector2 endpoint);
+        AddEntityResult CreateTile(float pos_x, float pos_y,float width,float height, int conGroup,bool enabled);
+        Entity* CreateMovingTile(float pos_x, float pos_y, float width, float height, int conGroup, Vector2 moveDirection, Vector2 endpoint,bool enabled);
         Entity* CreateInteractive(float pos_x, float pos_y, float width, float height, int conGroup);
         Entity* CreateCollectible(float pos_x, float pos_y, float width, float height, int conGroup);
         Entity* CreateDamagingTile(float pos_x, float pos_y, float width, float height, int conGroup);
         Entity* CreateDestroyTile(float pos_x, float pos_y, float width, float height, int conGroup);
         Entity* CreateCheckpoint(float pos_x, float pos_y, float width, float height);
         Entity* CreateExit(float pos_x, float pos_y, float width, float height);
-        Entity* CreateEnemy(float pos_x, float pos_y, float width, float height,int32_t property);
+        Entity* CreateEnemy(float pos_x, float pos_y, float width, float height,int32_t property,int health);
         Entity* World::CreateBullet(float pos_x, float pos_y, float width, float height,float vel_x,float vel_y,int owner);
         void LoadTextures();
         void hitObstacles(Entity &bullet);

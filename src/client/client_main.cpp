@@ -68,7 +68,7 @@ void DoGameScene(float dt)
 
     Camera2D camera = {};
     camera.offset = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
-    camera.zoom = 4.0f;
+    camera.zoom = 3.0f;
 
     if (!game_data.world.EntityReferenceIsValid(player_reference))
         player_reference = game_data.world.GetOwnedEntityReference(Game::ENTITY_TYPE_PLAYER, 1, 0);

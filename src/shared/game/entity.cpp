@@ -8,6 +8,7 @@
 #include "protocol/protocol.h"
 
 #include "raymath.h"
+#include <algorithm>
 
 namespace Game {
 
@@ -49,7 +50,7 @@ namespace Game {
     }
 
     void Entity::setMoveSpeed(Input* input) {
-        if (input->dash && dash_cooldown <= 0.0f && ability_reset)
+        if (input->dash && dash_cooldown <= 0.0f && ability_reset && velocity.x != 0)
         {
             move_speed *= Const::PLAYER.DASH_SPEED;
             dash_cooldown = Const::PLAYER.DASH_COOLDOWN;
@@ -103,18 +104,20 @@ namespace Game {
         float diry = 1;
         move_direction.x = 0;
         move_direction.y = 0;
-        if (position.x != endpoints[target].x) {
-            dirx = (position.x - endpoints[target].x) / abs(position.x - endpoints[target].x);
-            move_direction.x = log10f(abs(position.x - endpoints[target].x) + 5) * dirx * -1.0f;
-        }
-        if (position.y != endpoints[target].y) {
-            diry = (position.y - endpoints[target].y) / abs(position.y - endpoints[target].y);
-            move_direction.y = log10f(abs(position.y - endpoints[target].y) + 5) * diry * -1.0f;
-        }
-        if (reachedEndpoint(endpoints[target], dt)) {
-            target = !target;
-            move_direction.x = move_direction.x * -1.0f;
-            move_direction.y = move_direction.y * -1.0f;
+        if (active) {
+            if (position.x != endpoints[target].x) {
+                dirx = (position.x - endpoints[target].x) / abs(position.x - endpoints[target].x);
+                move_direction.x = log10f(abs(position.x - endpoints[target].x) + 5) * dirx * -1.0f;
+            }
+            if (position.y != endpoints[target].y) {
+                diry = (position.y - endpoints[target].y) / abs(position.y - endpoints[target].y);
+                move_direction.y = log10f(abs(position.y - endpoints[target].y) + 5) * diry * -1.0f;
+            }
+            if (reachedEndpoint(endpoints[target], dt)) {
+                target = !target;
+                move_direction.x = move_direction.x * -1.0f;
+                move_direction.y = move_direction.y * -1.0f;
+            }
         }
 
         velocity = Vector2Scale(move_direction, move_speed);
@@ -130,13 +133,8 @@ namespace Game {
         setMoveSpeed(input);
         move_direction.x -= input->move[DIRECTION_LEFT];
         move_direction.x += input->move[DIRECTION_RIGHT];
-        if (move_direction.x != 0.0f) //move to Update
-            facing = (int)move_direction.x;
         if (input->move[DIRECTION_UP] && on_ground)
             move_direction.y = (float)jump_height * -1.0f; 
-        if (!on_ground) { //move to Update
-            move_direction.y += 0.75f;
-        }
         velocity.x = move_direction.x * move_speed;
         velocity.y = move_direction.y * Const::PLAYER.FALL_SPEED;
     }
@@ -204,12 +202,6 @@ namespace Game {
         }
         return 0;
     }
-    void Entity::calculateCollisionSide(Entity ent) {
-        if ((position.x + size.x > ent.position.x && position.x < ent.position.x + ent.size.x) &&
-            (position.y + size.y / 2) > (ent.position.y + ent.size.y / 2)) {
-            collideTop = true;
-        }
-    }
 
     bool Entity::reachedEndpoint(Vector2 target,float dt) {
 
@@ -248,43 +240,23 @@ namespace Game {
         return true;
     }
 
-    void Entity::correctPositionsWithStatic(Entity ent,Vector2 velo,float dt) {
-        if (velo.x > 0) {
-            velocity.x = 0;
-            position.x = ent.position.x - size.x;
-        }
-        if (velo.x < 0) {
-            velocity.x = 0;
-            position.x = ent.position.x + ent.size.x;
-        }
-        if (velo.y < 0) {
-            position.y = ent.position.y + ent.size.y;
-            velocity.y = 0;
-            move_direction.y = 0;
-        }
-        if (velo.y > 0) {
-            position.y = ent.position.y - size.y;
-            on_ground = true;
-            ability_reset = true;
-            velocity.y = 0; 
-        }
-    }
-
-    void Entity::correctPositionsWithMoving(Entity ent, Vector2 velo, Vector2 ent_vel,float dt,float dim) {
-        Vector2 ent_pos = {}; //FIX - when moving horizontal and platform is changing direction from down to up
+    void Entity::correctPositions(Entity ent,Vector2 velo, Vector2 ent_vel,float dt) {
+        Vector2 ent_pos = {};
+        Vector2 startPosition = position;
         ent_pos.x = ent.position.x + ent.velocity.x * dt;
         ent_pos.y = ent.position.y + ent.velocity.y * dt;
         if (ent_vel.y < 0) {
             if (velo.y > 0) {
                 float offset = ent_pos.y - ent.position.y;
-                position.y = ent.position.y - size.y + offset;
-                velocity.x = ent.velocity.x; //moves with platform player is standing on
-                position.x += velocity.x * dt;
+                position.y = ent.position.y - size.y + offset - 0.5f; //WORKS, BUT LIKE SHIT
+                position.x += ent.velocity.x * dt;
+                on_ground = true;
             }
-            if (velo.y < 0) {
+            else if (velo.y < 0) {
                 position.y = ent.position.y + ent.size.y;
                 velocity.y = 0;
                 move_direction.y = 0;
+                collideTop = true;
             }
         }
         if (ent_vel.y > 0) {
@@ -293,9 +265,17 @@ namespace Game {
                 position.y = ent.position.y + size.y + offset;
                 velocity.y = 0;
                 move_direction.y = 0;
+                collideTop = true;
             }
-            if (velo.y > 0) {
-                position.y = ent.position.y - size.y;
+            else if (velo.y > 0) {
+                float offset = ent_pos.y - ent.position.y;
+                position.y = ent.position.y - size.y - offset;
+                position.x += ent.velocity.x * dt;
+                velocity.y = 0;
+                on_ground = true;
+            }
+            else {
+                collideTop = true;
             }
         }
         if (ent_vel.x > 0) {
@@ -304,11 +284,13 @@ namespace Game {
                 velocity.x = 0;
                 collideLeft = true;
             }
-            if (velo.x > 0) {
-                printf("Hit from back ->\n");
+            else if (velo.x > 0) {
                 velocity.x = 0;
-                position.x = ent.position.x-size.x;
+                position.x = ent.position.x - size.x;
                 collideRight = true;
+            }
+            else {
+                collideLeft = true;
             }
         }
         if (ent_vel.x < 0) {
@@ -317,12 +299,156 @@ namespace Game {
                 velocity.x = 0;
                 collideRight = true;
             }
-            if (velo.x < 0) {
-                printf("Hit from back <-\n");
-                collideLeft = true;
+            else if (velo.x < 0) {
                 velocity.x = 0;
                 position.x = ent.position.x + ent.size.x;
+                collideLeft = true;
             }
+            else {
+                collideRight = true;
+            }
+        }
+        if (ent_vel.y == 0 && ent_vel.x == 0) {
+            if (velo.y < 0) {
+                position.y = ent.position.y + ent.size.y;
+                velocity.y = 0;
+                move_direction.y = 0;
+                collideTop = true;
+            }
+            else if (velo.y > 0) {
+                position.y = ent.position.y - size.y;
+                on_ground = true;
+                position.x += ent.velocity.x * dt;
+                ability_reset = true;
+                velocity.y = 0;
+            }
+            if (velo.x > 0) {
+                velocity.x = 0;
+                position.x = ent.position.x - size.x;
+                collideRight = true;
+            }
+            else if (velo.x < 0) {
+                velocity.x = 0;
+                position.x = ent.position.x + ent.size.x;
+                collideLeft = true;
+            }
+            else if (velo.x == 0 && velo.y == 0) {
+                collideTop = true;
+            }
+        }
+        if (abs(startPosition.x - position.x) > (size.x) && dash_cooldown <= 0) {
+            collideTop = true;
+        }
+    }
+
+    void Entity::correctEnemyPositions(Entity ent, Vector2 velo, Vector2 ent_vel, float dt) {
+        Vector2 ent_pos = {};
+        Vector2 startPosition = position;
+        ent_pos.x = ent.position.x + ent.velocity.x * dt;
+        ent_pos.y = ent.position.y + ent.velocity.y * dt;
+        if (ent_vel.y < 0) {
+            if (velo.y > 0) {
+                float offset = ent_pos.y - ent.position.y;
+                position.y = ent.position.y - size.y + offset + ent.move_direction.y / 1.8f; //WORKS, BUT LIKE SHIT
+                position.x += ent.velocity.x * dt;
+                on_ground = true;
+            }
+            else if (velo.y < 0) {
+                position.y = ent.position.y + ent.size.y;
+                velocity.y = 0;
+                move_direction.y = 0;
+                collideTop = true;
+            }
+        }
+        if (ent_vel.y > 0) {
+            if (velo.y < 0) {
+                float offset = ent_pos.y - ent.position.y;
+                position.y = ent.position.y + size.y + offset;
+                velocity.y = 0;
+                move_direction.y = 0;
+                collideTop = true;
+            }
+            else if (velo.y > 0) {
+                float offset = ent_pos.y - ent.position.y;
+                position.y = ent.position.y - size.y - offset;
+                position.x += ent.velocity.x * dt;
+                velocity.y = 0;
+                on_ground = true;
+            }
+            else {
+                collideTop = true;
+            }
+        }
+        if (ent_vel.x > 0) {
+            position.x = ent.position.x + ent.size.x;
+            if (velo.x < 0) {
+                velocity.x = velocity.x *-1;
+                collideLeft = true;
+            }
+            else if (velo.x > 0) {
+                velocity.x = velocity.x * -1;
+                position.x = ent.position.x - size.x;
+                collideRight = true;
+            }
+            else {
+                collideLeft = true;
+            }
+        }
+        if (ent_vel.x < 0) {
+            position.x = ent.position.x - size.x;
+            if (velo.x > 0) {
+                velocity.x = velocity.x * -1;
+                collideRight = true;
+            }
+            else if (velo.x < 0) {
+                velocity.x = velocity.x * -1;
+                position.x = ent.position.x + ent.size.x;
+                collideLeft = true;
+            }
+            else {
+                collideRight = true;
+            }
+        }
+        if (ent_vel.y == 0 && ent_vel.x == 0) {
+            if (velo.y < 0) {
+                position.y = ent.position.y + ent.size.y;
+                velocity.y = 0;
+                move_direction.y = 0;
+                collideTop = true;
+            }
+            else if (velo.y > 0) {
+                position.y = ent.position.y - size.y;
+                on_ground = true;
+                position.x += ent.velocity.x * dt;
+                ability_reset = true;
+                velocity.y = 0;
+            }
+            if (velo.x > 0) {
+                velocity.x = velocity.x * -1;
+                position.x = ent.position.x - size.x;
+                collideRight = true;
+            }
+            else if (velo.x < 0) {
+                velocity.x = velocity.x* -1;
+                position.x = ent.position.x + ent.size.x;
+                collideLeft = true;
+            }
+            else if (velo.x == 0 && velo.y == 0) {
+                collideTop = true;
+            }
+        }
+        if (abs(startPosition.x - position.x) > (size.x) && dash_cooldown <= 0) {
+            collideTop = true;
+        }
+    }
+    void Entity::stalkPlayer(Entity ent, float dt) {
+        float distance = sqrt(pow(position.x - ent.position.x, 2) + pow(position.y - ent.position.y, 2));
+        if (distance < 70) {
+            float direction = abs(position.x - ent.position.x)/(position.x-ent.position.x) * -1;
+            velocity.x = 30.0f * direction;
+        }
+        else {
+            velocity.x = abs(velocity.x) / velocity.x * Const::ENEMY.VELOCITY_X;
         }
     }
 }

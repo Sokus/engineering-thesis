@@ -33,8 +33,7 @@ namespace Game {
         ENEMY_SHOOT_TOP = 2,
         ENEMY_SHOOT_SIDE = 4,
         ENEMY_FOLLOW = 8,
-        ENEMY_JUMP = 16,
-        ENEMY_BYTES = 0xF
+        ENEMY_JUMP = 16
     };
 
     void LoadEntityTextures();
@@ -107,8 +106,9 @@ namespace Game {
         void Draw();
         bool collidesWith(Entity ent);
         void calculateCollisionSide(Entity ent);
-        void correctPositionsWithStatic(Entity ent,Vector2 velocity,float dt);
-        void correctPositionsWithMoving(Entity ent,Vector2 velocity,Vector2 ent_vel,float dt,float dim);
+        void correctPositions(Entity ent,Vector2 velocity, Vector2 ent_vel,float dt);
+        void correctEnemyPositions(Entity ent, Vector2 velocity, Vector2 ent_vel, float dt);
+        void stalkPlayer(Entity ent,float dt);
         void Control(Input* input,float dt);
         void MoveX(float dt);
         void MoveY(float dt);

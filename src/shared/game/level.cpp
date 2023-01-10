@@ -7,34 +7,37 @@ namespace Game {
 
 void InitPlains(World *world)
 {
-	world->spawnpoint = Vector2{0.0f, 100.0f};
+	world->spawnpoint = Vector2{16.0f, 168.0f};
 
 	// -- INIT ALL ENTITIES --
 
-    world->CreateTile(0.0f, 192.0f, 464.0f, 16.0f, 0);
-    world->CreateTile(64.0f, 160.0f, 16.0f, 32.0f, 0);
-    world->CreateTile(112.0f, 64.0f, 96.0f, 16.0f, 0);
-    world->CreateTile(208.0f, 0.0f, 16.0f, 160.0f, 0);
-    //world->CreateTile(208.0f, 160.0f, 16.0f, 32.0f, 1);
-    world->CreateTile(336.0f, 176.0f, 16.0f, 16.0f, 0);
-    world->CreateTile(400.0f, 176.0f, 16.0f, 16.0f, 0);
+    world->CreateTile(0.0f, 192.0f, 896.0f, 16.0f, 0,1);
+	world->CreateTile(-16.0f, 0.0f, 16.0f, 192.0f, 0, 1);
+	world->CreateTile(896.0f, 0.0f, 16.0f, 192.0f, 0, 1);
+	world->CreateTile(64.0f, 160.0f, 16.0f, 32.0f, 0, 1);
+	world->CreateTile(880.0f, 160.0f, 16.0f, 32.0f, 0, 1);
+	world->CreateEnemy(96.0f, 176.0f, 16.0f, 16.0f, 16, 5000);
+	world->CreateDamagingTile(80.0f, 176.0f, 800.0f, 16.0f, 0);
+	world->CreateInteractive(0.0f, 96.0f, 16.0f, 16.0f, 1);
+	world->CreateTile(0.0f, 64.0f, 16.0f, 16.0f,0, 1);
+	world->CreateTile(0.0f, 112.0f, 32.0f, 16.0f, 0, 1);
 
-    world->CreateMovingTile(96.0f, 80.0f, 32.0f, 16.0f, 0, Vector2{0, 30}, Vector2{96.0f, 160.0f});
+	world->CreateTile(128.0f, 160.0f, 32.0f, 16.0f, 1, 1);
+	world->CreateTile(208.0f, 144.0f, 32.0f, 16.0f, 1, 0);
 
-    world->CreateInteractive(176.0f, 48.0f, 16.0f, 16.0f, 1);
+	world->CreateTile(240.0f, 96.0f, 32.0f, 16.0f, 0, 1);
+	world->CreateInteractive(256.0f, 80.0f, 16.0f, 16.0f, 2);
 
-    world->CreateCollectible(128.0f, 48.0f, 16.0f, 16.0f, 0);
-    world->CreateCollectible(96.0f, 144.0f, 16.0f, 16.0f, 0);
+	world->CreateMovingTile(16.0f, 48.0f, 32.0f, 16.0f, 2, Vector2{ 30, 0 }, Vector2{ 320.0f, 48.0f }, 0);
 
-    world->CreateDamagingTile(80.0f, 176.0f, 16.0f, 16.0f, 0);
+	world->CreateDestroyTile(176.0f, 64.0f, 16.0f, 96.0f, 0);
+	world->CreateTile(320.0f, 160.0f, 48.0f, 16.0f, 0, 1);
+	world->CreateCheckpoint(336.0f, 144.0f, 16.0f, 16.0f);
 
-    world->CreateDestroyTile(128.0f, 176.0f, 16.0f, 16.0f, 0);
+	world->CreateMovingTile(368.0f, 160.0f, 48.0f, 16.0f, 0, Vector2{ 30, 0 }, Vector2{ 496.0f, 160.0f }, 1);
+	world->CreateMovingTile(672.0f, 160.0f, 48.0f, 16.0f, 0, Vector2{ 30, 0 }, Vector2{ 544.0f, 160.0f }, 1);
 
-    world->CreateCheckpoint(144.0f, 176.0f, 16.0f, 16.0f);
-
-    world->CreateExit(432.0f, 160.0f, 32.0f, 32.0f);
-
-    world->CreateEnemy(352.0f, 176.0f, 16.0f, 16.0f,1);
+	world->CreateExit(720.0f, 128.0f, 16.0f, 32.0f);
 
     // -- INIT BACKGROUND --
 
@@ -64,11 +67,15 @@ void InitPlains(World *world)
 void InitLake(World *world) {
     world->spawnpoint = Vector2{ 0.0f, 100.0f };
 
-	world->CreateTile(0.0f, 192.0f, 464.0f, 16.0f, 0);
-	world->CreateTile(208.0f, 160.0f, 16.0f, 32.0f, 0);
-	world->CreateTile(400.0f, 160.0f, 16.0f, 32.0f, 0);
+	world->CreateTile(0.0f, 192.0f, 464.0f, 16.0f, 0,1);
+	world->CreateTile(208.0f, 160.0f, 16.0f, 32.0f, 0,1);
+	world->CreateTile(400.0f, 160.0f, 16.0f, 32.0f, 0,1);
+	world->CreateInteractive(0.0f, 176.0f, 16.0f, 16.0f, 1);
+	world->CreateMovingTile(96.0f, 80.0f, 32.0f, 16.0f, 1, Vector2{ 0, 30 }, Vector2{ 96.0f, 160.0f }, 1);
+	world->CreateTile(32.0f, 160.0f, 16.0f, 16.0f, 1, 1);
+	world->CreateTile(32.0f, 144.0f, 16.0f, 16.0f, 1, 0);
 	world->CreateExit(432.0f, 160.0f, 32.0f, 32.0f);
-	world->CreateEnemy(352.0f, 176.0f, 16.0f, 16.0f,19);
+	//world->CreateEnemy(352.0f, 176.0f, 16.0f, 16.0f,27);
 	// -- INIT BACKGROUND --
 
 	ParallaxLayer hills = {};
@@ -96,10 +103,12 @@ void InitLake(World *world) {
 void InitClouds(World* world) {
 	world->spawnpoint = Vector2{ 0.0f, 100.0f };
 
-	world->CreateTile(0.0f, 192.0f, 464.0f, 16.0f, 0);
-	world->CreateTile(208.0f, 160.0f, 16.0f, 32.0f, 0);
-	world->CreateTile(400.0f, 160.0f, 16.0f, 32.0f, 0);
-	world->CreateMovingTile(240.0f, 176.0f, 64.0f, 16.0f, 0, Vector2{ 10.0f,0.0f }, Vector2{ 240.0f,112.0f });
+	world->CreateTile(0.0f, 192.0f, 464.0f, 16.0f, 0,1);
+	world->CreateTile(208.0f, 160.0f, 16.0f, 32.0f, 0,1);
+	world->CreateTile(400.0f, 160.0f, 16.0f, 32.0f, 0,1);
+	//world->CreateTile(224.0f, 96.0f, 64.0f, 16.0f, 0);
+	//world->CreateMovingTile(240.0f, 176.0f, 64.0f, 16.0f, 0, Vector2{ 10.0f,0.0f }, Vector2{ 304.0f,176.0f });
+	world->CreateMovingTile(240.0f, 176.0f, 64.0f, 16.0f, 0, Vector2{ 10.0f,0.0f }, Vector2{ 240.0f,112.0f },1);
 	world->CreateExit(432.0f, 160.0f, 32.0f, 32.0f);
 	// -- INIT BACKGROUND --
 
