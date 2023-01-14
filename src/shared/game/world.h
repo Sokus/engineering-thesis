@@ -59,7 +59,7 @@ namespace Game {
         Entity* CreateCheckpoint(float pos_x, float pos_y, float width, float height);
         Entity* CreateExit(float pos_x, float pos_y, float width, float height);
         Entity* CreateEnemy(float pos_x, float pos_y, float width, float height,int32_t property,int health);
-        Entity* World::CreateBullet(float pos_x, float pos_y, float width, float height,float vel_x,float vel_y,int owner);
+        Entity* CreateBullet(float pos_x, float pos_y, float width, float height,float vel_x,float vel_y,int owner);
         void LoadTextures();
         void hitObstacles(Entity &bullet);
     };

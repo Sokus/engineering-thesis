@@ -1,6 +1,8 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
+#include <stddef.h>
+
 struct ProcessHandle;
 ProcessHandle *CreateChildProcess(char **argv, int argc);
 bool KillChildProcess(ProcessHandle *handle);

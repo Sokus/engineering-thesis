@@ -4,9 +4,11 @@
 
 #include <stdio.h>
 
+BitStream::BitStream() {}
+
 WriteStream WriteStream_Create(void *buffer, int bytes)
 {
-    WriteStream write_stream = { 0 };
+    WriteStream write_stream;
     write_stream.mode = WRITE_STREAM;
     write_stream.bit_writer = BitWriter_Create(buffer, bytes);
     return write_stream;
@@ -14,7 +16,7 @@ WriteStream WriteStream_Create(void *buffer, int bytes)
 
 WriteStream ReadStream_Create(void *buffer, int bytes)
 {
-    ReadStream read_stream = { 0 };
+    ReadStream read_stream;
     read_stream.mode = READ_STREAM;
     read_stream.bit_reader = BitReader_Create(buffer, bytes);
     return read_stream;
@@ -22,7 +24,7 @@ WriteStream ReadStream_Create(void *buffer, int bytes)
 
 MeasureStream MeasureStream_Create(void *buffer, int bytes)
 {
-    MeasureStream measure_stream = { 0 };
+    MeasureStream measure_stream;
     measure_stream.mode = MEASURE_STREAM;
     measure_stream.total_bytes = bytes;
     return measure_stream;
@@ -190,7 +192,7 @@ int BitStream_GetAlignBits(BitStream *stream)
     return 0;
 }
 
-bool BitStream_SerializeCheck(BitStream *stream, char *string)
+bool BitStream_SerializeCheck(BitStream *stream, const char *string)
 {
     ASSERT(stream->mode != BIT_STREAM_INVALID);
 
@@ -357,7 +359,7 @@ int BitsRequiredForRange(unsigned int min, unsigned int max)
     return (min == max) ? 0 : BitsRequired(max - min);
 }
 
-uint32_t HashString(char *string, uint32_t hash)
+uint32_t HashString(const char *string, uint32_t hash)
 {
     ASSERT(string);
     while (*string != '\0')

@@ -13,17 +13,17 @@ typedef enum BitPackerMode
 
 typedef struct BitPacker
 {
-    BitPackerMode mode;
-    uint32_t *data;
-    uint64_t scratch;
-    int num_bits;
-    int num_words;
-    int word_index;
-    int scratch_bits;
+    BitPackerMode mode = BIT_PACKER_INVALID;
+    uint32_t *data = nullptr;
+    uint64_t scratch = 0;
+    int num_bits = 0;
+    int num_words = 0;
+    int word_index = 0;
+    int scratch_bits = 0;
 
-    int bits_written; // BitWriter only
-    int bits_read;    // BitReader only
-    int num_bytes;    // BitReader only
+    int bits_written = 0; // BitWriter only
+    int bits_read = 0;    // BitReader only
+    int num_bytes = 0;    // BitReader only
 } BitPacker;
 
 typedef BitPacker BitWriter;

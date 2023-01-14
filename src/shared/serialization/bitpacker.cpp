@@ -6,7 +6,7 @@
 BitWriter BitWriter_Create(void *data, int bytes)
 {
     ASSERT(data);
-    BitWriter bit_writer = { 0 };
+    BitWriter bit_writer;
     bit_writer.mode = BIT_WRITER;
     bit_writer.data = (uint32_t *)data;
     bit_writer.num_words = bytes / 4;
@@ -128,7 +128,7 @@ int BitWriter_GetTotalBytes(BitWriter *bit_writer)
 BitReader BitReader_Create(void *data, int bytes)
 {
     ASSERT(data);
-    BitReader bit_reader = { 0 };
+    BitReader bit_reader;
     bit_reader.mode = BIT_READER;
     bit_reader.data = (uint32_t *)data;
     bit_reader.num_bytes = bytes;
