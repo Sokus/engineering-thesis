@@ -284,15 +284,14 @@ namespace Game {
         }
     }
 
-    // TODO: why is this not const?
-    void World::Draw()
+    void World::Draw() const
     {
         // TODO(sokus): Fix this
         parallax_background.Draw({ 0, 0 });
 
         for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
         {
-            Entity* entity = &entities[entity_idx];
+            const Entity* entity = &entities[entity_idx];
             if (entity->type != ENTITY_TYPE_NONE)
                 entity->Draw();
         }

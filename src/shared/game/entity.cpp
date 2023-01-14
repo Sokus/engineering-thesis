@@ -155,7 +155,7 @@ namespace Game {
         position.y += velocity.y * dt;
     }
 
-    void Entity::Draw()
+    void Entity::Draw() const
     {
         Rectangle source = {};
         source.width = facing >= 0 ? size.x : -size.x;

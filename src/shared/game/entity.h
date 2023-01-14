@@ -103,7 +103,7 @@ namespace Game {
         void Update(float dt);
         void UpdateMovingTile(float dt);
         void setMoveSpeed(Input* input);
-        void Draw();
+        void Draw() const;
         bool collidesWith(Entity ent);
         void calculateCollisionSide(Entity ent);
         void correctPositions(Entity ent,Vector2 velocity, Vector2 ent_vel,float dt);
@@ -120,7 +120,7 @@ namespace Game {
          *  Intended for healthbars etc.
          */
         float relativeHealth() const;
-        
+
         void drawHealthBar() const;
     };
 
