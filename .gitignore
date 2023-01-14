@@ -14,3 +14,8 @@ imgui.ini
 *.4coder
 .vs/
 .vscode/
+
+# Krita files
+*.png~
+*.kra~
+*.kra
