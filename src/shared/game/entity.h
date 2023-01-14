@@ -115,6 +115,13 @@ namespace Game {
         bool reachedEndpoint(Vector2 target, float dt);
 
         bool Serialize(BitStream *stream);
+
+        /** Health normalized to range [0, 1]
+         *  Intended for healthbars etc.
+         */
+        float relativeHealth() const;
+        
+        void drawHealthBar() const;
     };
 
     struct EntityReference

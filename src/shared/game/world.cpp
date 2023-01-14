@@ -284,6 +284,7 @@ namespace Game {
         }
     }
 
+    // TODO: why is this not const?
     void World::Draw()
     {
         // TODO(sokus): Fix this
@@ -294,6 +295,16 @@ namespace Game {
             Entity* entity = &entities[entity_idx];
             if (entity->type != ENTITY_TYPE_NONE)
                 entity->Draw();
+        }
+    }
+
+    void World::DrawHealthBars() const {
+
+        for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
+        {
+            const Entity* entity = &entities[entity_idx];
+            if (entity->base_health > 0)
+                entity->drawHealthBar();
         }
     }
 

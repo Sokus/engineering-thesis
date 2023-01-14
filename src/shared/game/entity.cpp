@@ -9,7 +9,7 @@
 
 #include "raymath.h"
 #include <algorithm>
-
+#include <glm/glm.hpp>
 
 #ifndef RESOURCE_PATH
 /* VSCode doesn't notice RESOURCE_PATH defined from CMake and shows nonexistent errors as a result.
@@ -458,5 +458,24 @@ namespace Game {
         else {
             velocity.x = abs(velocity.x) / velocity.x * Const::ENEMY.VELOCITY_X;
         }
+    }
+
+    float Entity::relativeHealth() const {
+        if(base_health <= 0) return 0;
+        return glm::clamp(health / static_cast<float>(base_health), 0.0f, 1.0f);
+    }
+
+    void Entity::drawHealthBar() const {
+
+        constexpr float 
+            barHeight = 3, 
+            barGap = 3, 
+            hueRed = 0, 
+            hueGreen = 120;
+
+        Color barColor = ColorFromHSV(glm::mix(hueRed, hueGreen, relativeHealth()), 1, 1);
+        
+        DrawRectangle(position.x, position.y + size.y + barGap, size.x, barHeight, BLACK);
+        DrawRectangle(position.x, position.y + size.y + barGap, size.x * relativeHealth(), barHeight, barColor);
     }
 }

@@ -82,6 +82,8 @@ void DoGameScene(float dt)
     BeginMode2D(camera);
     ClearBackground(Color{25, 30, 40});
     game_data.world.Draw();
+    game_data.world.DrawHealthBars();
+
     EndMode2D();
 
     if(IsKeyPressed(KEY_ESCAPE))
