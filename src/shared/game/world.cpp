@@ -517,7 +517,7 @@ namespace Game {
         {
             entity->entity_group = conGroup;
             entity->active = true;
-            entity->health = Const::ENTITY.DESTROY_TILE_HEALTH;
+            entity->health = entity->base_health = Const::ENTITY.DESTROY_TILE_HEALTH;
             entity->collidable = 1;
         }
         return entity;
@@ -554,7 +554,7 @@ namespace Game {
             entity->owner = 0;
             entity->move_speed = Const::ENEMY.MOVE_SPEED;
             entity->jump_height = Const::ENEMY.JUMP_HEIGHT;
-            entity->health = health;
+            entity->health = entity->base_health = health;
         }
         return entity;
     }
