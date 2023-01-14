@@ -10,6 +10,14 @@
 #include "raymath.h"
 #include <algorithm>
 
+
+#ifndef RESOURCE_PATH
+/* VSCode doesn't notice RESOURCE_PATH defined from CMake and shows nonexistent errors as a result.
+   This #define is here just to silence these errors.
+*/
+#define RESOURCE_PATH
+#endif
+
 namespace Game {
 
     Texture entity_textures[ENTITY_TYPE_COUNT];
