@@ -284,7 +284,7 @@ namespace Game {
         }
     }
 
-    void World::Draw() const
+    void World::Draw(DrawQueue &dq) const
     {
         // TODO(sokus): Fix this
         parallax_background.Draw({ 0, 0 });
