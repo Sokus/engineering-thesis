@@ -87,12 +87,15 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
 
     ClearBackground(Color{25, 30, 40});
     game_data.world.Draw(dq);
-    game_data.world.DrawHealthBars();
     
     EndMode2D();
     EndShaderMode();
     renderer.EndGeometry();
     renderer.Draw(dq, camera);
+
+    BeginMode2D(camera);
+    game_data.world.DrawHealthBars();
+    EndMode2D();
 
     if(IsKeyPressed(KEY_ESCAPE))
     {
