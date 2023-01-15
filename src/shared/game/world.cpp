@@ -570,6 +570,8 @@ namespace Game {
             entity->active = true;
             entity->time_until_state_change_allowed = Const::ENTITY.BULLET_LIFETIME;
             entity->owner = owner;
+            entity->num_frames = 4;
+            entity->max_frame_time = 0.1;
         }
         return entity;
     }
