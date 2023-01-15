@@ -1,11 +1,14 @@
 #include "world.h"
 #include "input.h"
+#include <graphics/raylib_shaders.h>
 
 #include "raylib.h"
 #include "raymath.h"
+#include "rlgl.h"
 
 #include <string.h>
 #include <macros.h>
+
 
 namespace Game {
 
@@ -288,6 +291,8 @@ namespace Game {
     {
         // TODO(sokus): Fix this
         parallax_background.Draw({ 0, 0 });
+        Game::RaylibShaders::worldSetDepth(1000);
+        rlDrawRenderBatchActive();
 
         for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
         {
@@ -295,6 +300,8 @@ namespace Game {
             if (entity->type != ENTITY_TYPE_NONE)
                 entity->Draw(dq);
         }
+        Game::RaylibShaders::worldSetDepth(1);
+        rlDrawRenderBatchActive();
     }
 
     void World::DrawHealthBars() const {

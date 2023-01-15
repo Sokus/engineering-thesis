@@ -101,7 +101,8 @@ namespace Game {
         glClearColor(0,0,0,0);
         glClear(GL_COLOR_BUFFER_BIT);
         lightRenderer.DrawLights(
-            viewProjection, TEX_ALBEDO_MAP, dq.ambientLight, 
+            viewProjection, TEX_ALBEDO_MAP, TEX_DEPTH_MAP, 
+            dq.ambientLight, 
             dq.lights.data(), dq.lights.size(),
             dq.energySpheres.data(), dq.energySpheres.size()
         );

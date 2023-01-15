@@ -142,21 +142,29 @@ namespace Game {
                 float k_bias()      {return v_attenuation.z;}
 
                 uniform sampler2D albedoMap;
+                uniform sampler2D depthMap;
                 uniform float bleedFactor;
 
                 out vec3 frag_color;
 
-                void main() 
-                {
-                    // distance to light
-                    float d = distance(v_position, v_light_position);
-
-                    vec3 local_intensity = max(
+                vec3 intensityAt(vec3 where) {
+                    float d = distance(
+                        where, 
+                        vec3(v_light_position, 1.0)
+                    );
+                    return max(
                         vec3(0.0), 
                         v_light_color / (k_quadratic()*d*d + k_linear()*d + 1.0) - vec3(k_bias())
                     );
+                }
+
+                void main() {
+                    float depth = texture(depthMap, v_uv).r;
                     vec3 albedo = texture(albedoMap, v_uv).rgb;
-                    frag_color = local_intensity * (albedo + bleedFactor);
+                    
+                    frag_color = 
+                        intensityAt(vec3(v_position, depth)) * albedo * (1-bleedFactor) +
+                        intensityAt(vec3(v_position, 1.0)) * bleedFactor;
                 }
             )glsl"
         );
@@ -194,7 +202,7 @@ namespace Game {
 
     void LightRenderer::DrawLights(
         const glm::mat4 &viewProjection, 
-        GL::TextureUnit albedoMap,
+        GL::TextureUnit albedoMap, GL::TextureUnit depthMap,
         const glm::vec3 &ambientLight, 
         const Light *lights, int noLights,
         const Light *energySpheres, int noEnergySpheres
@@ -223,11 +231,12 @@ namespace Game {
 
         omniLightProgram()
             .SetUniform("albedoMap", albedoMap)
+            .SetUniform("depthMap", depthMap)
             .SetUniform("view_projection", viewProjection)
-            .SetUniform("bleedFactor", 0);
+            .SetUniform("bleedFactor", 0.0f);
         glDrawArrays(GL_TRIANGLES, lightIndices.first, lightIndices.count);
 
-        omniLightProgram().SetUniform("bleedFactor", 1);
+        omniLightProgram().SetUniform("bleedFactor", 1.0f);
         glDrawArrays(GL_TRIANGLES, energySphereIndices.first, energySphereIndices.count);
 
         // Cleanup

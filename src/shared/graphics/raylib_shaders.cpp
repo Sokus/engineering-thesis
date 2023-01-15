@@ -25,6 +25,9 @@ namespace Game::RaylibShaders {
 
     Shader world;
     int worldDepthLoc;
+    void worldSetDepth(float value) {
+        SetShaderValue(world, worldDepthLoc, &value, SHADER_UNIFORM_FLOAT);
+    }
 
     void LoadShaders() {
         world = LoadShaderFromMemory(
@@ -36,7 +39,9 @@ namespace Game::RaylibShaders {
                 in vec4 fragColor;    
 
                 layout(location=0) out vec4 finalColor; 
-                layout(location=1) out float fragDepth;
+                // we only need to output 1 float, but if we output less than 4 components then alpha
+                // is undefined, which messes up the output due to blending
+                layout(location=1) out vec4 fragDepth;
 
                 uniform sampler2D texture0;
                 uniform vec4 colDiffuse;  
@@ -44,8 +49,8 @@ namespace Game::RaylibShaders {
 
                 void main() {                                  
                     vec4 texelColor = texture(texture0, fragTexCoord);   
-                    finalColor = texelColor*colDiffuse*fragColor;  
-                    fragDepth = depth;      
+                    finalColor = texelColor*colDiffuse*fragColor;
+                    fragDepth = vec4(depth, depth, depth, (texelColor*colDiffuse*fragColor).a);
                 }                                  
             )glsl"
         );

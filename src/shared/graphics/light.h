@@ -57,7 +57,7 @@ namespace Game {
 
         void DrawLights(
             const glm::mat4 &viewProjection, 
-            GL::TextureUnit albedoMap,
+            GL::TextureUnit albedoMap, GL::TextureUnit depthMap,
             const glm::vec3 &ambientLight, 
             const Light *lights, int noLights,
             const Light *energySpheres, int noEnergySpheres

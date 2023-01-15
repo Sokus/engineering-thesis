@@ -202,20 +202,22 @@ namespace Game {
             Light light;
             light.position = glm::vec2(position.x + size.x/2, position.y + size.y/2);
             switch(type) {
-                case ENTITY_TYPE_PLAYER:      light.intensity = {1.0f, 1.0f, 0.75f}; light.SetRange(MAX(size.x, size.y)*3); break;
+                case ENTITY_TYPE_PLAYER:      light.intensity = {1.0f, 1.0f, 0.75f}; light.SetRange(MAX(size.x, size.y)*4); break;
                 case ENTITY_TYPE_MOVING_TILE: light.intensity = {0.75f, 1.0f, 1.0f}; light.SetRange(MAX(size.x, size.y)*2); break;
                 case ENTITY_TYPE_INTERACTIVE: light.intensity = {0.75f, 1.0f, 1.0f}; light.SetRange(MAX(size.x, size.y)*2); break;
-                case ENTITY_TYPE_BULLET:      light.intensity = {0.5f, 1.0f, 1.0f};  light.SetRange(MAX(size.x, size.y)*3); break;
+                case ENTITY_TYPE_BULLET:      light.intensity = {0.25f, 0.5f, 0.5f};  light.SetRange(MAX(size.x, size.y)*4); break;
             }
-            
             dq.DrawLight(light);
         }
 
         if(type == ENTITY_TYPE_BULLET) {
             Light light;
             light.position = glm::vec2(position.x + size.x/2, position.y + size.y/2);
-            light.intensity = {1.5f, 3.0f, 3.0f};
-            light.SetRange(MAX(size.x, size.y)*0.8f);
+            light.intensity = glm::vec3(0.5f, 1.0f, 1.0f) / 1.0f;
+            light.SetRange(MAX(size.x, size.y)*1.0f);
+            dq.DrawEnergySphere(light);
+
+            light.SetRange(light.Range()/4);
             dq.DrawEnergySphere(light);
         }
 
