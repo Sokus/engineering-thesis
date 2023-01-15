@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <glm/vec2.hpp>
+#include <raylib.h>
 
 #include <gl/framebuffer.h>
 #include "light.h"
@@ -20,6 +21,7 @@ namespace Game {
 
         public:
 
+        glm::vec3 ambientLight = glm::vec3(0.5f);
         void DrawLight(const Light &light);
         void Clear();
     };
@@ -30,6 +32,8 @@ namespace Game {
 
         GL::Framebuffer gbuffer;
         GL::Framebuffer hdrFbo;
+
+        LightRenderer lightRenderer;
 
         public:
 
@@ -42,7 +46,7 @@ namespace Game {
         void EndGeometry();
 
         void ResizeFramebuffers(const glm::ivec2 &size);
-        void Draw(const DrawQueue &);
+        void Draw(const DrawQueue &, const Camera2D &);
     };
 
 }

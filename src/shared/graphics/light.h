@@ -1,10 +1,11 @@
 #ifndef GRAPHICS_LIGHT_H
 #define GRAPHICS_LIGHT_H
 
+#include <vector>
 #include <glm/glm.hpp>
 #include <gl/buffer.h>
 #include <gl/vao.h>
-#include <gl/shader.h>
+#include <gl/texture.h>
 
 namespace Game {
 
@@ -28,15 +29,30 @@ namespace Game {
         void SetRange(float newRange);
     };
 
+    struct LightVertex {
+        glm::vec2 position;
+        glm::vec2 lightPosition;
+        glm::vec3 intensity;
+        glm::vec4 attenuation;
+    };
+
     struct LightRenderer {
 
         private:
         GL::Buffer vbo;
         GL::VAO vao;
-        //GL::ShaderProgram program;
+        std::vector<LightVertex> vertices;
+
 
         public:
+
         LightRenderer();
+
+        void DrawLights(
+            const glm::mat4 &viewProjection, 
+            GL::TextureUnit albedoMap,
+            const glm::vec3 &ambientLight, const Light *lights, int count
+        );
     };
 
 }

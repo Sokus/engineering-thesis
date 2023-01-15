@@ -89,7 +89,7 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
     
     EndMode2D();
     renderer.EndGeometry();
-    renderer.Draw(dq);
+    renderer.Draw(dq, camera);
 
     if(IsKeyPressed(KEY_ESCAPE))
     {

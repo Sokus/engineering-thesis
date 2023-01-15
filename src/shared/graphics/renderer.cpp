@@ -1,10 +1,16 @@
 #include "renderer.h"
 
-#include <gl/gl.h>
-#include "programs.h"
 #include <stdio.h>
+#include <raymath.h>
+#include <gl/gl.h>
+#include <gl/texture.h>
+#include "programs.h"
 
 namespace Game {
+
+    glm::mat4 ToGLMMatrix(const Matrix &m) {
+        return {m.m0, m.m1, m.m2, m.m3, m.m4, m.m5, m.m6, m.m7, m.m8, m.m9, m.m10, m.m11, m.m12, m.m13, m.m14, m.m15};
+    }
 
     void DrawQueue::DrawLight(const Light &light) {
         lights.push_back(light);
@@ -15,6 +21,14 @@ namespace Game {
     }
 
 
+    GL::TextureUnit
+        TEX_ALBEDO_MAP(0),
+        TEX_HDR(1);
+
+    void BindTextureToTexUnit(uint texUnitIndex, GLuint texture) {
+        glActiveTexture(GL_TEXTURE0 + texUnitIndex);
+        glBindTexture(GL_TEXTURE_2D, texture);
+    }
 
     Renderer::Renderer() :
         gbuffer({{GL_COLOR_ATTACHMENT0, GL_RGBA8}}),
@@ -37,15 +51,39 @@ namespace Game {
         GL::Framebuffer::Default.BindForDrawing();
     }
 
-    void Renderer::Draw(const DrawQueue &dq) {
+    void Renderer::Draw(const DrawQueue &dq, const Camera2D &camera) {
 
+        // ==================== SETUP ====================
+
+        // Calculate matrices
+        glm::mat4 viewMatrix = ToGLMMatrix(GetCameraMatrix2D(camera));
+        glm::mat4 projectionMatrix = ToGLMMatrix(MatrixScale(
+            GL::Framebuffer::Default.Size().x/(1.0f*GetScreenWidth()),  
+            GL::Framebuffer::Default.Size().y/(1.0f*GetScreenHeight()), 
+            1.0f
+        ));
+        glm::mat4 viewProjection = projectionMatrix * viewMatrix;
+
+        // Bind textures
+        TEX_ALBEDO_MAP.AttachTexture2D(gbuffer.GetTexture(GL_COLOR_ATTACHMENT0));
+        TEX_HDR       .AttachTexture2D(hdrFbo.GetTexture(GL_COLOR_ATTACHMENT0));
+
+        // ==================== RENDERING ====================
+
+        // Apply lighting to gbuffer
+        hdrFbo.BindForDrawing();
         glClearColor(0,0,0,0);
-        glActiveTexture(GL_TEXTURE0);
-
-        GL::Framebuffer::Default.BindForDrawing();
         glClear(GL_COLOR_BUFFER_BIT);
-        glBindTexture(GL_TEXTURE_2D, gbuffer.GetTexture(GL_COLOR_ATTACHMENT0));
-        grayscaleProgram().SetUniform("tex", 0);
-        grayscaleProgram().DrawPostprocessing();
+        lightRenderer.DrawLights(viewProjection, TEX_ALBEDO_MAP, dq.ambientLight, dq.lights.data(), dq.lights.size());
+
+
+        // Apply other postprocessing effects
+        GL::Framebuffer::Default.BindForDrawing();
+        glClearColor(0,0,0,0);
+        glClear(GL_COLOR_BUFFER_BIT);
+        grayscaleProgram()
+            .SetUniform("tex", TEX_HDR)
+            .SetUniform("strength", 0.5f)
+            .DrawPostprocessing();
     }
 }

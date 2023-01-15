@@ -1,6 +1,7 @@
 #include "light.h"
 
 #include <algorithm>
+#include <gl/shader.h>
 
 /* Solves a quadratic equation
  *
@@ -64,22 +65,140 @@ namespace Game {
         }
     }
 
-    LightRenderer::LightRenderer() /*:
-        program(
+    LightRenderer::LightRenderer() {
+        
+        vao.Bind();
+        vbo.Bind();
+
+        glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof(LightVertex), (const void *)offsetof(LightVertex,position));
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, sizeof(LightVertex), (const void *)offsetof(LightVertex,lightPosition));
+        glVertexAttribPointer(2, 3, GL_FLOAT, false, sizeof(LightVertex), (const void *)offsetof(LightVertex,intensity));
+        glVertexAttribPointer(3, 4, GL_FLOAT, false, sizeof(LightVertex), (const void *)offsetof(LightVertex,attenuation));
+
+        for(int i=0; i<4; ++i) glEnableVertexAttribArray(i);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
+    GL::ShaderProgram &ambientLightProgram() {
+        static auto result = GL::ShaderProgram::ForPostprocessing(
             R"glsl(
                 #version 330 core
 
-                void main() {
+                in vec2 v_uv;
+                uniform sampler2D albedoMap;
+                uniform vec3 ambientLight;
+                out vec3 fragColor;
 
+                void main() {
+                    fragColor = texture(albedoMap, v_uv).rgb * ambientLight;
+                }
+            )glsl"
+        );
+        return result;
+    }
+
+    GL::ShaderProgram &omniLightProgram() {
+        static GL::ShaderProgram result(
+            R"glsl(
+                #version 330 core
+
+                layout(location=0) in vec2 position;
+                layout(location=1) in vec2 light_position;
+                layout(location=2) in vec3 light_color;
+                layout(location=3) in vec4 attenuation;
+
+                uniform mat4 view_projection;
+
+                out vec2 v_position;
+                out vec2 v_light_position;
+                out vec3 v_light_color;
+                out vec4 v_attenuation;
+
+                void main() {
+                    gl_Position = view_projection * vec4(position, 0.0, 1.0);
+                    v_position = position;
+                    v_light_position = light_position;
+                    v_light_color = light_color;
+                    v_attenuation = attenuation;
                 }
             )glsl",
             R"glsl(
                 #version 330 core
 
-                void main() {
-                    
+                in vec2 v_position;
+                in vec2 v_light_position;
+                in vec3 v_light_color;
+                in vec4 v_attenuation;
+
+                float k_quadratic() {return v_attenuation.x;}
+                float k_linear()    {return v_attenuation.y;}
+                float k_bias()      {return v_attenuation.z;}
+
+                uniform sampler2D albedoMap;
+
+                out vec3 frag_color;
+
+                void main() 
+                {
+                    // distance to light
+                    float d = distance(v_position, v_light_position);
+
+                    frag_color = max(
+                        vec3(0.0), 
+                        v_light_color / (k_quadratic*d*d + k_linear*d + 1.0) - vec3(k_bias)
+                    );
                 }
             )glsl"
-        )*/
-    {}
+        );
+        return result;
+    }
+
+    void LightRenderer::DrawLights(
+        const glm::mat4 &viewProjection, 
+        GL::TextureUnit albedoMap,
+        const glm::vec3 &ambientLight, const Light *lights, int count
+    ) {
+
+        // Setup
+        glBlendFunc(GL_ONE, GL_ONE);
+        glClearColor(0,0,0,0);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // Ambient light
+        ambientLightProgram()
+            .SetUniform("albedoMap", albedoMap)
+            .SetUniform("ambientLight", ambientLight)
+            .DrawPostprocessing();
+
+        /*// Omni lights
+
+        vertices.clear();
+        vertices.reserve(6 * count);
+
+        glm::vec2 positionLookup[6] = {
+            glm::vec2(-1,-1), glm::vec2(1,-1), glm::vec2(-1,1),
+            glm::vec2(-1,1), glm::vec2(1,-1), glm::vec2(1,1)
+        };
+
+        for(const Light *light = lights; light < lights+count; ++light) {
+            float range = light->Range();
+            for(int i=0; i<6; ++i) {
+                vertices.push_back({
+                    positionLookup[i] * glm::vec2(range) + light->position,
+                    light->position,
+                    light->intensity,
+                    light->attenuation
+                });
+            }
+        }
+
+        omniLightProgram()
+            .SetUniform("albedoMap", albedoMap - GL_TEXTURE0)
+            .SetUniform("view_projection", viewProjection);*/
+
+        // Cleanup
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
 }

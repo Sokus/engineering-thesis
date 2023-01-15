@@ -1,8 +1,8 @@
 #include "shader.h"
 #include <rlgl.h>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace GL {
-
 
     ShaderProgram::ShaderProgram(const char *vertexSource, const char *fragmentSource) {
         handle = rlLoadShaderCode(vertexSource, fragmentSource);
@@ -50,8 +50,33 @@ namespace GL {
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
-    void ShaderProgram::SetUniform(const char *name, int value) {
+
+    ShaderProgram &ShaderProgram::SetUniform(const char *name, int value) {
         Bind();
         glUniform1i(glGetUniformLocation(handle, name), value);
+        return *this;
+    }
+    ShaderProgram &ShaderProgram::SetUniform(const char *name, const TextureUnit &value) {
+        return SetUniform(name, static_cast<int>(value.Index()));
+    }
+    ShaderProgram &ShaderProgram::SetUniform(const char *name, float value) {
+        Bind();
+        glUniform1f(glGetUniformLocation(handle, name), value);
+        return *this;
+    }
+    ShaderProgram &ShaderProgram::SetUniform(const char *name, const glm::vec3 &value) {
+        Bind();
+        glUniform3f(glGetUniformLocation(handle,name), value.x, value.y, value.z);
+        return *this;
+    }
+    ShaderProgram &ShaderProgram::SetUniform(const char *name, const glm::vec4 &value) {
+        Bind();
+        glUniform4f(glGetUniformLocation(handle,name), value.x, value.y, value.z, value.w);
+        return *this;
+    }
+    ShaderProgram &ShaderProgram::SetUniform(const char *name, const glm::mat4 &value) {
+        Bind();
+        glUniformMatrix4fv(glGetUniformLocation(handle, name), 1, false, glm::value_ptr(value));
+        return *this;
     }
 }
