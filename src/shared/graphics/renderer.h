@@ -29,6 +29,7 @@ namespace Game {
         private:
 
         GL::Framebuffer gbuffer;
+        GL::Framebuffer hdrFbo;
 
         public:
 

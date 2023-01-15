@@ -1,4 +1,5 @@
 #include "framebuffer.h"
+#include <stdio.h>
 
 extern "C" {
     int GetRenderWidth(void);
@@ -56,6 +57,7 @@ namespace GL {
         _size(size),
         specs(specs)
     {
+        handle = 999999;
         Init();
     }
 
@@ -92,7 +94,7 @@ namespace GL {
     GLuint Framebuffer::GetTexture(GLenum attachment) const {
         auto it = attachments.find(attachment);
         if(it == attachments.end())
-            return 0;
+            return 999999;
         else
             return it->second;
     }
@@ -101,5 +103,11 @@ namespace GL {
         Bind(GL_READ_FRAMEBUFFER);
         dst.Bind(GL_DRAW_FRAMEBUFFER);
         glBlitFramebuffer(0, 0, Size().x, Size().y, 0, 0, dst.Size().x, dst.Size().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    }
+
+    void Framebuffer::PrintAttachmentInfo() {
+        for(const auto [att, texture] : attachments) {
+            printf("%d -> %d\n", att, texture);
+        }
     }
 }

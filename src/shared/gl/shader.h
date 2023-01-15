@@ -1,8 +1,9 @@
 #ifndef GL_SHADER_H
 #define GL_SHADER_H
 
-#include "gl.h"
 #include <string>
+#include "gl.h"
+#include <gl/framebuffer.h>
 
 namespace GL {
 
@@ -16,7 +17,12 @@ namespace GL {
         ~ShaderProgram();
         ShaderProgram(const ShaderProgram &) = delete;
 
+        static ShaderProgram ForPostprocessing(const char *fragmentSource);
+
         void Bind();
+        void DrawPostprocessing();
+
+        void SetUniform(const char *name, int value);
     };
 }
 

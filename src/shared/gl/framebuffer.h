@@ -44,6 +44,8 @@ namespace GL {
         GLuint GetTexture(GLenum attachment) const;
 
         void CopyTo(GL::Framebuffer &dst);
+
+        void PrintAttachmentInfo();
     };
 }
 
