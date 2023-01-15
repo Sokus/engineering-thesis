@@ -21,4 +21,22 @@ namespace Game {
         )glsl");
         return result;
     }
+
+    GL::ShaderProgram &toneMappingProgram() {
+        static auto result = GL::ShaderProgram::ForPostprocessing(R"glsl(
+            #version 330 core
+
+            in vec2 v_uv;
+            uniform sampler2D tex;
+            uniform float exposure;
+            out vec4 fragColor;
+
+            void main() {
+                vec3 color = texture(tex, v_uv).rgb;
+                color = color / (color + vec3(1.0));
+                fragColor = vec4(color, 1.0);
+            }
+        )glsl");
+        return result;
+    }
 }

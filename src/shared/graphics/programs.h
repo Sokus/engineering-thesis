@@ -5,6 +5,7 @@
 
 namespace Game {
     GL::ShaderProgram &grayscaleProgram();
+    GL::ShaderProgram &toneMappingProgram();
 }
 
 #endif

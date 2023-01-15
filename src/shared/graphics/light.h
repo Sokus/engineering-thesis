@@ -26,7 +26,7 @@ namespace Game {
                 float kBias;
                 float _kReserved;
             };
-            glm::vec4 attenuation = {3.0f, 0.0f, 0.1f, 0.5f};
+            glm::vec4 attenuation = {0.01f, 0.0f, 0.1f, 0.5f};
         };
 
         float Range() const;

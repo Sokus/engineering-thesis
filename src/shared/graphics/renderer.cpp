@@ -112,9 +112,9 @@ namespace Game {
         GL::Framebuffer::Default.BindForDrawing();
         glClearColor(0,0,0,0);
         glClear(GL_COLOR_BUFFER_BIT);
-        grayscaleProgram()
+        toneMappingProgram()
             .SetUniform("tex", TEX_HDR)
-            .SetUniform("strength", 0.5f)
+            .SetUniform("exposure", 1.0f)
             .DrawPostprocessing();
 
         // ==================== CLEANUP ====================

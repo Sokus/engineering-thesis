@@ -202,10 +202,10 @@ namespace Game {
             Light light;
             light.position = glm::vec2(position.x + size.x/2, position.y + size.y/2);
             switch(type) {
-                case ENTITY_TYPE_PLAYER:      light.intensity = {1.0f, 1.0f, 0.75f}; light.SetRange(MAX(size.x, size.y)*4); break;
-                case ENTITY_TYPE_MOVING_TILE: light.intensity = {0.75f, 1.0f, 1.0f}; light.SetRange(MAX(size.x, size.y)*2); break;
-                case ENTITY_TYPE_INTERACTIVE: light.intensity = {0.75f, 1.0f, 1.0f}; light.SetRange(MAX(size.x, size.y)*2); break;
-                case ENTITY_TYPE_BULLET:      light.intensity = {0.25f, 0.5f, 0.5f};  light.SetRange(MAX(size.x, size.y)*4); break;
+                case ENTITY_TYPE_PLAYER:      light.intensity = glm::vec3(1.0f, 1.0f, 0.75f)*2.5f; light.kQuadratic = 3e-3; break;
+                case ENTITY_TYPE_MOVING_TILE: light.intensity = glm::vec3(0.75f, 1.0f, 1.0f)*1.0f; light.kQuadratic = 1e-3; break;
+                case ENTITY_TYPE_INTERACTIVE: light.intensity = glm::vec3(0.75f, 1.0f, 1.0f)*5.0f; light.kQuadratic = 6e-2; break;
+                case ENTITY_TYPE_BULLET:      light.intensity = glm::vec3(0.50f, 1.0f, 1.0f)*2.5f; light.kQuadratic = 3e-3; break;
             }
             dq.DrawLight(light);
         }
@@ -213,11 +213,10 @@ namespace Game {
         if(type == ENTITY_TYPE_BULLET) {
             Light light;
             light.position = glm::vec2(position.x + size.x/2, position.y + size.y/2);
-            light.intensity = glm::vec3(0.5f, 1.0f, 1.0f) / 1.0f;
-            light.SetRange(MAX(size.x, size.y)*1.0f);
+            light.intensity = glm::vec3(0.5f, 1.0f, 1.0f) * 50.0f;
+            light.SetRange(MAX(size.x,size.y));
             dq.DrawEnergySphere(light);
-
-            light.SetRange(light.Range()/4);
+            light.SetRange(light.Range()/2);
             dq.DrawEnergySphere(light);
         }
 
@@ -501,7 +500,7 @@ namespace Game {
             hueRed = 0, 
             hueGreen = 120;
 
-        Color barColor = ColorFromHSV(glm::mix(hueRed, hueGreen, relativeHealth()), 1, 1);
+        Color barColor = ColorFromHSV(glm::mix(hueRed, hueGreen, relativeHealth()), 0.75f, 0.75f);
         
         DrawRectangle(position.x, position.y + size.y + barGap, size.x, barHeight, BLACK);
         DrawRectangle(position.x, position.y + size.y + barGap, size.x * relativeHealth(), barHeight, barColor);
