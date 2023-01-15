@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <gl/shader.h>
+#include <stdio.h>
 
 /* Solves a quadratic equation
  *
@@ -111,13 +112,16 @@ namespace Game {
 
                 uniform mat4 view_projection;
 
+                out vec2 v_uv;
                 out vec2 v_position;
                 out vec2 v_light_position;
                 out vec3 v_light_color;
                 out vec4 v_attenuation;
 
                 void main() {
-                    gl_Position = view_projection * vec4(position, 0.0, 1.0);
+                    vec4 clipSpacePosition = view_projection * vec4(position, 0.0, 1.0);
+                    gl_Position = clipSpacePosition;
+                    v_uv = (clipSpacePosition.xy + vec2(1.0)) * 0.5;
                     v_position = position;
                     v_light_position = light_position;
                     v_light_color = light_color;
@@ -127,6 +131,7 @@ namespace Game {
             R"glsl(
                 #version 330 core
 
+                in vec2 v_uv;
                 in vec2 v_position;
                 in vec2 v_light_position;
                 in vec3 v_light_color;
@@ -145,10 +150,12 @@ namespace Game {
                     // distance to light
                     float d = distance(v_position, v_light_position);
 
-                    frag_color = max(
+                    vec3 local_intensity = max(
                         vec3(0.0), 
-                        v_light_color / (k_quadratic*d*d + k_linear*d + 1.0) - vec3(k_bias)
+                        v_light_color / (k_quadratic()*d*d + k_linear()*d + 1.0) - vec3(k_bias())
                     );
+                    vec3 albedo = texture(albedoMap, v_uv).rgb;
+                    frag_color = albedo * local_intensity;
                 }
             )glsl"
         );
@@ -160,8 +167,8 @@ namespace Game {
         GL::TextureUnit albedoMap,
         const glm::vec3 &ambientLight, const Light *lights, int count
     ) {
-
         // Setup
+        glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
         glClearColor(0,0,0,0);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -172,8 +179,7 @@ namespace Game {
             .SetUniform("ambientLight", ambientLight)
             .DrawPostprocessing();
 
-        /*// Omni lights
-
+        // Omni lights
         vertices.clear();
         vertices.reserve(6 * count);
 
@@ -183,7 +189,12 @@ namespace Game {
         };
 
         for(const Light *light = lights; light < lights+count; ++light) {
+
             float range = light->Range();
+
+            if(range <= 0) 
+                continue;
+
             for(int i=0; i<6; ++i) {
                 vertices.push_back({
                     positionLookup[i] * glm::vec2(range) + light->position,
@@ -194,9 +205,14 @@ namespace Game {
             }
         }
 
+        vbo.Upload(vertices.data(), vertices.size());
+        vao.Bind();
+
+        omniLightProgram().Bind();
         omniLightProgram()
-            .SetUniform("albedoMap", albedoMap - GL_TEXTURE0)
-            .SetUniform("view_projection", viewProjection);*/
+            .SetUniform("albedoMap", albedoMap)
+            .SetUniform("view_projection", viewProjection);
+        glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 
         // Cleanup
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

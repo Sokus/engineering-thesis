@@ -293,7 +293,7 @@ namespace Game {
         {
             const Entity* entity = &entities[entity_idx];
             if (entity->type != ENTITY_TYPE_NONE)
-                entity->Draw();
+                entity->Draw(dq);
         }
     }
 

@@ -11,6 +11,6 @@ namespace GL {
     }
 
     void Buffer::Bind(GLenum target) {
-        glBindBuffer(handle, target);
+        glBindBuffer(target, handle);
     }
 }

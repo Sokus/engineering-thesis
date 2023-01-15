@@ -155,7 +155,7 @@ namespace Game {
         position.y += velocity.y * dt;
     }
 
-    void Entity::Draw() const
+    void Entity::Draw(DrawQueue &dq) const
     {
         Rectangle source = {};
         source.width = facing >= 0 ? size.x : -size.x;
@@ -191,6 +191,24 @@ namespace Game {
             } break;
 
             default: break;
+        }
+
+        if(
+            type == ENTITY_TYPE_PLAYER ||
+            (type == ENTITY_TYPE_INTERACTIVE && active) ||
+            type == ENTITY_TYPE_BULLET ||
+            (type == ENTITY_TYPE_MOVING_TILE && (velocity.x != 0 || velocity.y != 0))
+        ) {
+            Light light;
+            light.position = glm::vec2(position.x + size.x/2, position.y + size.y/2);
+            switch(type) {
+                case ENTITY_TYPE_PLAYER:      light.intensity = {1.0f, 1.0f, 0.75f}; light.SetRange(MAX(size.x, size.y)*3); break;
+                case ENTITY_TYPE_MOVING_TILE: light.intensity = {0.75f, 1.0f, 1.0f}; light.SetRange(MAX(size.x, size.y)*2); break;
+                case ENTITY_TYPE_INTERACTIVE: light.intensity = {0.75f, 1.0f, 1.0f}; light.SetRange(MAX(size.x, size.y)*2); break;
+                case ENTITY_TYPE_BULLET:      light.intensity = {0.5f, 1.0f, 1.0f};  light.SetRange(MAX(size.x, size.y)*3); break;
+            }
+            
+            dq.DrawLight(light);
         }
 
         Rectangle destination = {};

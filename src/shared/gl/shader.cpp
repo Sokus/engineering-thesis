@@ -76,7 +76,7 @@ namespace GL {
     }
     ShaderProgram &ShaderProgram::SetUniform(const char *name, const glm::mat4 &value) {
         Bind();
-        glUniformMatrix4fv(glGetUniformLocation(handle, name), 1, false, glm::value_ptr(value));
+        glUniformMatrix4fv(glGetUniformLocation(handle, name), 1, GL_FALSE, glm::value_ptr(value));
         return *this;
     }
 }

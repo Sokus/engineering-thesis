@@ -18,7 +18,7 @@ namespace Game {
 
         public:
 
-        glm::vec3 ambientLight = glm::vec3(0.5f);
+        glm::vec3 ambientLight = glm::vec3(0.15f);
         void DrawLight(const Light &light);
         void Clear();
     };

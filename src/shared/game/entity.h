@@ -4,6 +4,7 @@
 #include "raylib.h"
 #include "stdint.h"
 #include "constans/constans.h"
+#include <graphics/drawqueue.h>
 
 struct BitStream;
 
@@ -103,7 +104,7 @@ namespace Game {
         void Update(float dt);
         void UpdateMovingTile(float dt);
         void setMoveSpeed(Input* input);
-        void Draw() const;
+        void Draw(DrawQueue &dq) const;
         bool collidesWith(Entity ent);
         void calculateCollisionSide(Entity ent);
         void correctPositions(Entity ent,Vector2 velocity, Vector2 ent_vel,float dt);
