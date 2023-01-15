@@ -5,6 +5,13 @@
 
 namespace Game {
 
+bool load_textures = true;
+
+void SetLoadTextures(bool value)
+{
+	load_textures = value;
+}
+
 void InitPlains(World *world)
 {
 	world->spawnpoint = Vector2{16.0f, 168.0f};
@@ -44,20 +51,24 @@ void InitPlains(World *world)
 	ParallaxLayer hills = {};
 	hills.dimensions = {960, 540};
 	hills.position = {0, 0, 3};
-	hills.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/hills.png");
 	hills.natural_scroll_speed = -300;
 
 	ParallaxLayer clouds = {};
 	clouds.dimensions = {960, 540};
 	clouds.position = {0, 0, 10};
-	clouds.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/clouds.png");
 	clouds.natural_scroll_speed = -300;
 
 	ParallaxLayer sky = {};
 	sky.dimensions = {960, 540};
 	sky.position = {0, 0, 999};
-	sky.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/sky.png");
 	sky.natural_scroll_speed = 0;
+
+	if (load_textures)
+	{
+		hills.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/hills.png");
+		clouds.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/clouds.png");
+		sky.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/sky.png");
+	}
 
 	world->parallax_background.AddParallaxLayer(hills);
 	world->parallax_background.AddParallaxLayer(clouds);
@@ -81,25 +92,30 @@ void InitLake(World *world) {
 	ParallaxLayer hills = {};
 	hills.dimensions = { 960, 540 };
 	hills.position = { 0, 0, 3 };
-	hills.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/hills.png");
 	hills.natural_scroll_speed = -300;
 
 	ParallaxLayer clouds = {};
 	clouds.dimensions = { 960, 540 };
 	clouds.position = { 0, 0, 10 };
-	clouds.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/clouds.png");
 	clouds.natural_scroll_speed = -300;
 
 	ParallaxLayer sky = {};
 	sky.dimensions = { 960, 540 };
 	sky.position = { 0, 0, 999 };
-	sky.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/sky.png");
 	sky.natural_scroll_speed = 0;
+
+	if (load_textures)
+	{
+		hills.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/hills.png");
+		clouds.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/clouds.png");
+		sky.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/sky.png");
+	}
 
 	world->parallax_background.AddParallaxLayer(hills);
 	world->parallax_background.AddParallaxLayer(clouds);
 	world->parallax_background.AddParallaxLayer(sky);
 }
+
 void InitClouds(World* world) {
 	world->spawnpoint = Vector2{ 0.0f, 100.0f };
 
@@ -115,20 +131,24 @@ void InitClouds(World* world) {
 	ParallaxLayer hills = {};
 	hills.dimensions = { 960, 540 };
 	hills.position = { 0, 0, 3 };
-	hills.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/hills.png");
 	hills.natural_scroll_speed = -300;
 
 	ParallaxLayer clouds = {};
 	clouds.dimensions = { 960, 540 };
 	clouds.position = { 0, 0, 10 };
-	clouds.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/clouds.png");
 	clouds.natural_scroll_speed = -300;
 
 	ParallaxLayer sky = {};
 	sky.dimensions = { 960, 540 };
 	sky.position = { 0, 0, 999 };
-	sky.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/sky.png");
 	sky.natural_scroll_speed = 0;
+
+	if (load_textures)
+	{
+		hills.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/hills.png");
+		clouds.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/clouds.png");
+		sky.texture = LoadTexture(RESOURCE_PATH "/backgrounds/example_level/sky.png");
+	}
 
 	world->parallax_background.AddParallaxLayer(hills);
 	world->parallax_background.AddParallaxLayer(clouds);

@@ -37,7 +37,7 @@ ProcessHandle *CreateChildProcess(char **argv, int argc)
         if (arg < win32_argc - 1)
             cmd[cmd_length++] = ' ';
     }
-    cmd[cmd_length + 1] = '\0';
+    cmd[cmd_length] = '\0';
 
     STARTUPINFOA startup_info;
     GetStartupInfoA(&startup_info);

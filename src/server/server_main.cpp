@@ -5,6 +5,7 @@
 
 #include "system/pi_time.h"
 #include "system/network.h"
+#include "game/level.h"
 
 #include "parg.h"
 
@@ -40,7 +41,10 @@ int ProcessArguments(int argc, char *argv[])
                     case 'p':
                         printf("option -p required a port number\n");
                         return PARG_ERROR_MISSING_PORT;
-                    default: return PARG_ERROR_UNKNOWN_ERROR;
+                    default:
+                        //printf("unknown option %c\n", parg.optopt);
+                        //return PARG_ERROR_UNKNOWN_ERROR;
+                        return PARG_SUCCESS;
                 }
             default:
                 printf("unhandled option: -%c\n", parg_opt);
@@ -53,11 +57,11 @@ int ProcessArguments(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
+    for (int i = 0; i < argc; i++) printf("%s ", argv[i]); printf("\n");
     InitializeTime();
     InitializeNetwork();
 
-    if (!ProcessArguments(argc, argv))
-        return -1;
+    int pa_rc = ProcessArguments(argc, argv);
 
     Server server = {};
     printf("server starting on port %u\n", port);

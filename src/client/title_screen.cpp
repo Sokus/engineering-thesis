@@ -4,10 +4,13 @@
 #include "user_interface.h"
 #include "game/world.h"
 #include "macros.h"
+#include "system.h"
+#include "server_control.h"
 
 #include <string.h>
 
 extern AppData app_state;
+extern Client client_state;
 
 void DoMainMenu()
 {
@@ -53,7 +56,7 @@ void DoJoinMenu()
 {
     if(app_state.menu_changed)
     {
-        const char default_ip[] = "localhost";
+        const char default_ip[] = "127.0.0.1";
         const char default_port[] = "25565";
         memcpy(app_state.join_ip_field, default_ip, sizeof(default_ip));
         memcpy(app_state.join_port_field, default_port, sizeof(default_port));
@@ -78,7 +81,20 @@ void DoJoinMenu()
     port_field.Update();
 
     if(join_button.IsReleased())
-        app_state.current_menu = GAME_MENU_CONNECTING;
+    {
+        char address_string[255] = "";
+        int index = 0;
+        TextAppend(address_string, app_state.join_ip_field, &index);
+        TextAppend(address_string, ":", &index);
+        TextAppend(address_string, app_state.join_port_field, &index);
+        Address address = AddressParse(address_string);
+        if (AddressIsValid(address))
+        {
+            app_state.multiplayer = true;
+            app_state.current_menu = GAME_MENU_CONNECTING;
+            client_state.Connect(address);
+        }
+    }
 
     if(close_button.IsReleased())
         app_state.current_menu = GAME_MENU_MAIN;
@@ -91,12 +107,12 @@ void DoJoinMenu()
 
 void DoConnectingMenu()
 {
-    if(app_state.menu_changed)
+    DrawText("Connecting...", 20, 20, 20, WHITE);
+
+    if (client_state.state == CLIENT_ERROR)
     {
-
+        app_state.current_menu = GAME_MENU_MAIN;
     }
-
-    ClearBackground(DARKGREEN);
 }
 
 void DoHostMenu()
@@ -124,7 +140,17 @@ void DoHostMenu()
 
     if(host_button.IsReleased())
     {
-        // nothing done yet
+        char address_string[255] = "127.0.0.1:";
+        int address_length = TextLength(address_string);
+        TextAppend(address_string, app_state.host_port_field, &address_length);
+        Address address = AddressParse(address_string);
+        if (AddressIsValid(address))
+        {
+            LaunchServer(address.port);
+            app_state.multiplayer = true;
+            app_state.current_menu = GAME_MENU_CONNECTING;
+            client_state.Connect(address);
+        }
     }
 
     if(close_button.IsReleased())
@@ -154,7 +180,7 @@ void DoLevelMenu()
     UI::End();
 
     if (close_button.IsReleased())
-        app_state.current_menu = GAME_MENU_LEVEL;
+        app_state.current_menu = GAME_MENU_MAIN;
 
     for (int i = 0; i < ARRAY_SIZE(buttons); i++) {
         if (buttons[i].button.IsReleased()) {
@@ -191,6 +217,7 @@ void DoPlayerSelectionMenu()
 
     for (int i = 0; i < ARRAY_SIZE(buttons); i++) {
         if (buttons[i].button.IsReleased()) {
+            app_state.multiplayer = false;
             app_state.player_type_selected = buttons[i].player_type;
             app_state.current_menu = GAME_MENU_NONE;
             app_state.current_scene = GAME_SCENE_GAME;

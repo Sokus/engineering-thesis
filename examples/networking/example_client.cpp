@@ -10,7 +10,7 @@
 
 int main(int argc, char *argv[])
 {
-    unsigned short server_port = 25565;
+    unsigned short server_port = 60000;
 
     ProcessHandle *process;
     {

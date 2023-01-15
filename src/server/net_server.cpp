@@ -13,6 +13,7 @@ void Server::Init(Socket socket)
     for (int i = 1; i < MAX_CLIENTS; i++)
         ResetClientState(i);
     world.Clear();
+    Game::SetLoadTextures(false);
     Game::InitLevel(&world, Game::LEVEL_PLAINS);
 }
 

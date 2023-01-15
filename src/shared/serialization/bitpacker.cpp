@@ -93,7 +93,7 @@ void BitWriter_FlushBits(BitWriter *bit_writer)
     if (bit_writer->scratch_bits != 0)
     {
         ASSERT(bit_writer->word_index < bit_writer->num_words);
-        bit_writer->data[bit_writer->word_index++] = (uint32_t)(bit_writer->scratch & 0xFFFFFFFF);
+        bit_writer->data[bit_writer->word_index] = (uint32_t)(bit_writer->scratch & 0xFFFFFFFF);
         bit_writer->scratch >>= 32;
         bit_writer->scratch_bits -= 32;
         bit_writer->word_index++;

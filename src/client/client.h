@@ -75,6 +75,7 @@ struct GameData
     Game::Input input;
 };
 
+struct ProcessHandle;
 struct AppData
 {
     GameScene last_scene;
@@ -91,7 +92,9 @@ struct AppData
 
     Game::PlayerType player_type_selected;
     Game::LevelType level_type_selected;
+
     bool multiplayer;
+    ProcessHandle *server_handle;
 };
 
 #endif // CLIENT_H

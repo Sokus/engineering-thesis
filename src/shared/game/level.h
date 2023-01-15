@@ -13,6 +13,7 @@ enum LevelType
 
 struct World;
 void InitLevel(World *world, LevelType type);
+void SetLoadTextures(bool value);
 
 }
 

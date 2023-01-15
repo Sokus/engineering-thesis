@@ -11,10 +11,12 @@
 #include "title_screen.h"
 #include "game/entity.h"
 
+#include "server_control.h"
 #include "raylib.h"
 
 AppData app_state = {};
 GameData game_data = {};
+Client client_state = {};
 
 void DoPauseMenu()
 {
@@ -52,11 +54,15 @@ void DoGameScene(float dt)
 {
     static Game::EntityReference player_reference;
 
-    if(!game_data.world.initialised)
+    if (!game_data.world.initialised)
     {
         game_data.world.Clear();
         Game::InitLevel(&game_data.world, app_state.level_type_selected);
-        player_reference = game_data.world.CreatePlayer(1, game_data.world.spawnpoint.x, game_data.world.spawnpoint.y, app_state.player_type_selected).reference;
+
+        if (app_state.multiplayer == false)
+        {
+            player_reference = game_data.world.CreatePlayer(1, game_data.world.spawnpoint.x, game_data.world.spawnpoint.y, app_state.player_type_selected).reference;
+        }
 
         game_data.world.initialised = true;
     }
@@ -64,7 +70,10 @@ void DoGameScene(float dt)
     Game::Input inputs[2] = {};
     inputs[1] = Game::GetInput();
 
-    game_data.world.Update(inputs, ARRAY_SIZE(inputs), dt);
+    if (app_state.multiplayer == false)
+    {
+        game_data.world.Update(inputs, ARRAY_SIZE(inputs), dt);
+    }
 
     Camera2D camera = {};
     camera.offset = Vector2{ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
@@ -131,6 +140,9 @@ int main(int, char**)
     Game::LoadEntityTextures();
     UI::Init();
 
+    Socket socket = SocketCreate(SOCKET_IPV4, 50000);
+    client_state.Init(socket);
+
     app_state.last_scene = GAME_SCENE_INVALID;
     app_state.current_scene = GAME_SCENE_TITLE_SCREEN;
     app_state.last_menu = GAME_MENU_NONE;
@@ -147,18 +159,26 @@ int main(int, char**)
         float dt = GetFrameTime() > expected_delta_time ? expected_delta_time : GetFrameTime();
 
         BeginDrawing();
+        client_state.ReceivePackets();
+        client_state.CheckForTimeOut();
         switch(app_state.current_scene)
         {
             case GAME_SCENE_TITLE_SCREEN: DoTitleScreenScene(); break;
             case GAME_SCENE_GAME: DoGameScene(dt); break;
             default: app_state.should_quit = true; break;
         }
+        client_state.SendPackets();
         EndDrawing();
 
         if(WindowShouldClose()) app_state.should_quit = true;
     }
 
     CloseWindow();
+
+    if (app_state.server_handle)
+    {
+        ShutdownServer();
+    }
 
     return 0;
 }
