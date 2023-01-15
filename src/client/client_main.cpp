@@ -10,6 +10,7 @@
 #include "client.h"
 #include "title_screen.h"
 #include "game/entity.h"
+#include <graphics/raylib_shaders.h>
 #include <graphics/renderer.h>
 
 #include "raylib.h"
@@ -81,6 +82,7 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
     }
 
     renderer.BeginGeometry();
+    BeginShaderMode(Game::RaylibShaders::world);
     BeginMode2D(camera);
 
     ClearBackground(Color{25, 30, 40});
@@ -88,6 +90,7 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
     game_data.world.DrawHealthBars();
     
     EndMode2D();
+    EndShaderMode();
     renderer.EndGeometry();
     renderer.Draw(dq, camera);
 
@@ -136,6 +139,7 @@ int main(int, char**)
     InitializeNetwork();
     InitializeTime();
     Game::LoadEntityTextures();
+    Game::RaylibShaders::LoadShaders();
     UI::Init();
 
     app_state.last_scene = GAME_SCENE_INVALID;
@@ -172,6 +176,8 @@ int main(int, char**)
             if(WindowShouldClose()) app_state.should_quit = true;
         }
     }
+
+    Game::RaylibShaders::UnloadShaders();
 
     CloseWindow();
 

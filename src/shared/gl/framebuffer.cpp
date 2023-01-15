@@ -30,11 +30,16 @@ namespace GL {
         glGenFramebuffers(1, &handle);
         Bind(GL_FRAMEBUFFER);
 
+        std::vector<GLenum> attachmentPoints;
+
         for(auto &spec: specs) {
             GLuint texture = AllocTexture2D(_size, spec.internalFormat);
             glFramebufferTexture2D(GL_FRAMEBUFFER, spec.attachment, GL_TEXTURE_2D, texture, 0);
             attachments[spec.attachment] = texture;
+            attachmentPoints.push_back(spec.attachment);
         }
+
+        glDrawBuffers(attachmentPoints.size(), attachmentPoints.data());
     }
 
     void Framebuffer::Dispose() {

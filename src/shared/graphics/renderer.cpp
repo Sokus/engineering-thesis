@@ -12,6 +12,11 @@
 
 namespace Game {
 
+    enum {
+        ATT_GBUFFER_ALBEDO = GL_COLOR_ATTACHMENT0,
+        ATT_GBUFFER_DEPTH = GL_COLOR_ATTACHMENT1
+    };
+
     glm::mat4 ToGLMMatrix(const Matrix &m) {
         return {
             m.m0, m.m1, m.m2,  m.m3, 
@@ -24,7 +29,8 @@ namespace Game {
 
     GL::TextureUnit
         TEX_ALBEDO_MAP(0),
-        TEX_HDR(1);
+        TEX_DEPTH_MAP(1),
+        TEX_HDR(2);
 
     void BindTextureToTexUnit(uint texUnitIndex, GLuint texture) {
         glActiveTexture(GL_TEXTURE0 + texUnitIndex);
@@ -32,7 +38,10 @@ namespace Game {
     }
 
     Renderer::Renderer() :
-        gbuffer({{GL_COLOR_ATTACHMENT0, GL_RGBA8}}),
+        gbuffer({
+            {ATT_GBUFFER_ALBEDO, GL_RGBA8},
+            {ATT_GBUFFER_DEPTH,  GL_R16F}   
+        }),
         hdrFbo({{GL_COLOR_ATTACHMENT0, GL_RGBA16F}})
     {
         GL::Framebuffer::Default.BindForDrawing();
@@ -81,7 +90,8 @@ namespace Game {
         glm::mat4 viewProjection = projectionMatrix * viewMatrix;
 
         // Bind textures
-        TEX_ALBEDO_MAP.AttachTexture2D(gbuffer.GetTexture(GL_COLOR_ATTACHMENT0));
+        TEX_ALBEDO_MAP.AttachTexture2D(gbuffer.GetTexture(ATT_GBUFFER_ALBEDO));
+        TEX_DEPTH_MAP .AttachTexture2D(gbuffer.GetTexture(ATT_GBUFFER_DEPTH));
         TEX_HDR       .AttachTexture2D(hdrFbo.GetTexture(GL_COLOR_ATTACHMENT0));
 
         // ==================== RENDERING ====================
