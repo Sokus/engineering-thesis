@@ -6,25 +6,9 @@
 #include <raylib.h>
 
 #include <gl/framebuffer.h>
-#include "light.h"
+#include "drawqueue.h"
 
 namespace Game {
-
-    struct Renderer;
-
-    struct DrawQueue {
-
-        friend struct Renderer;
-
-        private:
-        std::vector<Light> lights;
-
-        public:
-
-        glm::vec3 ambientLight = glm::vec3(0.5f);
-        void DrawLight(const Light &light);
-        void Clear();
-    };
     
     struct Renderer {
 

@@ -12,14 +12,6 @@ namespace Game {
         return {m.m0, m.m1, m.m2, m.m3, m.m4, m.m5, m.m6, m.m7, m.m8, m.m9, m.m10, m.m11, m.m12, m.m13, m.m14, m.m15};
     }
 
-    void DrawQueue::DrawLight(const Light &light) {
-        lights.push_back(light);
-    }
-
-    void DrawQueue::Clear() {
-        lights.clear();
-    }
-
 
     GL::TextureUnit
         TEX_ALBEDO_MAP(0),
