@@ -34,6 +34,7 @@ namespace Game {
             void main() {
                 vec3 color = texture(tex, v_uv).rgb;
                 color = color / (color + vec3(1.0));
+                color = pow(color, vec3(1/exposure));
                 fragColor = vec4(color, 1.0);
             }
         )glsl");

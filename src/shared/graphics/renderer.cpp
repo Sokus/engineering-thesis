@@ -114,7 +114,7 @@ namespace Game {
         glClear(GL_COLOR_BUFFER_BIT);
         toneMappingProgram()
             .SetUniform("tex", TEX_HDR)
-            .SetUniform("exposure", 1.0f)
+            .SetUniform("exposure", dq.exposure)
             .DrawPostprocessing();
 
         // ==================== CLEANUP ====================

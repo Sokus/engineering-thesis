@@ -202,10 +202,10 @@ namespace Game {
             Light light;
             light.position = glm::vec2(position.x + size.x/2, position.y + size.y/2);
             switch(type) {
-                case ENTITY_TYPE_PLAYER:      light.intensity = glm::vec3(1.0f, 1.0f, 0.75f)*2.5f; light.kQuadratic = 3e-3; break;
-                case ENTITY_TYPE_MOVING_TILE: light.intensity = glm::vec3(0.75f, 1.0f, 1.0f)*1.0f; light.kQuadratic = 1e-3; break;
-                case ENTITY_TYPE_INTERACTIVE: light.intensity = glm::vec3(0.75f, 1.0f, 1.0f)*5.0f; light.kQuadratic = 6e-2; break;
-                case ENTITY_TYPE_BULLET:      light.intensity = glm::vec3(0.50f, 1.0f, 1.0f)*2.5f; light.kQuadratic = 3e-3; break;
+                case ENTITY_TYPE_PLAYER:      light.intensity = glm::vec3(1.0f, 1.0f, 0.75f)*1.0f; light.kQuadratic = 3e-3; break;
+                case ENTITY_TYPE_MOVING_TILE: light.intensity = glm::vec3(0.75f, 1.0f, 1.0f)*0.1f; light.kQuadratic = 1e-3; break;
+                case ENTITY_TYPE_INTERACTIVE: light.intensity = glm::vec3(0.75f, 1.0f, 1.0f)*1.0f; light.kQuadratic = 1e-2; break;
+                case ENTITY_TYPE_BULLET:      light.intensity = glm::vec3(0.50f, 1.0f, 1.0f)*1.0f; light.kQuadratic = 3e-3; break;
             }
             dq.DrawLight(light);
         }
@@ -213,10 +213,10 @@ namespace Game {
         if(type == ENTITY_TYPE_BULLET) {
             Light light;
             light.position = glm::vec2(position.x + size.x/2, position.y + size.y/2);
-            light.intensity = glm::vec3(0.5f, 1.0f, 1.0f) * 50.0f;
-            light.SetRange(MAX(size.x,size.y));
+            light.intensity = glm::vec3(0.5f, 1.0f, 1.0f) * 10.0f;
+            light.SetRange(MAX(size.x,size.y)/1.33f);
             dq.DrawEnergySphere(light);
-            light.SetRange(light.Range()/2);
+            light.SetRange(light.Range()/1.5f);
             dq.DrawEnergySphere(light);
         }
 
