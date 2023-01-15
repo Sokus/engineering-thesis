@@ -90,7 +90,11 @@ namespace Game {
         hdrFbo.BindForDrawing();
         glClearColor(0,0,0,0);
         glClear(GL_COLOR_BUFFER_BIT);
-        lightRenderer.DrawLights(viewProjection, TEX_ALBEDO_MAP, dq.ambientLight, dq.lights.data(), dq.lights.size());
+        lightRenderer.DrawLights(
+            viewProjection, TEX_ALBEDO_MAP, dq.ambientLight, 
+            dq.lights.data(), dq.lights.size(),
+            dq.energySpheres.data(), dq.energySpheres.size()
+        );
 
 
         // Apply other postprocessing effects

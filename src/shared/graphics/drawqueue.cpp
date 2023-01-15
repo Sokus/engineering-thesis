@@ -6,8 +6,13 @@ namespace Game {
         lights.push_back(light);
     }
 
+    void DrawQueue::DrawEnergySphere(const Light &sphere) {
+        energySpheres.push_back(sphere);
+    }
+
     void DrawQueue::Clear() {
         lights.clear();
+        energySpheres.clear();
     }
 
 }

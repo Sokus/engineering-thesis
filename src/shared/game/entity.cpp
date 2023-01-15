@@ -211,6 +211,14 @@ namespace Game {
             dq.DrawLight(light);
         }
 
+        if(type == ENTITY_TYPE_BULLET) {
+            Light light;
+            light.position = glm::vec2(position.x + size.x/2, position.y + size.y/2);
+            light.intensity = {1.5f, 3.0f, 3.0f};
+            light.SetRange(MAX(size.x, size.y)*0.8f);
+            dq.DrawEnergySphere(light);
+        }
+
         Rectangle destination = {};
         destination.x = position.x;
         destination.y = position.y;

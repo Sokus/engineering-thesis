@@ -9,12 +9,16 @@
 
 namespace Game {
 
+    struct IndexInterval {
+        int first;
+        int count;
+    };
+
     struct Light {
 
         glm::vec2 position;  //in world space
         glm::vec3 intensity = {1.0f, 1.0f, 1.0f}; //RGB
 
-        // Attenuation coefficients
         union {
             struct {
                 float kQuadratic;
@@ -22,11 +26,13 @@ namespace Game {
                 float kBias;
                 float _kReserved;
             };
-            glm::vec4 attenuation = {6.0f, 3.0f, 0.1f, 0.5f};
+            glm::vec4 attenuation = {3.0f, 0.0f, 0.1f, 0.5f};
         };
 
         float Range() const;
         void SetRange(float newRange);
+
+        static Light CreateRanged(const glm::vec2 &position, const glm::vec3 &intensity, float range);
     };
 
     struct LightVertex {
@@ -43,6 +49,7 @@ namespace Game {
         GL::VAO vao;
         std::vector<LightVertex> vertices;
 
+        IndexInterval PrepareVertexData(const Light *lights, int count);
 
         public:
 
@@ -51,7 +58,9 @@ namespace Game {
         void DrawLights(
             const glm::mat4 &viewProjection, 
             GL::TextureUnit albedoMap,
-            const glm::vec3 &ambientLight, const Light *lights, int count
+            const glm::vec3 &ambientLight, 
+            const Light *lights, int noLights,
+            const Light *energySpheres, int noEnergySpheres
         );
     };
 

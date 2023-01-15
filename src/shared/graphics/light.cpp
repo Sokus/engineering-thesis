@@ -142,6 +142,7 @@ namespace Game {
                 float k_bias()      {return v_attenuation.z;}
 
                 uniform sampler2D albedoMap;
+                uniform float bleedFactor;
 
                 out vec3 frag_color;
 
@@ -155,33 +156,16 @@ namespace Game {
                         v_light_color / (k_quadratic()*d*d + k_linear()*d + 1.0) - vec3(k_bias())
                     );
                     vec3 albedo = texture(albedoMap, v_uv).rgb;
-                    frag_color = albedo * local_intensity;
+                    frag_color = local_intensity * (albedo + bleedFactor);
                 }
             )glsl"
         );
         return result;
     }
 
-    void LightRenderer::DrawLights(
-        const glm::mat4 &viewProjection, 
-        GL::TextureUnit albedoMap,
-        const glm::vec3 &ambientLight, const Light *lights, int count
-    ) {
-        // Setup
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
-        glClearColor(0,0,0,0);
-        glClear(GL_COLOR_BUFFER_BIT);
+    IndexInterval LightRenderer::PrepareVertexData(const Light *lights, int count) {
 
-        // Ambient light
-        ambientLightProgram()
-            .SetUniform("albedoMap", albedoMap)
-            .SetUniform("ambientLight", ambientLight)
-            .DrawPostprocessing();
-
-        // Omni lights
-        vertices.clear();
-        vertices.reserve(6 * count);
+        auto oldVertexCount = vertices.size();
 
         glm::vec2 positionLookup[6] = {
             glm::vec2(-1,-1), glm::vec2(1,-1), glm::vec2(-1,1),
@@ -205,14 +189,46 @@ namespace Game {
             }
         }
 
+        return {(int)oldVertexCount, (int)(vertices.size() - oldVertexCount)};
+    }
+
+    void LightRenderer::DrawLights(
+        const glm::mat4 &viewProjection, 
+        GL::TextureUnit albedoMap,
+        const glm::vec3 &ambientLight, 
+        const Light *lights, int noLights,
+        const Light *energySpheres, int noEnergySpheres
+    ) {
+        // Setup
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
+        glClearColor(0,0,0,0);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        vertices.clear();
+        vertices.reserve(6 * (noLights+noEnergySpheres));
+
+        // Ambient light
+        ambientLightProgram()
+            .SetUniform("albedoMap", albedoMap)
+            .SetUniform("ambientLight", ambientLight)
+            .DrawPostprocessing();
+
+        // Omni lights
+        auto lightIndices = PrepareVertexData(lights, noLights);
+        auto energySphereIndices = PrepareVertexData(energySpheres, noEnergySpheres);
+
         vbo.Upload(vertices.data(), vertices.size());
         vao.Bind();
 
-        omniLightProgram().Bind();
         omniLightProgram()
             .SetUniform("albedoMap", albedoMap)
-            .SetUniform("view_projection", viewProjection);
-        glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+            .SetUniform("view_projection", viewProjection)
+            .SetUniform("bleedFactor", 0);
+        glDrawArrays(GL_TRIANGLES, lightIndices.first, lightIndices.count);
+
+        omniLightProgram().SetUniform("bleedFactor", 1);
+        glDrawArrays(GL_TRIANGLES, energySphereIndices.first, energySphereIndices.count);
 
         // Cleanup
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

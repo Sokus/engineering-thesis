@@ -15,11 +15,13 @@ namespace Game {
 
         private:
         std::vector<Light> lights;
+        std::vector<Light> energySpheres;
 
         public:
 
         glm::vec3 ambientLight = glm::vec3(0.15f);
         void DrawLight(const Light &light);
+        void DrawEnergySphere(const Light &sphere);
         void Clear();
     };
 
