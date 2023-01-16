@@ -57,7 +57,7 @@ void DoJoinMenu()
     if(app_state.menu_changed)
     {
         const char default_ip[] = "127.0.0.1";
-        const char default_port[] = "25565";
+        const char default_port[] = "50000";
         memcpy(app_state.join_ip_field, default_ip, sizeof(default_ip));
         memcpy(app_state.join_port_field, default_port, sizeof(default_port));
     }
@@ -90,8 +90,6 @@ void DoJoinMenu()
         Address address = AddressParse(address_string);
         if (AddressIsValid(address))
         {
-            address = AddressParseEx("127.0.0.1", 50000);
-            app_state.multiplayer = true;
             app_state.current_menu = GAME_MENU_CONNECTING;
             client_state.Connect(address);
         }
@@ -110,7 +108,15 @@ void DoConnectingMenu()
 {
     DrawText("Connecting...", 20, 20, 20, WHITE);
 
-    if (client_state.state == CLIENT_ERROR || client_state.state == CLIENT_DISCONNECTED)
+    if (client_state.state == CLIENT_CONNECTED)
+    {
+        app_state.player_type_selected = Game::PLAYER_TYPE_ROUGE;
+        app_state.level_type_selected = Game::LEVEL_PLAINS;
+        app_state.multiplayer = true;
+        app_state.current_menu = GAME_MENU_NONE;
+        app_state.current_scene = GAME_SCENE_GAME;
+    }
+    else if (client_state.state == CLIENT_ERROR || client_state.state == CLIENT_DISCONNECTED)
     {
         app_state.current_menu = GAME_MENU_MAIN;
     }
@@ -120,7 +126,7 @@ void DoHostMenu()
 {
     if(app_state.menu_changed)
     {
-        const char default_port[] = "25565";
+        const char default_port[] = "50000";
         memcpy(app_state.host_port_field, default_port, sizeof(default_port));
     }
 
@@ -148,7 +154,6 @@ void DoHostMenu()
         if (AddressIsValid(address))
         {
             LaunchServer(address.port);
-            app_state.multiplayer = true;
             app_state.current_menu = GAME_MENU_CONNECTING;
             client_state.Connect(address);
         }

@@ -59,7 +59,11 @@ void DoGameScene(float dt)
         game_data.world.Clear();
         Game::InitLevel(&game_data.world, app_state.level_type_selected);
 
-        if (app_state.multiplayer == false)
+        if (app_state.multiplayer)
+        {
+            player_reference = game_data.world.GetOwnedEntityReference(Game::ENTITY_TYPE_PLAYER, client_state.client_index, 0);
+        }
+        else
         {
             player_reference = game_data.world.CreatePlayer(1, game_data.world.spawnpoint.x, game_data.world.spawnpoint.y, app_state.player_type_selected).reference;
         }
@@ -68,7 +72,7 @@ void DoGameScene(float dt)
     }
 
     Game::Input inputs[2] = {};
-    inputs[1] = Game::GetInput();
+    game_data.input = inputs[1] = Game::GetInput();
 
     if (app_state.multiplayer == false)
     {
@@ -80,7 +84,10 @@ void DoGameScene(float dt)
     camera.zoom = 3.0f;
 
     if (!game_data.world.EntityReferenceIsValid(player_reference))
-        player_reference = game_data.world.GetOwnedEntityReference(Game::ENTITY_TYPE_PLAYER, 1, 0);
+    {
+        int owner = app_state.multiplayer ? client_state.client_index : 1;
+        player_reference = game_data.world.GetOwnedEntityReference(Game::ENTITY_TYPE_PLAYER, owner, 0);
+    }
 
     Game::Entity *player = game_data.world.GetEntityByReference(player_reference);
     if (player)

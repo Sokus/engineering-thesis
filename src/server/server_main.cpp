@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     Socket socket = SocketCreate(SOCKET_IPV4, port);
     server.Init(socket);
 
-    float hz = 10.0f; // refresh rate
+    float hz = 60.0f; // refresh rate
     float dt = 1.0f / hz;
     uint64_t last_time = Time_Now();
     while (true)
@@ -81,9 +81,11 @@ int main(int argc, char *argv[])
 
         uint64_t laptime = Time_Laptime(&last_time);
         double laptime_ms = Time_Ms(laptime);
-        double sleeptime_ms = (double)dt - laptime_ms;
+        double sleeptime_ms = (double)dt * 1000.0 - laptime_ms;
         if (sleeptime_ms >= 1.0)
+        {
             Time_Sleep((unsigned long)sleeptime_ms);
+        }
     }
 
     ShutdownNetwork();

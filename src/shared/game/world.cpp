@@ -93,7 +93,7 @@ namespace Game {
             }
         }
     }
-    
+
     void World::CheckStates(Entity& player, Vector2 velocity, Input* input, float dt) {
         for (int collide_idx = 0; collide_idx < max_entity_count; collide_idx++)
         {
@@ -259,7 +259,9 @@ namespace Game {
                 ASSERT(entity->owner >= 0);
                 ASSERT(entity->owner < num_inputs);
                 if (entity->owner >= 0 && entity->owner < num_inputs)
+                {
                     MovePlayer(*entity, &inputs[entity->owner], dt);
+                }
             } break;
 
             case ENTITY_TYPE_MOVING_TILE:

@@ -297,4 +297,6 @@ void Server::ProcessInputPacket(InputPacket *packet, Address address)
     ASSERT(client_index < MAX_CLIENTS);
 
     client_input[client_index] = packet->input;
+
+    client_data[client_index].last_packet_receive_time = Time_Now();
 }

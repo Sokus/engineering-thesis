@@ -226,8 +226,21 @@ void Client::ProcessWorldStatePacket(WorldStatePacket *packet, Address address)
     ASSERT(packet->entity_count >= 0);
     ASSERT(packet->start_index + packet->entity_count <= Game::max_entity_count);
 
-    size_t entity_data_size = packet->entity_count * sizeof(Game::Entity);
-    memcpy(&game_data.world.entities[packet->start_index], packet->entities, entity_data_size);
+    int start_index = packet->start_index;
+    int end_index = packet->start_index + packet->entity_count;
+    for (int i = start_index; i < end_index; i++)
+    {
+        game_data.world.entities[i].type = packet->entities[i].type;
+        game_data.world.entities[i].revision = packet->entities[i].revision;
+        if (packet->entities[i].type != Game::ENTITY_TYPE_NONE)
+        {
+            game_data.world.entities[i].owner = packet->entities[i].owner;
+            game_data.world.entities[i].current_frame = packet->entities[i].current_frame;
+            game_data.world.entities[i].size = packet->entities[i].size;
+            game_data.world.entities[i].position = packet->entities[i].position;
+        }
+
+    }
 
     last_packet_receive_time = Time_Now();
 }
