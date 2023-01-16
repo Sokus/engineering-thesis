@@ -61,8 +61,6 @@ bool BitStream_SerializeInteger(BitStream *stream, int32_t *value, int32_t min, 
 
     if(stream->mode == MEASURE_STREAM)
     {
-        ASSERT(*value >= min);
-        ASSERT(*value <= max);
         stream->bits_written += bits;
         return true;
     }

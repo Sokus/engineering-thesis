@@ -140,7 +140,7 @@ int main(int, char**)
     Game::LoadEntityTextures();
     UI::Init();
 
-    Socket socket = SocketCreate(SOCKET_IPV4, 50000);
+    Socket socket = SocketCreate(SOCKET_IPV4, 0);
     client_state.Init(socket);
 
     app_state.last_scene = GAME_SCENE_INVALID;

@@ -50,7 +50,7 @@ struct BitStream;
 
 #define SERIALIZE_ENUM(stream_ptr, value, type, num_entries) \
     do { \
-        int32_t int32_value; \
+        int32_t int32_value = 0; \
         if ((stream_ptr)->mode == WRITE_STREAM) \
             int32_value = (int32_t)value; \
         if (!BitStream_SerializeInteger((stream_ptr), &int32_value, 0, (num_entries) - 1)) \

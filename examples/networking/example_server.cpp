@@ -1,4 +1,5 @@
 #include "system/pi_time.h"
+#include "system/network.h"
 
 #include <stddef.h>
 #include <stdio.h>
@@ -7,31 +8,24 @@
 
 int main(int argc, char *argv[])
 {
+    InitializeNetwork();
     InitializeTime();
 
-    unsigned int port = 25565;
+    Socket socket = SocketCreate(SOCKET_IPV4, 60000);
 
-    parg_state parg;
-    int parg_opt;
-    parg_init(&parg);
-    while((parg_opt = parg_getopt(&parg, argc, argv, "hp:")) != -1)
+    uint8_t data[1400];
+
+    while(true)
     {
-        switch(parg_opt)
+        Address addr;
+        int d;
+        if (SocketReceive(socket, &addr, data, sizeof(data)))
         {
-            case 'h': printf("Usage: example_server [-h] [-p PORT]\n"); return 0; break;
-            case 'p': if(sscanf(parg.optarg, "%u", &port) <= 0) return -1; break;
-            case '?':
-                switch(parg.optopt)
-                {
-                    case 'p': printf("option -p required a port number\n"); return -1; break;
-                    default: return -1; break;
-                }
-                break;
-            default: printf("error: unhandled option: -%c\n", parg_opt); return -1; break;
+            for (int i = 0; i < 32; i++)
+                printf("%u", data[i]);
+            printf("\n");
         }
     }
-
-    printf("Starting on port %u\n", port);
 
     return 0;
 }

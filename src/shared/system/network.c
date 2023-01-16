@@ -432,6 +432,7 @@ int SocketReceive(Socket socket, Address *from, void *packet_data, int max_packe
         if (error == WSAEWOULDBLOCK || error == WSAECONNRESET)
             return 0;
         printf("recvfrom failed: %d\n", error);
+        printf("max packet size: %d\n", max_packet_size);
         return 0;
     }
 #else

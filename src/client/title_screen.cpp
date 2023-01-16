@@ -90,6 +90,7 @@ void DoJoinMenu()
         Address address = AddressParse(address_string);
         if (AddressIsValid(address))
         {
+            address = AddressParseEx("127.0.0.1", 50000);
             app_state.multiplayer = true;
             app_state.current_menu = GAME_MENU_CONNECTING;
             client_state.Connect(address);
@@ -109,7 +110,7 @@ void DoConnectingMenu()
 {
     DrawText("Connecting...", 20, 20, 20, WHITE);
 
-    if (client_state.state == CLIENT_ERROR)
+    if (client_state.state == CLIENT_ERROR || client_state.state == CLIENT_DISCONNECTED)
     {
         app_state.current_menu = GAME_MENU_MAIN;
     }

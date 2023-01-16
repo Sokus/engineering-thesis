@@ -196,7 +196,7 @@ void Server::SendWorldState()
 
     WorldStatePacket *packet = (WorldStatePacket *)CreatePacket(PACKET_WORLD_STATE);
 
-    BitStream stream = MeasureStream_Create(nullptr, MAX_PACKET_SIZE);
+    BitStream stream = MeasureStream_Create(nullptr, 1000);
     for (int i = 0; i < Game::max_entity_count; i++)
     {
         world.entities[i].Serialize(&stream);
@@ -204,7 +204,7 @@ void Server::SendWorldState()
         {
             BroadcastPacketToConnectedClients(packet);
 
-            stream = MeasureStream_Create(nullptr, MAX_PACKET_SIZE);
+            stream = MeasureStream_Create(nullptr, 1000);
             world.entities[i].Serialize(&stream);
             ASSERT(BitStream_GetBitsRemaining(&stream) >= 0);
 

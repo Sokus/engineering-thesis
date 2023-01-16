@@ -134,7 +134,7 @@ namespace Game {
         move_direction.x -= input->move[DIRECTION_LEFT];
         move_direction.x += input->move[DIRECTION_RIGHT];
         if (input->move[DIRECTION_UP] && on_ground)
-            move_direction.y = (float)jump_height * -1.0f; 
+            move_direction.y = (float)jump_height * -1.0f;
         velocity.x = move_direction.x * move_speed;
         velocity.y = move_direction.y * Const::PLAYER.FALL_SPEED;
     }
@@ -228,7 +228,7 @@ namespace Game {
 
     bool Entity::Serialize(BitStream *stream)
     {
-        SERIALIZE_ENUM(stream, type, EntityType, ENTITY_TYPE_COUNT - 1);
+        SERIALIZE_ENUM(stream, type, EntityType, ENTITY_TYPE_COUNT);
         SERIALIZE_BITS(stream, revision, 16);
         if (type != ENTITY_TYPE_NONE)
         {

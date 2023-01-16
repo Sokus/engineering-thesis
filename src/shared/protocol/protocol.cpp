@@ -120,7 +120,7 @@ Packet *ReadPacket(PacketInfo info, uint8_t *buffer, int buffer_size)
         return nullptr;
     }
 
-    if (packet->Serialize(&stream))
+    if (!packet->Serialize(&stream))
         goto cleanup;
 
     if (!BitStream_SerializeCheck(&stream, "end of packet"))

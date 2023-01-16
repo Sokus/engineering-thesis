@@ -9,7 +9,7 @@
 
 #include "parg.h"
 
-unsigned int port = 60000;
+unsigned int port = 50000;
 
 enum PargError
 {
@@ -65,9 +65,10 @@ int main(int argc, char *argv[])
 
     Server server = {};
     printf("server starting on port %u\n", port);
-    server.Init(SocketCreate(SOCKET_IPV4, port));
+    Socket socket = SocketCreate(SOCKET_IPV4, port);
+    server.Init(socket);
 
-    float hz = 30.0f; // refresh rate
+    float hz = 10.0f; // refresh rate
     float dt = 1.0f / hz;
     uint64_t last_time = Time_Now();
     while (true)
