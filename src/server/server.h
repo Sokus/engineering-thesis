@@ -25,6 +25,7 @@ struct Server
     Game::Input client_input[MAX_CLIENTS];
 
     Game::World world;
+    Game::LevelType level_type;
 
     void Init(Socket socket);
     void ResetClientState(int client_index);

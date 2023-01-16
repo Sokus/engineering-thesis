@@ -211,7 +211,7 @@ namespace Game {
             entity.move_direction.y += 0.75f;
         }
         if (entity.move_direction.x != 0.0f)
-            entity.facing = (int)entity.move_direction.x;
+            entity.facing = (int)SIGNF(entity.move_direction.x);
         entity.Control(input, dt);
         CheckPlayerShot(entity, input, dt);
 
@@ -229,7 +229,7 @@ namespace Game {
         entity.collideTop = false;
     }
     void World::MoveEnemy(Entity &entity,float dt) {
-        entity.facing = (int)entity.velocity.x / 10;
+        entity.facing = (int)SIGNF(entity.velocity.x);
 
         if (!entity.on_ground) {
             entity.move_direction.y += 0.75f;

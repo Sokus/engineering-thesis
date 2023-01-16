@@ -233,9 +233,14 @@ namespace Game {
         if (type != ENTITY_TYPE_NONE)
         {
             SERIALIZE_INT(stream, owner, 0, MAX_CLIENTS - 1);
-            SERIALIZE_INT(stream, current_frame, 0, 7);
+            ASSERT(num_frames <= 32);
+            SERIALIZE_INT(stream, num_frames, 0, 32);
+            if (num_frames > 0)
+                SERIALIZE_INT(stream, current_frame, 0, num_frames);
             SERIALIZE_VECTOR2(stream, size);
             SERIALIZE_VECTOR2(stream, position);
+            SERIALIZE_VECTOR2(stream, velocity);
+            SERIALIZE_INT(stream, facing, -2, 2);
         }
         return true;
     }
@@ -442,7 +447,7 @@ namespace Game {
         }
     }
     void Entity::stalkPlayer(Entity ent, float dt) {
-        float distance = sqrt(pow(position.x - ent.position.x, 2) + pow(position.y - ent.position.y, 2));
+        float distance = sqrtf(powf(position.x - ent.position.x, 2) + powf(position.y - ent.position.y, 2));
         if (distance < 70) {
             float direction = abs(position.x - ent.position.x)/(position.x-ent.position.x) * -1;
             velocity.x = 30.0f * direction;

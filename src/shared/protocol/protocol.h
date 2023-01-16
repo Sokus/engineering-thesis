@@ -12,6 +12,7 @@
 #include "game/input.h"
 #include "game/entity.h"
 #include "game/world.h"
+#include "game/level.h"
 
 #define MAX_PACKET_SIZE 1200
 #define MAX_CLIENTS 16
@@ -88,6 +89,7 @@ struct ConnectionRequestPacket : public Packet
 struct ConnectionAcceptedPacket : public Packet
 {
     int client_index;
+    Game::LevelType level_type;
 
     ConnectionAcceptedPacket() : Packet(PACKET_CONNECTION_ACCEPTED)
     {
@@ -97,6 +99,7 @@ struct ConnectionAcceptedPacket : public Packet
     bool Serialize(BitStream *stream)
     {
         SERIALIZE_INT(stream, client_index, 0, MAX_CLIENTS - 1);
+        SERIALIZE_ENUM(stream, level_type, Game::LevelType, Game::LEVEL_COUNT);
         return true;
     }
 };

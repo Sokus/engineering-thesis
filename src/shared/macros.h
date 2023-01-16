@@ -31,5 +31,6 @@
 #define ABS(a) (((a) >= 0) ? (a) : -(a))
 #define ABSF(a) (((a) >= 0.0f) ? (a) : (-a))
 #define SIGN(x) (((x) > 0) - ((x) < 0))
+#define SIGNF(x) (((x) > 0.0001f) - ((x) < 0.0001f))
 
 #endif //BASE_COMMON_H

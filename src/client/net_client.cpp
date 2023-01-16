@@ -6,6 +6,7 @@
 #include "macros.h"
 
 extern GameData game_data;
+extern AppData app_state;
 
 void Client::Init(Socket socket)
 {
@@ -172,6 +173,7 @@ void Client::ProcessConnectionAcceptedPacket(ConnectionAcceptedPacket *packet, A
     printf("client is now connected to server: %s (client index = %d)\n", address_string, packet->client_index);
     state = CLIENT_CONNECTED;
     client_index = packet->client_index;
+    app_state.level_type_selected = packet->level_type;
     last_packet_receive_time = Time_Now();
 }
 
@@ -228,18 +230,24 @@ void Client::ProcessWorldStatePacket(WorldStatePacket *packet, Address address)
     ASSERT(packet->entity_count >= 0);
     ASSERT(packet->start_index + packet->entity_count <= Game::max_entity_count);
 
-    int start_index = packet->start_index;
-    int end_index = packet->start_index + packet->entity_count;
-    for (int i = start_index; i < end_index; i++)
+    for (int i = packet->start_index; i < packet->entity_count; i++)
     {
-        game_data.world.entities[i].type = packet->entities[i].type;
-        game_data.world.entities[i].revision = packet->entities[i].revision;
-        if (packet->entities[i].type != Game::ENTITY_TYPE_NONE)
+        Game::Entity *dst = &game_data.world.entities[i + packet->start_index];
+        Game::Entity *src = &packet->entities[i];
+
+        dst->type = src->type;
+        dst->revision = src->revision;
+        if (src->type != Game::ENTITY_TYPE_NONE)
         {
-            game_data.world.entities[i].owner = packet->entities[i].owner;
-            game_data.world.entities[i].current_frame = packet->entities[i].current_frame;
-            game_data.world.entities[i].size = packet->entities[i].size;
-            game_data.world.entities[i].position = packet->entities[i].position;
+            dst->owner = src->owner;
+            dst->num_frames = src->num_frames;
+            if (src->num_frames > 0)
+                dst->current_frame = src->current_frame;
+
+            dst->size = src->size;
+            dst->position = src->position;
+            dst->velocity = src->velocity;
+            dst->facing = src->facing;
         }
 
     }

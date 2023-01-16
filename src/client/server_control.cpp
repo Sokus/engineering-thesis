@@ -9,7 +9,7 @@ void ShutdownServer()
     app_state.server_handle = nullptr;
 }
 
-void LaunchServer(unsigned int server_port, Game::LevelType level_type)
+void LaunchServer(unsigned int server_port, int level_type)
 {
     if (app_state.server_handle)
     {

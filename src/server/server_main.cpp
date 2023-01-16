@@ -41,7 +41,7 @@ int ProcessArguments(int argc, char *argv[])
                 break;
             case 'l':
             {
-                int suggested_level = 0;
+                int suggested_level = Game::LEVEL_PLAINS;
                 if (sscanf(parg.optarg, "%d", &suggested_level) <= 0)
                 {
                     printf("invalid level (%s)", parg.optarg);
@@ -82,17 +82,18 @@ int main(int argc, char *argv[])
 {
     InitializeTime();
     InitializeNetwork();
+    Game::SetLoadTextures(false);
 
     int pa_rc = ProcessArguments(argc, argv);
 
     Server server = {};
-    printf("server starting on port %u\n", port);
     Socket socket = SocketCreate(SOCKET_IPV4, port);
+    printf("server starting on port %u\n", port);
     server.Init(socket);
+    server.level_type = level_type;
     server.world.Clear();
-    Game::SetLoadTextures(false);
-    Game::InitLevel(&server.world, level_type);
-    printf("initialised level %d\n", level_type);
+    Game::InitLevel(&server.world,  server.level_type);
+    printf("initialised level %d\n",  server.level_type);
 
     float hz = 60.0f; // refresh rate
     float dt = 1.0f / hz;

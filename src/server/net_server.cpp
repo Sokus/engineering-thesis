@@ -139,6 +139,8 @@ void Server::ConnectClient(int client_index, Game::PlayerType player_type, Addre
 
     ConnectionAcceptedPacket *packet = (ConnectionAcceptedPacket *)CreatePacket(PACKET_CONNECTION_ACCEPTED);
     packet->client_index = client_index;
+    packet->level_type = this->level_type;
+    printf("PACKET: %d\n", packet->level_type);
     SendPacketToConnectedClient(client_index, packet);
     DestroyPacket(packet);
 
