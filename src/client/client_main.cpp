@@ -40,6 +40,11 @@ void DoPauseMenu()
 
     if(exit_button.IsReleased())
     {
+        if (app_state.multiplayer)
+        {
+            client_state.Disconnect();
+        }
+
         app_state.current_scene = GAME_SCENE_TITLE_SCREEN;
         app_state.current_menu = GAME_MENU_NONE;
         game_data.world.initialised = false;

@@ -23,10 +23,11 @@ void Client::ResetConnectionData()
     last_packet_receive_time = Time_Now() - Time_SecToTicks(60);
 }
 
-void Client::Connect(Address address)
+void Client::Connect(Address address, Game::PlayerType player_type)
 {
     Disconnect();
     server_address = address;
+    this->player_type = player_type;
     state = CLIENT_SENDING_CONNECTION_REQUEST;
     last_packet_send_time = Time_Now() - Time_SecToTicks(1.0);
     last_packet_receive_time = Time_Now();
@@ -70,6 +71,7 @@ void Client::SendPackets()
             printf("sending connection request to server: %s\n", address_string);
 
             ConnectionRequestPacket *packet = (ConnectionRequestPacket *)CreatePacket(PACKET_CONNECTION_REQUEST);
+            packet->player_type = player_type;
             SendPacketToServer(packet);
             DestroyPacket(packet);
         } break;

@@ -67,6 +67,7 @@ Packet *ReadPacket(PacketInfo info, uint8_t *buffer, int buffer_size);
 
 struct ConnectionRequestPacket : public Packet
 {
+    Game::PlayerType player_type;
     uint8_t data[256];
 
     ConnectionRequestPacket() : Packet(PACKET_CONNECTION_REQUEST)
@@ -76,6 +77,7 @@ struct ConnectionRequestPacket : public Packet
 
     bool Serialize(BitStream *stream)
     {
+        SERIALIZE_ENUM(stream, player_type, Game::PlayerType, Game::PLAYER_TYPE_COUNT);
         if (stream->mode == READ_STREAM && BitStream_GetBitsRemaining(stream) < 256 * 8)
             return false;
         SERIALIZE_BYTES(stream, data, sizeof(data));
@@ -102,7 +104,7 @@ struct ConnectionAcceptedPacket : public Packet
 enum ConnectionDeniedReason
 {
     CONNECTION_DENIED_SERVER_FULL,
-    CONNECTION_DENIED_ALREADY_CONNECTED,
+    CONNECTION_DENIED_INVALID_PLAYER_TYPE,
     CONNECTION_DENIED_REASON_COUNT,
 };
 

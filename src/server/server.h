@@ -34,7 +34,7 @@ struct Server
     void BroadcastPacketToConnectedClients(Packet *packet);
     int FindFreeClientIndex();
     int FindExistingClientIndex(Address address);
-    void ConnectClient(int client_index, Address address);
+    void ConnectClient(int client_index, Game::PlayerType player_type, Address address);
     void DisconnectClient(int client_index);
     void CheckForTimeOut();
     void SendWorldState();

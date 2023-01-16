@@ -8,7 +8,9 @@ enum LevelType
     LEVEL_INVALID,
     LEVEL_PLAINS,
     LEVEL_LAKE,
-    LEVEL_CLOUDS
+    LEVEL_CLOUDS,
+    // ---------
+    LEVEL_COUNT,
 };
 
 struct World;

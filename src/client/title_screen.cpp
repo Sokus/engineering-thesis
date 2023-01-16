@@ -31,7 +31,10 @@ void DoMainMenu()
     UI::End();
 
     if (solo_play_button.IsReleased())
+    {
+        app_state.multiplayer = false;
         app_state.current_menu = GAME_MENU_LEVEL;
+    }
 
     if (join_game_button.IsReleased())
         app_state.current_menu = GAME_MENU_JOIN;
@@ -90,8 +93,9 @@ void DoJoinMenu()
         Address address = AddressParse(address_string);
         if (AddressIsValid(address))
         {
-            app_state.current_menu = GAME_MENU_CONNECTING;
-            client_state.Connect(address);
+            app_state.multiplayer = true;
+            app_state.server_address = address;
+            app_state.current_menu = GAME_MENU_PLAYER_SELECTION;
         }
     }
 
@@ -108,11 +112,13 @@ void DoConnectingMenu()
 {
     DrawText("Connecting...", 20, 20, 20, WHITE);
 
+    if (app_state.menu_changed)
+    {
+        client_state.Connect(app_state.server_address, app_state.player_type_selected);
+    }
+
     if (client_state.state == CLIENT_CONNECTED)
     {
-        app_state.player_type_selected = Game::PLAYER_TYPE_ROUGE;
-        app_state.level_type_selected = Game::LEVEL_PLAINS;
-        app_state.multiplayer = true;
         app_state.current_menu = GAME_MENU_NONE;
         app_state.current_scene = GAME_SCENE_GAME;
     }
@@ -153,9 +159,9 @@ void DoHostMenu()
         Address address = AddressParse(address_string);
         if (AddressIsValid(address))
         {
-            LaunchServer(address.port);
-            app_state.current_menu = GAME_MENU_CONNECTING;
-            client_state.Connect(address);
+            app_state.multiplayer = true;
+            app_state.server_address = address;
+            app_state.current_menu = GAME_MENU_LEVEL;
         }
     }
 
@@ -192,6 +198,11 @@ void DoLevelMenu()
         if (buttons[i].button.IsReleased()) {
             app_state.level_type_selected = buttons[i].level_type;
             app_state.current_menu = GAME_MENU_PLAYER_SELECTION;
+
+            if (app_state.multiplayer)
+            {
+                LaunchServer(app_state.server_address.port, app_state.level_type_selected);
+            }
         }
         buttons[i].button.Draw();
     }
@@ -223,10 +234,17 @@ void DoPlayerSelectionMenu()
 
     for (int i = 0; i < ARRAY_SIZE(buttons); i++) {
         if (buttons[i].button.IsReleased()) {
-            app_state.multiplayer = false;
             app_state.player_type_selected = buttons[i].player_type;
-            app_state.current_menu = GAME_MENU_NONE;
-            app_state.current_scene = GAME_SCENE_GAME;
+
+            if (app_state.multiplayer)
+            {
+                app_state.current_menu = GAME_MENU_CONNECTING;
+            }
+            else
+            {
+                app_state.current_menu = GAME_MENU_NONE;
+                app_state.current_scene = GAME_SCENE_GAME;
+            }
         }
         buttons[i].button.Draw();
     }

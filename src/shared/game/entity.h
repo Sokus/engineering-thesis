@@ -44,7 +44,9 @@ namespace Game {
         PLAYER_TYPE_ROUGE,
         PLAYER_TYPE_SNIPER,
         PLAYER_TYPE_HEALER,
-        PLAYER_TYPE_WARRIOR
+        PLAYER_TYPE_WARRIOR,
+        // ----------------
+        PLAYER_TYPE_COUNT,
     };
 
     struct Entity

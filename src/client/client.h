@@ -49,13 +49,14 @@ struct Client
     ClientError error;
     Socket socket;
     Address server_address;
+    Game::PlayerType player_type;
     int client_index;
     uint64_t last_packet_send_time;
     uint64_t last_packet_receive_time;
 
     void Init(Socket socket);
     void ResetConnectionData();
-    void Connect(Address address);
+    void Connect(Address address, Game::PlayerType player_type);
     void Disconnect();
     void SendPacketToServer(Packet *packet);
     void SendPackets();
@@ -89,6 +90,7 @@ struct AppData
     char join_ip_field[16];
     char join_port_field[6];
     char host_port_field[6];
+    Address server_address;
 
     Game::PlayerType player_type_selected;
     Game::LevelType level_type_selected;

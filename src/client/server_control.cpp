@@ -9,7 +9,7 @@ void ShutdownServer()
     app_state.server_handle = nullptr;
 }
 
-void LaunchServer(unsigned int server_port)
+void LaunchServer(unsigned int server_port, Game::LevelType level_type)
 {
     if (app_state.server_handle)
     {
@@ -39,10 +39,15 @@ void LaunchServer(unsigned int server_port)
     char port_stringified[32];
     snprintf(port_stringified, sizeof(port_stringified), "%u", server_port);
 
+    char level_stringified[32];
+    snprintf(level_stringified, sizeof(level_stringified), "%d", level_type);
+
     char *launch_arguments[] = {
         server_executable,
         (char *)"-p",
         port_stringified,
+        (char *)"-l",
+        level_stringified,
         NULL};
 
     printf("launching: %s %s %s\n", server_executable, "-p", port_stringified);

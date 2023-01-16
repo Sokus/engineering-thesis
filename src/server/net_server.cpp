@@ -12,9 +12,6 @@ void Server::Init(Socket socket)
     this->socket = socket;
     for (int i = 1; i < MAX_CLIENTS; i++)
         ResetClientState(i);
-    world.Clear();
-    Game::SetLoadTextures(false);
-    Game::InitLevel(&world, Game::LEVEL_PLAINS);
 }
 
 void Server::ResetClientState(int client_index)
@@ -119,7 +116,7 @@ int Server::FindExistingClientIndex(Address address)
     return 0;
 }
 
-void Server::ConnectClient(int client_index, Address address)
+void Server::ConnectClient(int client_index, Game::PlayerType player_type, Address address)
 {
     ASSERT(client_index >= 0);
     ASSERT(client_index < MAX_CLIENTS);
@@ -146,7 +143,7 @@ void Server::ConnectClient(int client_index, Address address)
     DestroyPacket(packet);
 
     // TODO: Remove hardcoded spawnpoint
-    world.CreatePlayer(client_index, 0.0f, 100.0f, Game::PLAYER_TYPE_ROUGE);
+    world.CreatePlayer(client_index, 0.0f, 100.0f, player_type);
 }
 
 void Server::DisconnectClient(int client_index)
@@ -254,13 +251,23 @@ void Server::ProcessConnectionRequestPacket(ConnectionRequestPacket *packet, Add
         return;
     }
 
+    if (packet->player_type < 0 || packet->player_type >= Game::PLAYER_TYPE_COUNT)
+    {
+        printf("connection denied: invalid player type (%d)\n", packet->player_type);
+        ConnectionDeniedPacket *packet = (ConnectionDeniedPacket *)CreatePacket(PACKET_CONNECTION_DENIED);
+        packet->reason = CONNECTION_DENIED_INVALID_PLAYER_TYPE;
+        SendPacket(socket, address, packet);
+        DestroyPacket(packet);
+        return;
+    }
+
     int client_index = FindFreeClientIndex();
 
     ASSERT(client_index);
     if (!client_index)
         return;
 
-    ConnectClient(client_index, address);
+    ConnectClient(client_index, packet->player_type, address);
 }
 
 void Server::ProcessConnectionDisconnectPacket(ConnectionDisconnectPacket *packet, Address address)
