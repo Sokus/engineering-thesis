@@ -32,7 +32,7 @@ namespace Game {
         TEX_DEPTH_MAP(1),
         TEX_HDR(2);
 
-    void BindTextureToTexUnit(uint texUnitIndex, GLuint texture) {
+    void BindTextureToTexUnit(GLuint texUnitIndex, GLuint texture) {
         glActiveTexture(GL_TEXTURE0 + texUnitIndex);
         glBindTexture(GL_TEXTURE_2D, texture);
     }
