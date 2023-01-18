@@ -17,6 +17,7 @@ target_include_directories(shared
 
 target_link_libraries(shared
     raylib
+    glm
 )
 
 if(WIN32)
