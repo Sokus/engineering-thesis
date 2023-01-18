@@ -5,6 +5,7 @@
 #include <memory>
 #include "entity.h"
 #include "game/parallax.h"
+#include <graphics/renderer.h>
 
 struct BitStream;
 
@@ -31,7 +32,8 @@ namespace Game {
         void Clear();
         void Update(Input *inputs, int num_inputs, float dt);
 
-        void Draw();
+        void Draw(DrawQueue &dq) const;
+        void DrawHealthBars() const;
         void ControlEnemy(Entity& enemy, float dt);
         void MovePlayer(Entity& player,Input* input, float dt);
         void MoveEnemy(Entity& player, float dt);

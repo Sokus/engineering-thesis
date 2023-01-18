@@ -10,6 +10,8 @@
 #include "client.h"
 #include "title_screen.h"
 #include "game/entity.h"
+#include <graphics/raylib_shaders.h>
+#include <graphics/renderer.h>
 
 #include "server_control.h"
 #include "raylib.h"
@@ -55,7 +57,7 @@ void DoPauseMenu()
     exit_button.Draw();
 }
 
-void DoGameScene(float dt)
+void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
 {
     static Game::EntityReference player_reference;
 
@@ -100,9 +102,20 @@ void DoGameScene(float dt)
         camera.target = player->position;
     }
 
+    renderer.BeginGeometry();
+    BeginShaderMode(Game::RaylibShaders::world);
     BeginMode2D(camera);
+
     ClearBackground(Color{25, 30, 40});
-    game_data.world.Draw();
+    game_data.world.Draw(dq);
+    
+    EndMode2D();
+    EndShaderMode();
+    renderer.EndGeometry();
+    renderer.Draw(dq, camera);
+
+    BeginMode2D(camera);
+    game_data.world.DrawHealthBars();
     EndMode2D();
 
     if(IsKeyPressed(KEY_ESCAPE))
@@ -150,6 +163,7 @@ int main(int, char**)
     InitializeNetwork();
     InitializeTime();
     Game::LoadEntityTextures();
+    Game::RaylibShaders::LoadShaders();
     UI::Init();
 
     Socket socket = SocketCreate(SOCKET_IPV4, 0);
@@ -160,30 +174,44 @@ int main(int, char**)
     app_state.last_menu = GAME_MENU_NONE;
     app_state.current_menu = GAME_MENU_MAIN;
 
-    while(!app_state.should_quit)
     {
-        app_state.scene_changed = (app_state.current_scene != app_state.last_scene);
-        app_state.last_scene = app_state.current_scene;
-        app_state.menu_changed = (app_state.current_menu != app_state.last_menu);
-        app_state.last_menu = app_state.current_menu;
+        Game::Renderer renderer;
+        Game::DrawQueue drawQueue;
 
-        float expected_delta_time = 1.0f / (float)GetFPS();
-        float dt = GetFrameTime() > expected_delta_time ? expected_delta_time : GetFrameTime();
-
-        BeginDrawing();
-        client_state.ReceivePackets();
-        client_state.CheckForTimeOut();
-        switch(app_state.current_scene)
+        while(!app_state.should_quit)
         {
-            case GAME_SCENE_TITLE_SCREEN: DoTitleScreenScene(); break;
-            case GAME_SCENE_GAME: DoGameScene(dt); break;
-            default: app_state.should_quit = true; break;
-        }
-        client_state.SendPackets();
-        EndDrawing();
+            app_state.scene_changed = (app_state.current_scene != app_state.last_scene);
+            app_state.last_scene = app_state.current_scene;
+            app_state.menu_changed = (app_state.current_menu != app_state.last_menu);
+            app_state.last_menu = app_state.current_menu;
 
-        if(WindowShouldClose()) app_state.should_quit = true;
+            float expected_delta_time = 1.0f / (float)GetFPS();
+            float dt = GetFrameTime() > expected_delta_time ? expected_delta_time : GetFrameTime();
+
+            drawQueue.Clear();
+            renderer.ResizeFramebuffers({GetRenderWidth(), GetRenderHeight()});
+
+            BeginDrawing();
+
+            client_state.ReceivePackets();
+            client_state.CheckForTimeOut();
+
+            switch(app_state.current_scene)
+            {
+                case GAME_SCENE_TITLE_SCREEN: DoTitleScreenScene(); break;
+                case GAME_SCENE_GAME: DoGameScene(renderer, drawQueue, dt); break;
+                default: app_state.should_quit = true; break;
+            }
+
+            client_state.SendPackets();
+            
+            EndDrawing();
+
+            if(WindowShouldClose()) app_state.should_quit = true;
+        }
     }
+
+    Game::RaylibShaders::UnloadShaders();
 
     CloseWindow();
 

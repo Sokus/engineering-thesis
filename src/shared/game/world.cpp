@@ -1,11 +1,14 @@
 #include "world.h"
 #include "input.h"
+#include <graphics/raylib_shaders.h>
 
 #include "raylib.h"
 #include "raymath.h"
+#include "rlgl.h"
 
 #include <string.h>
 #include <macros.h>
+
 
 namespace Game {
 
@@ -286,16 +289,30 @@ namespace Game {
         }
     }
 
-    void World::Draw()
+    void World::Draw(DrawQueue &dq) const
     {
         // TODO(sokus): Fix this
         parallax_background.Draw({ 0, 0 });
+        Game::RaylibShaders::worldSetDepth(1000);
+        rlDrawRenderBatchActive();
 
         for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
         {
-            Entity* entity = &entities[entity_idx];
+            const Entity* entity = &entities[entity_idx];
             if (entity->type != ENTITY_TYPE_NONE)
-                entity->Draw();
+                entity->Draw(dq);
+        }
+        Game::RaylibShaders::worldSetDepth(1);
+        rlDrawRenderBatchActive();
+    }
+
+    void World::DrawHealthBars() const {
+
+        for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
+        {
+            const Entity* entity = &entities[entity_idx];
+            if (entity->base_health > 0)
+                entity->drawHealthBar();
         }
     }
 
@@ -509,7 +526,7 @@ namespace Game {
         {
             entity->entity_group = conGroup;
             entity->active = true;
-            entity->health = Const::ENTITY.DESTROY_TILE_HEALTH;
+            entity->health = entity->base_health = Const::ENTITY.DESTROY_TILE_HEALTH;
             entity->collidable = 1;
         }
         return entity;
@@ -546,7 +563,7 @@ namespace Game {
             entity->owner = 0;
             entity->move_speed = Const::ENEMY.MOVE_SPEED;
             entity->jump_height = Const::ENEMY.JUMP_HEIGHT;
-            entity->health = health;
+            entity->health = entity->base_health = health;
         }
         return entity;
     }
@@ -562,6 +579,8 @@ namespace Game {
             entity->active = true;
             entity->time_until_state_change_allowed = Const::ENTITY.BULLET_LIFETIME;
             entity->owner = owner;
+            entity->num_frames = 4;
+            entity->max_frame_time = 0.1;
         }
         return entity;
     }

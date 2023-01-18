@@ -9,6 +9,14 @@
 
 #include "raymath.h"
 #include <algorithm>
+#include <glm/glm.hpp>
+
+#ifndef RESOURCE_PATH
+/* VSCode doesn't notice RESOURCE_PATH defined from CMake and shows nonexistent errors as a result.
+   This #define is here just to silence these errors.
+*/
+#define RESOURCE_PATH
+#endif
 
 namespace Game {
 
@@ -23,15 +31,15 @@ namespace Game {
             // TODO: stub texture
             // entity_textures[ENTITY_TYPE_NONE] = LoadTexture(RESOURCE_PATH "");
             entity_textures[ENTITY_TYPE_PLAYER] = LoadTexture(RESOURCE_PATH "/character.png");
-            entity_textures[ENTITY_TYPE_TILE] = LoadTexture(RESOURCE_PATH "/tile.png");
-            entity_textures[ENTITY_TYPE_INTERACTIVE] = LoadTexture(RESOURCE_PATH "/interactive.png");
-            entity_textures[ENTITY_TYPE_MOVING_TILE] = LoadTexture(RESOURCE_PATH "/movingtile.png");
+            entity_textures[ENTITY_TYPE_TILE] = LoadTexture(RESOURCE_PATH "/tiles/tile.png");
+            entity_textures[ENTITY_TYPE_INTERACTIVE] = LoadTexture(RESOURCE_PATH "/tiles/interactive.png");
+            entity_textures[ENTITY_TYPE_MOVING_TILE] = LoadTexture(RESOURCE_PATH "/tiles/movingtile.png");
             entity_textures[ENTITY_TYPE_COLLECTIBLE] = LoadTexture(RESOURCE_PATH "/collectible.png");
-            entity_textures[ENTITY_TYPE_DAMAGING_TILE] = LoadTexture(RESOURCE_PATH "/dmgtile.png");
-            entity_textures[ENTITY_TYPE_DESTRUCTIBLE_TILE] = LoadTexture(RESOURCE_PATH "/destroytile.png");
+            entity_textures[ENTITY_TYPE_DAMAGING_TILE] = LoadTexture(RESOURCE_PATH "/tiles/dmgtile.png");
+            entity_textures[ENTITY_TYPE_DESTRUCTIBLE_TILE] = LoadTexture(RESOURCE_PATH "/tiles/destroytile.png");
             entity_textures[ENTITY_TYPE_CHECKPOINT] = LoadTexture(RESOURCE_PATH "/checkpoint.png");
             entity_textures[ENTITY_TYPE_ENEMY] = LoadTexture(RESOURCE_PATH "/enemy.png");
-            entity_textures[ENTITY_TYPE_BULLET] = LoadTexture(RESOURCE_PATH "/ballLightning.2x2.png");
+            entity_textures[ENTITY_TYPE_BULLET] = LoadTexture(RESOURCE_PATH "/ballLightning.png");
             entity_textures[ENTITY_TYPE_EXIT] = LoadTexture(RESOURCE_PATH "/exit.png");
             entity_textures_loaded = true;
         }
@@ -147,7 +155,7 @@ namespace Game {
         position.y += velocity.y * dt;
     }
 
-    void Entity::Draw()
+    void Entity::Draw(DrawQueue &dq) const
     {
         Rectangle source = {};
         source.width = facing >= 0 ? size.x : -size.x;
@@ -183,6 +191,33 @@ namespace Game {
             } break;
 
             default: break;
+        }
+
+        if(
+            type == ENTITY_TYPE_PLAYER ||
+            (type == ENTITY_TYPE_INTERACTIVE && active) ||
+            type == ENTITY_TYPE_BULLET ||
+            (type == ENTITY_TYPE_MOVING_TILE && (velocity.x != 0 || velocity.y != 0))
+        ) {
+            Light light;
+            light.position = glm::vec2(position.x + size.x/2, position.y + size.y/2);
+            switch(type) {
+                case ENTITY_TYPE_PLAYER:      light.intensity = glm::vec3(1.0f, 1.0f, 0.75f)*1.0f; light.kQuadratic = 3e-3; break;
+                case ENTITY_TYPE_MOVING_TILE: light.intensity = glm::vec3(0.75f, 1.0f, 1.0f)*0.1f; light.kQuadratic = 1e-3; break;
+                case ENTITY_TYPE_INTERACTIVE: light.intensity = glm::vec3(0.75f, 1.0f, 1.0f)*1.0f; light.kQuadratic = 1e-2; break;
+                case ENTITY_TYPE_BULLET:      light.intensity = glm::vec3(0.50f, 1.0f, 1.0f)*1.0f; light.kQuadratic = 3e-3; break;
+            }
+            dq.DrawLight(light);
+        }
+
+        if(type == ENTITY_TYPE_BULLET) {
+            Light light;
+            light.position = glm::vec2(position.x + size.x/2, position.y + size.y/2);
+            light.intensity = glm::vec3(0.5f, 1.0f, 1.0f) * 10.0f;
+            light.SetRange(MAX(size.x,size.y)/1.33f);
+            dq.DrawEnergySphere(light);
+            light.SetRange(light.Range()/1.5f);
+            dq.DrawEnergySphere(light);
         }
 
         Rectangle destination = {};
@@ -455,5 +490,24 @@ namespace Game {
         else {
             velocity.x = abs(velocity.x) / velocity.x * Const::ENEMY.VELOCITY_X;
         }
+    }
+
+    float Entity::relativeHealth() const {
+        if(base_health <= 0) return 0;
+        return glm::clamp(health / static_cast<float>(base_health), 0.0f, 1.0f);
+    }
+
+    void Entity::drawHealthBar() const {
+
+        constexpr float 
+            barHeight = 3, 
+            barGap = 3, 
+            hueRed = 0, 
+            hueGreen = 120;
+
+        Color barColor = ColorFromHSV(glm::mix(hueRed, hueGreen, relativeHealth()), 0.75f, 0.75f);
+        
+        DrawRectangle(position.x, position.y + size.y + barGap, size.x, barHeight, BLACK);
+        DrawRectangle(position.x, position.y + size.y + barGap, size.x * relativeHealth(), barHeight, barColor);
     }
 }
