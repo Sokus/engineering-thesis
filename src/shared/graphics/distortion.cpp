@@ -45,7 +45,7 @@ namespace Game {
                 in float v_scale;
                 in float v_strength;
 
-                const float bias = exp(-4);
+                const float bias = exp(-4.0);
 
                 uniform sampler2D tex;
 
