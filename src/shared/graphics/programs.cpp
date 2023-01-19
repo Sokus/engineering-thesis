@@ -41,31 +41,27 @@ namespace Game {
         return result;
     }
 
-    GL::ShaderProgram &bloodProgram() {
+    GL::ShaderProgram &vignetteProgram() {
         static auto result = GL::ShaderProgram::ForPostprocessing(R"glsl(
             #version 330 core
             
             in vec2 v_uv;
-            uniform sampler2D tex;
-            uniform float strength;
+            uniform vec4 vignetteColor;
+            uniform float vignetteExponent;
             out vec4 fragColor;
 
+            float product(vec2 v) {
+                return v.x * v.y;
+            }
+
             void main() {
-                
-                const vec3 bloodColor = vec3(187,10,30)/255.0;
-                vec3 inColor = texture(tex, v_uv).rgb;
 
-                vec3 outColor = mix(
-
-                    inColor,
-                    bloodColor,
-
-                    strength *
-                    // make the effect stronger near framebuffer edges
-                    (abs(v_uv.x - 0.5) + abs(v_uv.y - 0.5))
+                float strength = 1 - pow(
+                    16*product(v_uv * (1.0-v_uv)),
+                    vignetteExponent
                 );
 
-                fragColor = vec4(outColor, 1);
+                fragColor = vec4(vignetteColor.rgb, vignetteColor.a * strength);
             }
         )glsl");
         return result;

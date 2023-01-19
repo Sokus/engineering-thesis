@@ -20,7 +20,8 @@ namespace Game {
         lights.clear();
         energySpheres.clear();
         shockwaves.clear();
-        bloodEffectStrength = grayscaleEffectStrength = blurStrength = 0;
+        grayscaleEffectStrength = blurStrength = 0;
+        vignetteColor = glm::vec4(0);
     }
 
 }

@@ -164,21 +164,16 @@ namespace Game {
             kernel.Apply(*sdrFboSrc, *TEX_SDR_DST, glm::vec2(0,1));
         }
 
-        // Apply blood effect
-
-        if(dq.bloodEffectStrength > 1e-4) {
-            sdrFboDst->BindForDrawing();
-            glClear(GL_COLOR_BUFFER_BIT);
-            bloodProgram()
-                .SetUniform("tex", *TEX_SDR_SRC)
-                .SetUniform("strength", dq.bloodEffectStrength)
-                .DrawPostprocessing();
-            std::swap(sdrFboSrc, sdrFboDst);
-            std::swap(TEX_SDR_SRC, TEX_SDR_DST);
-        }
-
         // Copy results to default FBO
         sdrFboSrc->CopyTo(GL::Framebuffer::Default);
+
+        // Apply vignette effect
+        if(dq.vignetteColor.a > 0) {
+            vignetteProgram()
+                .SetUniform("vignetteColor", dq.vignetteColor)
+                .SetUniform("vignetteExponent", dq.vignetteExponent)
+                .DrawPostprocessing();
+        }
 
         // ==================== CLEANUP ====================
         glBindBuffer(GL_ARRAY_BUFFER, 0);

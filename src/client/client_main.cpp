@@ -107,8 +107,11 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
             float fxStrength = 1 - 2*player->relativeHealth();
             float sine = sin(6*Time_Sec(Time_Now()))*0.5f+0.5f;
 
-            dq.bloodEffectStrength = fxStrength;
-            dq.bloodEffectStrength = sine * fxStrength;
+            dq.grayscaleEffectStrength = fxStrength;
+            dq.vignetteColor = glm::vec4(
+                glm::vec3(187,10,30)/255.0f,
+                sine * fxStrength
+            );
             dq.blurStrength += sine * fxStrength * 5;
         }
     }

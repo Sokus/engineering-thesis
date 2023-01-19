@@ -25,7 +25,10 @@ namespace Game {
         float exposure = 1.2f;
         
         float grayscaleEffectStrength = 0; //0 - 1
-        float bloodEffectStrength = 0;     //0 - 1
+
+        glm::vec4 vignetteColor = glm::vec4(0);
+        float vignetteExponent = 0.25f;
+
         float blurStrength = 0;            //0 - N
 
         void DrawLight(const Light &light);
