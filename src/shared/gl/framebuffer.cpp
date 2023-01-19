@@ -104,10 +104,10 @@ namespace GL {
             return it->second;
     }
 
-    void Framebuffer::CopyTo(GL::Framebuffer &dst) {
+    void Framebuffer::CopyTo(GL::Framebuffer &dst, GLenum filter) {
         Bind(GL_READ_FRAMEBUFFER);
         dst.Bind(GL_DRAW_FRAMEBUFFER);
-        glBlitFramebuffer(0, 0, Size().x, Size().y, 0, 0, dst.Size().x, dst.Size().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+        glBlitFramebuffer(0, 0, Size().x, Size().y, 0, 0, dst.Size().x, dst.Size().y, GL_COLOR_BUFFER_BIT, filter);
     }
 
     void Framebuffer::PrintAttachmentInfo() {

@@ -19,6 +19,7 @@ namespace Game {
         GL::Framebuffer gbuffer;
         GL::Framebuffer hdrFbo;
         GL::Framebuffer sdrFbo1, sdrFbo2;
+        std::vector<GL::Framebuffer> bloomFbos;
 
         LightRenderer lightRenderer;
         DistortionRenderer distortionRenderer;

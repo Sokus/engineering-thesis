@@ -33,6 +33,7 @@ namespace GL {
         Framebuffer(const std::vector<AttachmentSpec> &specs, const glm::ivec2 &size = {640,480});
         ~Framebuffer();
         Framebuffer(const Framebuffer &) = delete;
+        Framebuffer(Framebuffer &&) noexcept = default;
 
         void Bind(GLenum target);
         void BindForDrawing();
@@ -43,7 +44,7 @@ namespace GL {
 
         GLuint GetTexture(GLenum attachment) const;
 
-        void CopyTo(GL::Framebuffer &dst);
+        void CopyTo(GL::Framebuffer &dst, GLenum filter = GL_LINEAR);
 
         void PrintAttachmentInfo();
     };

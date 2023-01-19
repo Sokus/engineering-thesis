@@ -32,7 +32,8 @@ namespace Game {
         TEX_DEPTH_MAP(1),
         TEX_HDR(2),
         TEX_SDR1(3),
-        TEX_SDR2(4);
+        TEX_SDR2(4),
+        TEX_BLOOM[] {{5}, {6}, {7}, {8}};
 
     void BindTextureToTexUnit(GLuint texUnitIndex, GLuint texture) {
         glActiveTexture(GL_TEXTURE0 + texUnitIndex);
@@ -48,6 +49,10 @@ namespace Game {
         sdrFbo1({{GL_COLOR_ATTACHMENT0, GL_RGBA8}}),
         sdrFbo2({{GL_COLOR_ATTACHMENT0, GL_RGBA8}})
     {
+        for(int i=0; i<4; ++i) {
+            int downscale = 2 << i;
+            bloomFbos.push_back(GL::Framebuffer({{GL_COLOR_ATTACHMENT0, GL_RGB16F}}, gbuffer.Size()/downscale));
+        }
         GL::Framebuffer::Default.BindForDrawing();
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
@@ -58,6 +63,10 @@ namespace Game {
         hdrFbo.Resize(size);
         sdrFbo1.Resize(size);
         sdrFbo2.Resize(size);
+        for(int i=0; i<bloomFbos.size(); ++i) {
+            int downscale = 2 << i;
+            bloomFbos[i].Resize(size/downscale);
+        }
         GL::Framebuffer::Default.BindForDrawing();
     }
 
@@ -101,6 +110,8 @@ namespace Game {
         TEX_HDR       .AttachTexture2D(hdrFbo.GetTexture(GL_COLOR_ATTACHMENT0));
         TEX_SDR1      .AttachTexture2D(sdrFbo1.GetTexture(GL_COLOR_ATTACHMENT0));
         TEX_SDR2      .AttachTexture2D(sdrFbo2.GetTexture(GL_COLOR_ATTACHMENT0));
+        for(int i=0; i<bloomFbos.size(); ++i)
+            TEX_BLOOM[i].AttachTexture2D(bloomFbos[i].GetTexture(GL_COLOR_ATTACHMENT0));
 
         // Ping-pong framebuffers
         GL::Framebuffer *sdrFboSrc = &sdrFbo1, *sdrFboDst = &sdrFbo2;
@@ -119,6 +130,32 @@ namespace Game {
             dq.energySpheres.data(), dq.energySpheres.size()
         );
 
+        // Bloom
+        if(dq.bloomStrength > 0) {
+
+            // Downsample bloom fbos
+            for(int i=0; i<bloomFbos.size(); ++i) {
+                bloomFbos[i].BindForDrawing();
+                blur3x3Program()
+                    .SetUniform("tex", i == 0 ? TEX_HDR : TEX_BLOOM[i-1])
+                    .DrawPostprocessing();
+            }
+
+            // Upsample bloom fbos
+            for(int i=bloomFbos.size()-2; i>=0; --i) {
+                bloomFbos[i].BindForDrawing();
+                blur3x3Program()
+                    .SetUniform("tex", TEX_BLOOM[i+1])
+                    .DrawPostprocessing();
+            }
+
+            // Write bloom back to HDR fbo
+            hdrFbo.BindForDrawing();
+            bloomApplyProgram()
+                .SetUniform("tex", TEX_BLOOM[0])
+                .SetUniform("bloomStrength", dq.bloomStrength)
+                .DrawPostprocessing();
+        }
 
         // Apply tone mapping
 

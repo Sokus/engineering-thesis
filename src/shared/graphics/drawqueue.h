@@ -24,6 +24,9 @@ namespace Game {
         // Passive light present even without light sources. Any positive values are allowed.
         glm::vec3 ambientLight = glm::vec3(0.025f) * 10.0f;
 
+        // Larger values = stronger bloom
+        float bloomStrength = 0.01;
+
         // Exposure time for tone mapping. Larger values improve visibility in dark environments.
         float exposure = 1.2f; 
         

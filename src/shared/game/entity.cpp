@@ -207,7 +207,7 @@ namespace Game {
                 case ENTITY_TYPE_PLAYER:      light.intensity = glm::vec3(1.0f, 1.0f, 0.75f)*1.0f; light.kQuadratic = 3e-3; break;
                 case ENTITY_TYPE_MOVING_TILE: light.intensity = glm::vec3(0.75f, 1.0f, 1.0f)*0.1f; light.kQuadratic = 1e-3; break;
                 case ENTITY_TYPE_INTERACTIVE: light.intensity = glm::vec3(0.75f, 1.0f, 1.0f)*1.0f; light.kQuadratic = 1e-2; break;
-                case ENTITY_TYPE_BULLET:      light.intensity = glm::vec3(0.50f, 1.0f, 1.0f)*1.0f; light.kQuadratic = 3e-3; break;
+                case ENTITY_TYPE_BULLET:      light.intensity = glm::vec3(0.50f, 1.0f, 1.0f)*50.0f; light.kQuadratic = 150e-3; break;
             }
             dq.DrawLight(light);
         }
