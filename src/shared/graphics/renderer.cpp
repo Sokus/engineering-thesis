@@ -6,9 +6,8 @@
 #include <gl/gl.h>
 #include <gl/texture.h>
 #include "programs.h"
-#include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
+#include <algorithm>
 
 namespace Game {
 
@@ -30,7 +29,9 @@ namespace Game {
     GL::TextureUnit
         TEX_ALBEDO_MAP(0),
         TEX_DEPTH_MAP(1),
-        TEX_HDR(2);
+        TEX_HDR(2),
+        TEX_SDR1(3),
+        TEX_SDR2(4);
 
     void BindTextureToTexUnit(GLuint texUnitIndex, GLuint texture) {
         glActiveTexture(GL_TEXTURE0 + texUnitIndex);
@@ -42,7 +43,9 @@ namespace Game {
             {ATT_GBUFFER_ALBEDO, GL_RGBA8},
             {ATT_GBUFFER_DEPTH,  GL_R16F}   
         }),
-        hdrFbo({{GL_COLOR_ATTACHMENT0, GL_RGBA16F}})
+        hdrFbo({{GL_COLOR_ATTACHMENT0, GL_RGBA16F}}),
+        sdrFbo1({{GL_COLOR_ATTACHMENT0, GL_RGBA8}}),
+        sdrFbo2({{GL_COLOR_ATTACHMENT0, GL_RGBA8}})
     {
         GL::Framebuffer::Default.BindForDrawing();
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -52,6 +55,8 @@ namespace Game {
     void Renderer::ResizeFramebuffers(const glm::ivec2 &size) {
         gbuffer.Resize(size);
         hdrFbo.Resize(size);
+        sdrFbo1.Resize(size);
+        sdrFbo2.Resize(size);
         GL::Framebuffer::Default.BindForDrawing();
     }
 
@@ -93,6 +98,12 @@ namespace Game {
         TEX_ALBEDO_MAP.AttachTexture2D(gbuffer.GetTexture(ATT_GBUFFER_ALBEDO));
         TEX_DEPTH_MAP .AttachTexture2D(gbuffer.GetTexture(ATT_GBUFFER_DEPTH));
         TEX_HDR       .AttachTexture2D(hdrFbo.GetTexture(GL_COLOR_ATTACHMENT0));
+        TEX_SDR1      .AttachTexture2D(sdrFbo1.GetTexture(GL_COLOR_ATTACHMENT0));
+        TEX_SDR2      .AttachTexture2D(sdrFbo2.GetTexture(GL_COLOR_ATTACHMENT0));
+
+        // Ping-pong framebuffers
+        GL::Framebuffer *sdrFboSrc = &sdrFbo1, *sdrFboDst = &sdrFbo2;
+        GL::TextureUnit *TEX_SDR_SRC = &TEX_SDR1, *TEX_SDR_DST = &TEX_SDR2;
 
         // ==================== RENDERING ====================
 
@@ -108,14 +119,25 @@ namespace Game {
         );
 
 
-        // Apply other postprocessing effects
-        GL::Framebuffer::Default.BindForDrawing();
+        // Apply tone mapping
+        sdrFboDst->BindForDrawing();
         glClearColor(0,0,0,0);
         glClear(GL_COLOR_BUFFER_BIT);
         toneMappingProgram()
             .SetUniform("tex", TEX_HDR)
             .SetUniform("exposure", dq.exposure)
             .DrawPostprocessing();
+
+        std::swap(sdrFboSrc, sdrFboDst);
+        std::swap(TEX_SDR_SRC, TEX_SDR_DST);
+
+        // Apply distortions
+
+        sdrFboSrc->CopyTo(GL::Framebuffer::Default);
+        distortionRenderer.DrawDistortions(
+            viewProjection, *TEX_SDR_SRC, 
+            dq.shockwaves.data(), dq.shockwaves.size()
+        );
 
         // ==================== CLEANUP ====================
         glBindBuffer(GL_ARRAY_BUFFER, 0);

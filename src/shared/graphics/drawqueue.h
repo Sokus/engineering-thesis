@@ -4,6 +4,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "light.h"
+#include "distortion.h"
 
 namespace Game {
 
@@ -16,6 +17,7 @@ namespace Game {
         private:
         std::vector<Light> lights;
         std::vector<Light> energySpheres;
+        std::vector<ShockwaveEffect> shockwaves;
 
         public:
 
@@ -24,6 +26,7 @@ namespace Game {
 
         void DrawLight(const Light &light);
         void DrawEnergySphere(const Light &sphere);
+        void DrawShockwaveEffect(const ShockwaveEffect &effect);
         void Clear();
     };
 

@@ -7,6 +7,8 @@
 
 #include <gl/framebuffer.h>
 #include "drawqueue.h"
+#include "light.h"
+#include "distortion.h"
 
 namespace Game {
     
@@ -16,8 +18,10 @@ namespace Game {
 
         GL::Framebuffer gbuffer;
         GL::Framebuffer hdrFbo;
+        GL::Framebuffer sdrFbo1, sdrFbo2;
 
         LightRenderer lightRenderer;
+        DistortionRenderer distortionRenderer;
 
         public:
 

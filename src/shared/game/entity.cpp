@@ -218,6 +218,13 @@ namespace Game {
             dq.DrawEnergySphere(light);
             light.SetRange(light.Range()/1.5f);
             dq.DrawEnergySphere(light);
+
+            ShockwaveEffect swave;
+            swave.center = {position.x+size.x/2, position.y+size.y/2};
+            swave.radius = MAX(size.x,size.y)*1.5f;
+            swave.scale = swave.radius/4.0f;
+            swave.strength = 4;
+            dq.DrawShockwaveEffect(swave);
         }
 
         Rectangle destination = {};
