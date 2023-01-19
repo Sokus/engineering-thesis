@@ -3,6 +3,7 @@
 #include <gl/shader.h>
 #include <math.h>
 #include <stdio.h>
+#include "glm/gtc/constants.hpp"
 
 namespace Game {
 
@@ -56,13 +57,13 @@ namespace Game {
 
         Kernel1D kernel;
 
-        float minKernelValue = 0.01;
-        float xMax = sqrt(-2*stdev*stdev*log(minKernelValue*stdev*sqrt(2*M_PI)));
+        float minKernelValue = 0.01f;
+        float xMax = sqrt(-2*stdev*stdev*log(minKernelValue*stdev*sqrt(2*glm::pi<float>())));
         xMax = glm::clamp(xMax, 0.0f, (float)maxRadius);
 
         kernel.count = 0;
-        for(int x=ceil(-xMax); x<=floor(xMax); ++x) {
-            kernel.data[kernel.count++] = exp(-x*x/(2*stdev*stdev)) / (stdev * sqrt(2*M_PI));
+        for(float x=ceil(-xMax); x<=floor(xMax); x += 1.0f) {
+            kernel.data[kernel.count++] = exp(-x*x/(2*stdev*stdev)) / (stdev * sqrt(2*glm::pi<float>()));
         }
         kernel.Normalize();
         return kernel;
