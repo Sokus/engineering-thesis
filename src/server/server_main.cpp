@@ -103,7 +103,6 @@ int main(int argc, char *argv[])
         const uint64_t t0 = Time_Now();
 
         server.ReceivePackets();
-        printf("Server: updating world: dt=%f", dt);
         server.world.Update(server.client_input, MAX_CLIENTS, dt);
         server.SendPackets();
         server.SendWorldState();
