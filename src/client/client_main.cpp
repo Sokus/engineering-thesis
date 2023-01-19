@@ -100,6 +100,9 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
     if (player)
     {
         camera.target = player->position;
+        if(player->relativeHealth() < 0.5) {
+            dq.bloodEffectStrength = dq.grayscaleEffectStrength = 1 - 2*player->relativeHealth();
+        }
     }
 
     renderer.BeginGeometry();

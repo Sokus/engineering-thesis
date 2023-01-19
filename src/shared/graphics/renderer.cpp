@@ -120,6 +120,7 @@ namespace Game {
 
 
         // Apply tone mapping
+
         sdrFboDst->BindForDrawing();
         glClearColor(0,0,0,0);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -131,13 +132,46 @@ namespace Game {
         std::swap(sdrFboSrc, sdrFboDst);
         std::swap(TEX_SDR_SRC, TEX_SDR_DST);
 
-        // Apply distortions
+        // Apply distortions (shockwaves etc.)
 
-        sdrFboSrc->CopyTo(GL::Framebuffer::Default);
+        sdrFboSrc->CopyTo(*sdrFboDst);
         distortionRenderer.DrawDistortions(
             viewProjection, *TEX_SDR_SRC, 
             dq.shockwaves.data(), dq.shockwaves.size()
         );
+
+        std::swap(sdrFboSrc, sdrFboDst);
+        std::swap(TEX_SDR_SRC, TEX_SDR_DST);
+
+        // Apply grayscale effect
+        
+        if(dq.grayscaleEffectStrength > 1e-4) {
+            sdrFboDst->BindForDrawing();
+            glClear(GL_COLOR_BUFFER_BIT);
+            grayscaleProgram()
+                .SetUniform("tex", *TEX_SDR_SRC)
+                .SetUniform("strength", dq.bloodEffectStrength)
+                .DrawPostprocessing();
+            std::swap(sdrFboSrc, sdrFboDst);
+            std::swap(TEX_SDR_SRC, TEX_SDR_DST);
+        }
+
+        // Apply blood effect
+
+        if(dq.bloodEffectStrength > 1e-4) {
+            sdrFboDst->BindForDrawing();
+            glClear(GL_COLOR_BUFFER_BIT);
+            bloodProgram()
+                .SetUniform("tex", *TEX_SDR_SRC)
+                .SetUniform("strength", dq.bloodEffectStrength)
+                .SetUniform("time", dq.time)
+                .DrawPostprocessing();
+            std::swap(sdrFboSrc, sdrFboDst);
+            std::swap(TEX_SDR_SRC, TEX_SDR_DST);
+        }
+
+        // Copy results to default FBO
+        sdrFboSrc->CopyTo(GL::Framebuffer::Default);
 
         // ==================== CLEANUP ====================
         glBindBuffer(GL_ARRAY_BUFFER, 0);

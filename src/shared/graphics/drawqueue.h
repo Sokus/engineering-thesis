@@ -21,8 +21,13 @@ namespace Game {
 
         public:
 
+        float time;
+
         glm::vec3 ambientLight = glm::vec3(0.025f) * 10.0f;
         float exposure = 1.2f;
+        
+        float grayscaleEffectStrength = 0;
+        float bloodEffectStrength = 0;
 
         void DrawLight(const Light &light);
         void DrawEnergySphere(const Light &sphere);

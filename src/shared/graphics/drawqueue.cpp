@@ -1,5 +1,7 @@
 #include "drawqueue.h"
 
+#include <system/pi_time.h>
+
 namespace Game {
 
     void DrawQueue::DrawLight(const Light &light) {
@@ -18,6 +20,8 @@ namespace Game {
         lights.clear();
         energySpheres.clear();
         shockwaves.clear();
+        bloodEffectStrength = grayscaleEffectStrength = 0;
+        time = Time_Sec(Time_Now());
     }
 
 }

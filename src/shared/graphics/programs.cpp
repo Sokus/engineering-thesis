@@ -40,4 +40,37 @@ namespace Game {
         )glsl");
         return result;
     }
+
+    GL::ShaderProgram &bloodProgram() {
+        static auto result = GL::ShaderProgram::ForPostprocessing(R"glsl(
+            #version 330 core
+            
+            in vec2 v_uv;
+            uniform sampler2D tex;
+            uniform float strength;
+            uniform float time;
+            out vec4 fragColor;
+
+            void main() {
+                
+                const vec3 bloodColor = vec3(187,10,30)/255.0;
+                vec3 inColor = texture(tex, v_uv).rgb;
+
+                vec3 outColor = mix(
+
+                    inColor,
+                    bloodColor,
+
+                    strength *
+                    // make the effect stronger near the edges
+                    (abs(v_uv.x - 0.5) + abs(v_uv.y - 0.5)) *
+                    // make the effect pulse
+                    (sin(6*time)*0.5+0.5)
+                );
+
+                fragColor = vec4(outColor, 1);
+            }
+        )glsl");
+        return result;
+    }
 }
