@@ -62,6 +62,7 @@ namespace Game {
         Entity* CreateExit(float pos_x, float pos_y, float width, float height);
         Entity* CreateEnemy(float pos_x, float pos_y, float width, float height,int32_t property,int health);
         Entity* CreateBullet(float pos_x, float pos_y, float width, float height,float vel_x,float vel_y,int owner);
+        Entity* CreateShockwave(Vector2 pos, float max_radius);
         void LoadTextures();
         void hitObstacles(Entity &bullet);
     };

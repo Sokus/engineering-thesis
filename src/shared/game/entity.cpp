@@ -82,6 +82,9 @@ namespace Game {
             {
                 current_frame = (current_frame + 1) % num_frames;
                 frame_time -= max_frame_time;
+
+                if(type == ENTITY_TYPE_SHOCKWAVE && current_frame == 0)
+                    Despawn();
             }
         }
 
@@ -104,7 +107,6 @@ namespace Game {
             if (dash_cooldown < 0.0f)
                 dash_cooldown = 0.0f;
         }
-
     }
     void Entity::UpdateMovingTile(float dt) {
         Vector2 tmp_pos = Vector2Scale(velocity, dt);
@@ -218,23 +220,28 @@ namespace Game {
             dq.DrawEnergySphere(light);
             light.SetRange(light.Range()/1.5f);
             dq.DrawEnergySphere(light);
-
-            ShockwaveEffect swave;
-            swave.center = {position.x+size.x/2, position.y+size.y/2};
-            swave.radius = MAX(size.x,size.y)*1.5f;
-            swave.scale = swave.radius/4.0f;
-            swave.strength = 4;
-            dq.DrawShockwaveEffect(swave);
         }
 
-        Rectangle destination = {};
-        destination.x = position.x;
-        destination.y = position.y;
-        destination.width = size.x;
-        destination.height = size.y;
+        if(type == ENTITY_TYPE_SHOCKWAVE) {
 
-        Texture texture = GetEntityTexture(type);
-        DrawTexturePro(texture, source, destination, Vector2{}, 0.0f, WHITE);
+            float relativeT = current_frame / (float)num_frames;
+
+            ShockwaveEffect swave;
+            swave.center = {position.x, position.y};
+            swave.radius = MAX(size.x,size.y)/2 * relativeT;
+            swave.scale = swave.radius/4.0f;
+            swave.strength = 20 * (1 - 2*ABS(relativeT - 0.5f));
+            dq.DrawShockwaveEffect(swave);
+        } else {
+            Rectangle destination = {};
+            destination.x = position.x;
+            destination.y = position.y;
+            destination.width = size.x;
+            destination.height = size.y;
+
+            Texture texture = GetEntityTexture(type);
+            DrawTexturePro(texture, source, destination, Vector2{}, 0.0f, WHITE);
+        }
     }
 
     bool Entity::collidesWith(Entity ent) {
@@ -519,5 +526,10 @@ namespace Game {
         
         DrawRectangle(position.x, position.y + size.y + barGap, size.x, barHeight, BLACK);
         DrawRectangle(position.x, position.y + size.y + barGap, size.x * relativeHealth(), barHeight, barColor);
+    }
+
+    void Entity::Despawn() {
+        type = ENTITY_TYPE_NONE;
+        ++revision;
     }
 }

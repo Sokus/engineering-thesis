@@ -25,6 +25,7 @@ namespace Game {
         ENTITY_TYPE_CHECKPOINT,
         ENTITY_TYPE_ENEMY,
         ENTITY_TYPE_BULLET,
+        ENTITY_TYPE_SHOCKWAVE,
         ENTITY_TYPE_EXIT,
 
         ENTITY_TYPE_COUNT, // ALWAYS LAST
@@ -118,6 +119,7 @@ namespace Game {
         void MoveX(float dt);
         void MoveY(float dt);
         bool reachedEndpoint(Vector2 target, float dt);
+        void Despawn();
 
         bool Serialize(BitStream *stream);
 

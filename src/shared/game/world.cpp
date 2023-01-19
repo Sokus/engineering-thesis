@@ -164,6 +164,9 @@ namespace Game {
         }
     }
     void World::hitObstacles(Entity& bullet) {
+
+        bool collided = false;
+
         for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
         {
             Entity* entity = entities + entity_idx;
@@ -175,11 +178,21 @@ namespace Game {
 
                     FreeEntity(entity);
                 }
-                FreeEntity(&bullet);
+                collided = true;
+                break;
             }
             if (entity->type != ENTITY_TYPE_NONE && entity->collidable && bullet.collidesWith(*entity)) {
-                FreeEntity(&bullet);
+                collided = true;
+                break;
             }
+        }
+
+        if(collided) {
+            CreateShockwave(
+                Vector2Add(bullet.position, {bullet.size.x/2, bullet.size.y/2}), 
+                MAX(bullet.size.x, bullet.size.y)*6
+            );
+            FreeEntity(&bullet);
         }
     }
 
@@ -397,14 +410,8 @@ namespace Game {
 
     void World::FreeEntity(Entity* entity)
     {
-        if (entity)
-        {
-            if (entity->type != ENTITY_TYPE_NONE)
-            {
-                entity->type = ENTITY_TYPE_NONE;
-                entity->revision++;
-            }
-        }
+        if (entity && entity->type != ENTITY_TYPE_NONE)
+            entity->Despawn();
     }
 
     void World::FreeOwnedEntities(int owner)
@@ -581,6 +588,17 @@ namespace Game {
             entity->owner = owner;
             entity->num_frames = 4;
             entity->max_frame_time = 0.1;
+        }
+        return entity;
+    }
+
+    Entity* World::CreateShockwave(Vector2 pos, float max_size)
+    {
+        Entity* entity = AddEntity(ENTITY_TYPE_SHOCKWAVE, 0, pos.x, pos.y, max_size, max_size).entity;
+        if(entity) {
+            entity->num_frames = 30;
+            entity->current_frame = 6;
+            entity->max_frame_time = 1/60.0;
         }
         return entity;
     }
