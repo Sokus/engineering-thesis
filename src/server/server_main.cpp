@@ -97,18 +97,22 @@ int main(int argc, char *argv[])
 
     float hz = 60.0f; // refresh rate
     float dt = 1.0f / hz;
-    uint64_t last_time = Time_Now();
+    
     while (true)
     {
+        const uint64_t t0 = Time_Now();
+
         server.ReceivePackets();
+        printf("Server: updating world: dt=%f", dt);
         server.world.Update(server.client_input, MAX_CLIENTS, dt);
         server.SendPackets();
         server.SendWorldState();
         server.CheckForTimeOut();
 
-        uint64_t laptime = Time_Laptime(&last_time);
+        const uint64_t laptime = Time_Now() - t0;
         double laptime_ms = Time_Ms(laptime);
         double sleeptime_ms = (double)dt * 1000.0 - laptime_ms;
+
         if (sleeptime_ms >= 1.0)
         {
             Time_Sleep((unsigned long)sleeptime_ms);
