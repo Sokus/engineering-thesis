@@ -50,6 +50,9 @@ void Begin()
     memset(layout.rows, 0, sizeof(layout.rows));
     layout.min_size = Vector2{ 0.0f, 0.0f };
     layout.element_offset = Vector2{ 0.0f, 0.0f };
+
+    memset(layout.spaces, 0, sizeof(layout.spaces));
+    layout.spaces_count = 0;
 }
 
 void Add(Base *base)
@@ -73,7 +76,9 @@ void AddSpace()
     Base base;
     base.style = layout.current_style;
     base.min_size = MeasureTextEx(layout.current_style->font, "X", layout.current_style->font_size, 0.0f);
-    Add(&base);
+
+    layout.spaces[layout.spaces_count++] = base;
+    Add(&layout.spaces[layout.spaces_count-1]);
 }
 
 void EndRow()

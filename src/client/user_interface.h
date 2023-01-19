@@ -49,6 +49,9 @@ struct Layout
     Vector2 min_size;
     Vector2 element_offset;
     Base *active_element;
+
+    Base spaces[max_element_count];
+    int spaces_count = 0;
 };
 
 void Init();
