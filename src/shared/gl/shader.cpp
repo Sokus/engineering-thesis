@@ -64,6 +64,16 @@ namespace GL {
         glUniform1f(glGetUniformLocation(handle, name), value);
         return *this;
     }
+    ShaderProgram &ShaderProgram::SetUniform(const char *name, const float *values, int count) {
+        Bind();
+        glUniform1fv(glGetUniformLocation(handle, name), count, values);
+        return *this;
+    }
+    ShaderProgram &ShaderProgram::SetUniform(const char *name, const glm::vec2 &value) {
+        Bind();
+        glUniform2f(glGetUniformLocation(handle,name), value.x, value.y);
+        return *this;
+    }
     ShaderProgram &ShaderProgram::SetUniform(const char *name, const glm::vec3 &value) {
         Bind();
         glUniform3f(glGetUniformLocation(handle,name), value.x, value.y, value.z);

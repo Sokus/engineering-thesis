@@ -29,6 +29,8 @@ namespace GL {
         ShaderProgram &SetUniform(const char *name, int value);
         ShaderProgram &SetUniform(const char *name, const TextureUnit &value);
         ShaderProgram &SetUniform(const char *name, float value);
+        ShaderProgram &SetUniform(const char *name, const float *values, int count);
+        ShaderProgram &SetUniform(const char *name, const glm::vec2 &value);
         ShaderProgram &SetUniform(const char *name, const glm::vec3 &value);
         ShaderProgram &SetUniform(const char *name, const glm::vec4 &value);
         ShaderProgram &SetUniform(const char *name, const glm::mat4 &value);

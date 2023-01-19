@@ -20,7 +20,7 @@ namespace Game {
         lights.clear();
         energySpheres.clear();
         shockwaves.clear();
-        bloodEffectStrength = grayscaleEffectStrength = 0;
+        bloodEffectStrength = grayscaleEffectStrength = blurStrength = 0;
     }
 
 }

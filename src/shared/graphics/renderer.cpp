@@ -8,6 +8,7 @@
 #include "programs.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
+#include "kernel.h"
 
 namespace Game {
 
@@ -154,6 +155,13 @@ namespace Game {
                 .DrawPostprocessing();
             std::swap(sdrFboSrc, sdrFboDst);
             std::swap(TEX_SDR_SRC, TEX_SDR_DST);
+        }
+
+        // Apply blur
+        if(dq.blurStrength > 1e-4) {
+            auto kernel = Kernel1D::GaussianBlur(dq.blurStrength);
+            kernel.Apply(*sdrFboDst, *TEX_SDR_SRC, glm::vec2(1,0));
+            kernel.Apply(*sdrFboSrc, *TEX_SDR_DST, glm::vec2(0,1));
         }
 
         // Apply blood effect
