@@ -37,11 +37,6 @@ namespace Game {
         const glm::vec2 &step
     ) const {
 
-        printf("Applying Kernel1D: step = %.2f %.2f, data =", step.x, step.y);
-        for(int i=0; i<count; ++i)
-            printf(" %.3f", data[i]);
-        puts("");
-
         dst.BindForDrawing();
         kernel1DProgram()
             .SetUniform("tex", src)
