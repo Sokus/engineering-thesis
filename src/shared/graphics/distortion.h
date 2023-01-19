@@ -12,7 +12,9 @@ namespace Game {
     struct ShockwaveEffect {
         glm::vec2 center;
         float radius;
+        // Thickness of the shockwave
         float scale;
+        // How much the image is distorted by the shockwave
         float strength;
     };
 

@@ -19,6 +19,8 @@ namespace Game {
         glm::vec2 position;  //in world space
         glm::vec3 intensity = {1.0f, 1.0f, 1.0f}; //RGB
 
+        // Local intensity = intensity / (kQuadratic*d*d + kLinear*d + 1) - kBias
+        // where d = distance from the light source
         union {
             struct {
                 float kQuadratic;

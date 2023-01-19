@@ -21,15 +21,21 @@ namespace Game {
 
         public:
 
+        // Passive light present even without light sources. Any positive values are allowed.
         glm::vec3 ambientLight = glm::vec3(0.025f) * 10.0f;
-        float exposure = 1.2f;
+
+        // Exposure time for tone mapping. Larger values improve visibility in dark environments.
+        float exposure = 1.2f; 
         
-        float grayscaleEffectStrength = 0; //0 - 1
+        // Reduces saturation of the image
+        float grayscaleEffectStrength = 0;
 
-        glm::vec4 vignetteColor = glm::vec4(0);
+        // Controls the size of the vignette effect. Larger values = larger vignette.
         float vignetteExponent = 0.25f;
+        glm::vec4 vignetteColor = glm::vec4(0);
 
-        float blurStrength = 0;            //0 - N
+        // Larger values = more blurry image
+        float blurStrength = 0;
 
         void DrawLight(const Light &light);
         void DrawEnergySphere(const Light &sphere);
