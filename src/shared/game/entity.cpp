@@ -276,6 +276,9 @@ namespace Game {
             SERIALIZE_VECTOR2(stream, position);
             SERIALIZE_VECTOR2(stream, velocity);
             SERIALIZE_INT(stream, facing, -2, 2);
+            SERIALIZE_INT(stream, base_health, 0, max_base_health);
+            if(base_health > 0)
+                SERIALIZE_INT(stream, health, 0, base_health+1);
         }
         return true;
     }

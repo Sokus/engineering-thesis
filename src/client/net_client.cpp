@@ -248,6 +248,8 @@ void Client::ProcessWorldStatePacket(WorldStatePacket *packet, Address address)
             dst->position = src->position;
             dst->velocity = src->velocity;
             dst->facing = src->facing;
+            dst->health = src->health;
+            dst->base_health = src->base_health;
         }
 
     }

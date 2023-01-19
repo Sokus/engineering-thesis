@@ -52,6 +52,8 @@ namespace Game {
 
     struct Entity
     {
+        static const int max_base_health = 10'000;
+
         // NOTE: Only data that is absolutely necessary
         // to represent the game on the client side is serialized.
         // The client will not try to run the simulation himself thus
