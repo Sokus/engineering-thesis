@@ -150,7 +150,7 @@ namespace Game {
             glClear(GL_COLOR_BUFFER_BIT);
             grayscaleProgram()
                 .SetUniform("tex", *TEX_SDR_SRC)
-                .SetUniform("strength", dq.bloodEffectStrength)
+                .SetUniform("strength", dq.grayscaleEffectStrength)
                 .DrawPostprocessing();
             std::swap(sdrFboSrc, sdrFboDst);
             std::swap(TEX_SDR_SRC, TEX_SDR_DST);
@@ -164,7 +164,6 @@ namespace Game {
             bloodProgram()
                 .SetUniform("tex", *TEX_SDR_SRC)
                 .SetUniform("strength", dq.bloodEffectStrength)
-                .SetUniform("time", dq.time)
                 .DrawPostprocessing();
             std::swap(sdrFboSrc, sdrFboDst);
             std::swap(TEX_SDR_SRC, TEX_SDR_DST);

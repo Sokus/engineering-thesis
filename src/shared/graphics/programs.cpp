@@ -48,7 +48,6 @@ namespace Game {
             in vec2 v_uv;
             uniform sampler2D tex;
             uniform float strength;
-            uniform float time;
             out vec4 fragColor;
 
             void main() {
@@ -62,10 +61,8 @@ namespace Game {
                     bloodColor,
 
                     strength *
-                    // make the effect stronger near the edges
-                    (abs(v_uv.x - 0.5) + abs(v_uv.y - 0.5)) *
-                    // make the effect pulse
-                    (sin(6*time)*0.5+0.5)
+                    // make the effect stronger near framebuffer edges
+                    (abs(v_uv.x - 0.5) + abs(v_uv.y - 0.5))
                 );
 
                 fragColor = vec4(outColor, 1);

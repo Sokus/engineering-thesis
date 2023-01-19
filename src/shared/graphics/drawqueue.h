@@ -21,8 +21,6 @@ namespace Game {
 
         public:
 
-        float time;
-
         glm::vec3 ambientLight = glm::vec3(0.025f) * 10.0f;
         float exposure = 1.2f;
         

@@ -21,7 +21,6 @@ namespace Game {
         energySpheres.clear();
         shockwaves.clear();
         bloodEffectStrength = grayscaleEffectStrength = 0;
-        time = Time_Sec(Time_Now());
     }
 
 }
