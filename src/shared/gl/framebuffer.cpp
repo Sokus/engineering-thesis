@@ -1,5 +1,6 @@
 #include "framebuffer.h"
 #include <stdio.h>
+#include <algorithm>
 
 extern "C" {
     int GetRenderWidth(void);
@@ -68,6 +69,12 @@ namespace GL {
 
     Framebuffer::~Framebuffer() {
         Dispose();
+    }
+
+    Framebuffer::Framebuffer(Framebuffer &&other) noexcept {
+        handle = other.handle; other.handle = 0;
+        specs = std::move(other.specs);
+        _size = other._size;
     }
 
     void Framebuffer::Bind(GLenum target) {

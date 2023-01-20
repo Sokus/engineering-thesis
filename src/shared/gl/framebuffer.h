@@ -33,7 +33,7 @@ namespace GL {
         Framebuffer(const std::vector<AttachmentSpec> &specs, const glm::ivec2 &size = {640,480});
         ~Framebuffer();
         Framebuffer(const Framebuffer &) = delete;
-        Framebuffer(Framebuffer &&) noexcept = default;
+        Framebuffer(Framebuffer &&) noexcept;
 
         void Bind(GLenum target);
         void BindForDrawing();
