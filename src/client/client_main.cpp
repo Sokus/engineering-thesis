@@ -57,6 +57,35 @@ void DoPauseMenu()
     exit_button.Draw();
 }
 
+Rectangle GetVisibleArea2D(const Camera2D camera) {
+
+    Vector2 cornersScreen[4] = {
+        {0,0},
+        {(float)GetScreenWidth(), 0},
+        {0, (float)GetScreenHeight()}, 
+        {(float)GetScreenWidth(), (float)GetScreenHeight()}
+    };
+    Rectangle result;
+
+    Vector2 lo, hi;
+    lo = hi = GetScreenToWorld2D(cornersScreen[0], camera);
+
+    for(int i=1; i<4; ++i) {
+        Vector2 cornerWorld = GetScreenToWorld2D(cornersScreen[i], camera);
+        lo.x = MIN(lo.x, cornerWorld.x);
+        lo.y = MIN(lo.y, cornerWorld.y);
+        hi.x = MAX(hi.x, cornerWorld.x);
+        hi.y = MAX(hi.y, cornerWorld.y);
+    }
+
+    return {
+        .x = lo.x, 
+        .y = lo.y, 
+        .width = hi.x - lo.x, 
+        .height = hi.y - lo.y
+    };
+}
+
 void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
 {
     static Game::EntityReference player_reference;
@@ -121,7 +150,7 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
     BeginMode2D(camera);
 
     ClearBackground(Color{25, 30, 40});
-    game_data.world.Draw(dq);
+    game_data.world.Draw(GetVisibleArea2D(camera), dq);
     
     EndMode2D();
     EndShaderMode();

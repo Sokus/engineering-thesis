@@ -48,20 +48,20 @@ void InitPlains(World *world)
 
     // -- INIT BACKGROUND --
 
+	puts("Loading plains!");
+
 	ParallaxLayer hills = {};
-	hills.dimensions = {960, 540};
-	hills.position = {0, 0, 3};
-	hills.natural_scroll_speed = -300;
+	hills.bounds = {-160, 80, 320, 180};
+	hills.z = 3;
 
 	ParallaxLayer clouds = {};
-	clouds.dimensions = {960, 540};
-	clouds.position = {0, 0, 10};
-	clouds.natural_scroll_speed = -300;
+	clouds.bounds = {-160, -90, 320, 180};
+	clouds.z = 10;
+	clouds.scrollSpeed = -100;
 
 	ParallaxLayer sky = {};
-	sky.dimensions = {960, 540};
-	sky.position = {0, 0, 999};
-	sky.natural_scroll_speed = 0;
+	sky.bounds = {-160, -90, 320, 180};
+	sky.z = 999;
 
 	if (load_textures)
 	{
@@ -90,19 +90,17 @@ void InitLake(World *world) {
 	// -- INIT BACKGROUND --
 
 	ParallaxLayer hills = {};
-	hills.dimensions = { 960, 540 };
-	hills.position = { 0, 0, 3 };
-	hills.natural_scroll_speed = -300;
+	hills.bounds = {0, 0, 320, 180};
+	hills.z = 3;
 
 	ParallaxLayer clouds = {};
-	clouds.dimensions = { 960, 540 };
-	clouds.position = { 0, 0, 10 };
-	clouds.natural_scroll_speed = -300;
+	clouds.bounds = {0, 0, 320, 180};
+	clouds.z = 10;
+	clouds.scrollSpeed = -100;
 
 	ParallaxLayer sky = {};
-	sky.dimensions = { 960, 540 };
-	sky.position = { 0, 0, 999 };
-	sky.natural_scroll_speed = 0;
+	sky.bounds = {0, 0, 320, 180};
+	sky.z = 999;
 
 	if (load_textures)
 	{
@@ -129,19 +127,17 @@ void InitClouds(World* world) {
 	// -- INIT BACKGROUND --
 
 	ParallaxLayer hills = {};
-	hills.dimensions = { 960, 540 };
-	hills.position = { 0, 0, 3 };
-	hills.natural_scroll_speed = -300;
+	hills.bounds = {0, 0, 320, 180};
+	hills.z = 3;
 
 	ParallaxLayer clouds = {};
-	clouds.dimensions = { 960, 540 };
-	clouds.position = { 0, 0, 10 };
-	clouds.natural_scroll_speed = -300;
+	clouds.bounds = {0, 0, 320, 180};
+	clouds.z = 10;
+	clouds.scrollSpeed = -100;
 
 	ParallaxLayer sky = {};
-	sky.dimensions = { 960, 540 };
-	sky.position = { 0, 0, 999 };
-	sky.natural_scroll_speed = 0;
+	sky.bounds = {0, 0, 320, 180};
+	sky.z = 999;
 
 	if (load_textures)
 	{

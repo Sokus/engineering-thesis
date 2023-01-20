@@ -32,7 +32,7 @@ namespace Game {
         void Clear();
         void Update(Input *inputs, int num_inputs, float dt);
 
-        void Draw(DrawQueue &dq) const;
+        void Draw(const Rectangle visibleArea, DrawQueue &dq) const;
         void DrawHealthBars() const;
         void ControlEnemy(Entity& enemy, float dt);
         void MovePlayer(Entity& player,Input* input, float dt);

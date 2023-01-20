@@ -302,10 +302,10 @@ namespace Game {
         }
     }
 
-    void World::Draw(DrawQueue &dq) const
+    void World::Draw(const Rectangle visibleArea, DrawQueue &dq) const
     {
         // TODO(sokus): Fix this
-        parallax_background.Draw({ 0, 0 });
+        parallax_background.Draw(visibleArea);
         Game::RaylibShaders::worldSetDepth(1000);
         rlDrawRenderBatchActive();
 

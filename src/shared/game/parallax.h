@@ -7,17 +7,21 @@
 
 struct ParallaxLayer
 {
+    private:
+    float offsetX = 0;
+
+    public:
+
     Texture2D texture;
-    Vector3 position;
-    Vector2 dimensions;
+    Rectangle bounds;
+    float z;
 
     /// How fast the layer scrolls horizontally even when the camera is not moving
-    float natural_scroll_speed = 0;
-    bool repeat_horizontally = true;
-    float horizontal_offset = 0;
+    float scrollSpeed = 0;
+    bool repeatX = true;
 
     void Update(float dt);
-    void Draw(Vector2 camera_position) const;
+    void Draw(const Rectangle visibleArea) const;
 };
 
 struct ParallaxBackground
@@ -27,7 +31,7 @@ struct ParallaxBackground
     void AddParallaxLayer(const ParallaxLayer &layer);
     void Sort();
     void Update(float dt);
-    void Draw(Vector2 camera_position) const;
+    void Draw(const Rectangle visibleArea) const;
     void Clear();
 };
 

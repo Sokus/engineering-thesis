@@ -7,6 +7,18 @@
 
 #include <algorithm>
 
+Vector2 GetRectCenter(const Rectangle &rect) {
+    return {rect.x+rect.width/2, rect.y+rect.height/2};
+}
+Rectangle RectCentered(Vector2 center, Vector2 size) {
+    return {
+        .x = center.x - size.x/2,
+        .y = center.y - size.y/2,
+        .width = size.x,
+        .height = size.y 
+    };
+}
+
 float FloorMod(float a, float b)
 {
     return fmodf(fmodf(a, b) + b, b);
@@ -14,53 +26,44 @@ float FloorMod(float a, float b)
 
 void ParallaxLayer::Update(float dt)
 {
-    horizontal_offset += natural_scroll_speed * dt;
+    offsetX += scrollSpeed * dt;
 }
 
-void ParallaxLayer::Draw(Vector2 cameraPosition) const
-{
+void ParallaxLayer::Draw(const Rectangle visibleArea) const {
 
-    Vector2 parallax_2d_pos = Vector2{position.x, position.y};
-    Vector2 displacementFromCamera = Vector2Subtract(parallax_2d_pos, cameraPosition);
-    displacementFromCamera.x += horizontal_offset;
+    Vector2 cameraPos = GetRectCenter(visibleArea), 
+            centerPos = GetRectCenter(bounds); 
+    centerPos.x += offsetX;
 
-    Rectangle source, dest, visibleArea;
+    // Apply parallax effect
+    Vector2 displacement = Vector2Subtract(centerPos, cameraPos);
+    centerPos = Vector2Add(
+        cameraPos,
+        Vector2Divide(displacement, {z,z})
+    );
 
-    source.x = source.y = 0;
-    source.width = (float)texture.width;
-    source.height = (float)texture.height;
+    
 
-    dest.x = displacementFromCamera.x / position.z;
-    dest.y = displacementFromCamera.y / position.z;
-    dest.width = dimensions.x;
-    dest.height = dimensions.y;
+    Rectangle source = {0, 0, (float)texture.width, (float)texture.height};
+    Rectangle dest = RectCentered(centerPos, {bounds.width, bounds.height});
 
-    visibleArea.x = visibleArea.y = 0;
-    visibleArea.width = (float)GetScreenWidth();
-    visibleArea.height = (float)GetScreenHeight();
-
-    if (repeat_horizontally)
-    {
+    if(repeatX) {
 
         // Position the layer to the left of the visible area
         dest.x = FloorMod(dest.x - visibleArea.x, visibleArea.width) + visibleArea.x - visibleArea.width;
-
-        // Draw multiple times side by side until we fill the entire width of the screen
-        do
-        {
+        do {
             DrawTexturePro(texture, source, dest, {0, 0}, 0, WHITE);
             dest.x += dest.width;
         } while (CheckCollisionRecs(dest, visibleArea));
-    }
-    else if (CheckCollisionRecs(dest, visibleArea))
-    {
+
+    } else if(CheckCollisionRecs(dest, visibleArea)) {
         DrawTexturePro(texture, source, dest, {0, 0}, 0, WHITE);
     }
 }
 
 void ParallaxBackground::AddParallaxLayer(const ParallaxLayer &layer)
 {
-    ASSERT(layer.position.z > 1);
+    ASSERT(layer.z > 1);
     parallax_layers.push_back(layer);
 }
 
@@ -70,7 +73,7 @@ void ParallaxBackground::Sort()
     std::sort(
         parallax_layers.begin(), parallax_layers.end(),
         [](const ParallaxLayer &a, const ParallaxLayer &b)
-        { return a.position.z > b.position.z; }
+        { return a.z > b.z; }
     );
 }
 
@@ -80,10 +83,10 @@ void ParallaxBackground::Update(float dt)
         layer.Update(dt);
 }
 
-void ParallaxBackground::Draw(Vector2 cameraPosition) const
+void ParallaxBackground::Draw(const Rectangle visibleArea) const
 {
     for (auto &layer : parallax_layers)
-        layer.Draw(cameraPosition);
+        layer.Draw(visibleArea);
 }
 
 void ParallaxBackground::Clear()
