@@ -23,6 +23,7 @@ namespace Game {
 
         Rectangle textureBounds;
         float maxLifetime = 1;
+        float gravity = 0;
 
         int GetID() const;
     };

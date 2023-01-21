@@ -36,7 +36,8 @@ namespace Game {
     void Particle::Update(float dt) {
         bounds.x += velocity.x * dt;
         bounds.y += velocity.y * dt;
-        rotation += angularVelocity *dt;
+        rotation += angularVelocity * dt;
+        velocity.y += type->gravity * dt;
         lifetime += dt;
     }
     void Particle::Draw(Texture atlas) const {

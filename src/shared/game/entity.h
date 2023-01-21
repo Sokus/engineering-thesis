@@ -120,6 +120,7 @@ namespace Game {
         void MoveY(float dt);
         bool reachedEndpoint(Vector2 target, float dt);
         void Despawn();
+        Vector2 GetCenter() const;
 
         bool Serialize(BitStream *stream);
 

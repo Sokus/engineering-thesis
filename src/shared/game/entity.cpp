@@ -532,4 +532,8 @@ namespace Game {
         type = ENTITY_TYPE_NONE;
         ++revision;
     }
+
+    Vector2 Entity::GetCenter() const {
+        return {.x = position.x + size.x/2, .y = position.y + size.y/2};
+    }
 }
