@@ -5,6 +5,7 @@
 #include "system/network.h"
 #include "game/level.h"
 #include "protocol/protocol.h"
+#include <graphics/particle.h>
 
 enum GameScene
 {
@@ -74,6 +75,7 @@ struct GameData
 {
     Game::World world;
     Game::Input input;
+    Game::ParticleSystem particleSystem;
 };
 
 struct ProcessHandle;

@@ -12,6 +12,8 @@
 #include "game/entity.h"
 #include <graphics/raylib_shaders.h>
 #include <graphics/renderer.h>
+#include <graphics/particle.h>
+#include <content/content.h>
 
 #include "server_control.h"
 #include "raylib.h"
@@ -93,6 +95,7 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
     if (!game_data.world.initialised)
     {
         game_data.world.Clear();
+        game_data.particleSystem.ClearParticles();
         Game::InitLevel(&game_data.world, app_state.level_type_selected);
 
         if (app_state.multiplayer)
@@ -143,7 +146,23 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
             );
             dq.blurStrength += sine * fxStrength * 5;
         }
+
+        if(IsKeyDown(KEY_Q)) {
+            Game::Particle p;
+            p.type = Game::Particles::spark;
+            p.bounds = {
+                .x = player->position.x,
+                .y = player->position.y,
+                .width = 8, 
+                .height = 8
+            };
+            p.velocity = {player->velocity.x*2, player->velocity.y/2};
+            p.angularVelocity = 720;
+            game_data.particleSystem.AddParticle(p);
+        }
     }
+
+    game_data.particleSystem.Update(dt);
 
     renderer.BeginGeometry();
     BeginShaderMode(Game::RaylibShaders::world);
@@ -151,6 +170,7 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
 
     ClearBackground(Color{25, 30, 40});
     game_data.world.Draw(GetVisibleArea2D(camera), dq);
+    game_data.particleSystem.Draw();
     
     EndMode2D();
     EndShaderMode();
@@ -205,8 +225,10 @@ int main(int, char**)
 
     InitializeNetwork();
     InitializeTime();
+    Game::InitContentTypes();
     Game::LoadEntityTextures();
     Game::RaylibShaders::LoadShaders();
+    game_data.particleSystem.LoadTextures();
     UI::Init();
 
     Socket socket = SocketCreate(SOCKET_IPV4, 0);
@@ -255,6 +277,7 @@ int main(int, char**)
     }
 
     Game::RaylibShaders::UnloadShaders();
+    game_data.particleSystem.UnloadTextures();
 
     CloseWindow();
 
