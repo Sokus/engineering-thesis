@@ -10,6 +10,9 @@
 #include "raymath.h"
 #include <algorithm>
 #include <glm/glm.hpp>
+#include "world.h"
+#include <content/particles.h>
+#include <rng.h>
 
 #ifndef RESOURCE_PATH
 /* VSCode doesn't notice RESOURCE_PATH defined from CMake and shows nonexistent errors as a result.
@@ -535,5 +538,34 @@ namespace Game {
 
     Vector2 Entity::GetCenter() const {
         return {.x = position.x + size.x/2, .y = position.y + size.y/2};
+    }
+
+    void Entity::InflictDamage(World &world, Entity& attacker, int damageAmount) {
+        ASSERT(base_health != 0);
+
+        health -= damageAmount;
+
+        // give players immunity frames on hit
+        if(type == ENTITY_TYPE_PLAYER) {
+            time_until_state_change_allowed = Const::PLAYER.DAMAGE_COOLDOWN;
+        }
+
+        // spawn debris
+        switch(type) {
+
+            case ENTITY_TYPE_PLAYER:
+            world.SprayParticles(RandomInt(10,20), Particles::blood, GetCenter(), {0,-30}, 80, 3, 5);
+            world.SprayParticles(RandomInt(1,5),   Particles::bone,  GetCenter(), {0,-50}, 50, 5, 9);
+            break;
+
+            case ENTITY_TYPE_ENEMY:
+            world.SprayParticles(RandomInt(10,20), Particles::alienBlood, GetCenter(), {0,-30}, 80, 3, 5);
+            world.SprayParticles(RandomInt(1,5),   Particles::bone,  GetCenter(), {0,-50}, 50, 5, 9);
+            break;
+
+            case ENTITY_TYPE_DESTRUCTIBLE_TILE:
+            world.SprayParticles(RandomInt(10,15), Particles::pebble, attacker.GetCenter(), {0,-50}, 80, 3, 8);
+            break;
+        }
     }
 }

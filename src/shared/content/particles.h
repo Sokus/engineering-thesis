@@ -7,7 +7,10 @@ namespace Game::Particles {
 
     extern ParticleType 
         *pebble,
-        *spark;
+        *spark,
+        *blood,
+        *alienBlood,
+        *bone;
 
     void InitContentTypes();
 }

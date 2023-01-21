@@ -121,8 +121,7 @@ namespace Game {
             else if (collideEntity->type == ENTITY_TYPE_DAMAGING_TILE) {
                 if (player.collidesWith(*collideEntity)
                     && player.time_until_state_change_allowed <= 0.0f) {
-                    player.health -= collideEntity->damage;
-                    player.time_until_state_change_allowed = Const::PLAYER.DAMAGE_COOLDOWN; //hurts every 1.5 of sec
+                    player.InflictDamage(*this, *collideEntity, collideEntity->damage);
                 }
             }
             else if (collideEntity->type == ENTITY_TYPE_CHECKPOINT) {
@@ -140,15 +139,13 @@ namespace Game {
             else if (collideEntity->type == ENTITY_TYPE_ENEMY) {
                 if (player.collidesWith(*collideEntity)
                     && player.time_until_state_change_allowed <= 0.0f) {
-                    player.health -= collideEntity->damage;
-                    player.time_until_state_change_allowed = Const::PLAYER.DAMAGE_COOLDOWN;
+                    player.InflictDamage(*this, *collideEntity, collideEntity->damage);
                 }
             }
             else if (collideEntity->type == ENTITY_TYPE_BULLET && collideEntity->owner == 0) {
                 if (player.collidesWith(*collideEntity)
                     && player.time_until_state_change_allowed <= 0.0f) {
-                    player.health -= collideEntity->damage;
-                    player.time_until_state_change_allowed = Const::PLAYER.DAMAGE_COOLDOWN;
+                    player.InflictDamage(*this, *collideEntity, collideEntity->damage);
                     FreeEntity(collideEntity);
                 }
             }
@@ -166,6 +163,31 @@ namespace Game {
             }
         }
     }
+
+    void World::SprayParticles(
+        int count,
+        const ParticleType *type, 
+        Vector2 position, 
+        Vector2 velocity, float velocitySpread, 
+        float minSize, float maxSize
+    ) {
+        if(type == nullptr) return;
+
+        Particle particle;
+        particle.type = type;
+        particle.bounds = RectCentered(position, {});
+
+        for(int i=0; i<count; ++i) {
+            particle.velocity = Vector2Add(
+                RandomVector2(0, velocitySpread),
+                velocity
+            );
+            particle.bounds.width = particle.bounds.height = RandomFloat(minSize, maxSize);
+            particle.angularVelocity = RandomFloat(-300, 300);
+            queuedParticles.push_back(particle);
+        }
+    }
+
     void World::hitObstacles(Entity& bullet) {
 
         EntityType collidedEntityType = ENTITY_TYPE_NONE;
@@ -176,7 +198,9 @@ namespace Game {
             if ((entity->type == ENTITY_TYPE_DESTRUCTIBLE_TILE || entity->type == ENTITY_TYPE_ENEMY)
                 && bullet.collidesWith(*entity)
                 && bullet.owner != entity->owner) {
-                entity->health -= bullet.damage;
+
+                entity->InflictDamage(*this, bullet, bullet.damage);
+
                 collidedEntityType = entity->type;
                 if (entity->health <= 0) {
 
@@ -197,38 +221,8 @@ namespace Game {
                 MAX(bullet.size.x, bullet.size.y)*6
             );
 
-            const ParticleType *particleType;
-
-            switch(collidedEntityType) {
-
-                case ENTITY_TYPE_TILE:
-                case ENTITY_TYPE_DESTRUCTIBLE_TILE:
-                particleType = Particles::pebble;
-                break;
-
-                default: particleType = nullptr; break;
-            }
-
-            if(particleType != nullptr) {
-
-                Particle particle;
-                particle.type = particleType;
-                particle.bounds = RectCentered(
-                    bullet.GetCenter(),
-                    {4.0f, 4.0f}
-                );
-
-                int noSpawnedParticles = RandomInt(4, 8);
-
-                for(int i=0; i<noSpawnedParticles; ++i) {
-                    particle.velocity = Vector2Add(
-                        RandomVector2(0, 80),
-                        {0, -50}
-                    );
-                    particle.bounds.width = particle.bounds.height = RandomFloat(3, 5);
-                    particle.angularVelocity = RandomFloat(-300, 300);
-                    queuedParticles.push_back(particle);
-                }
+            if(collidedEntityType == ENTITY_TYPE_TILE) {
+                SprayParticles(RandomInt(2,5), Particles::pebble, bullet.GetCenter(), {0,-40}, 40, 2, 4);
             }
 
             FreeEntity(&bullet);

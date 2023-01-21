@@ -11,6 +11,7 @@ struct BitStream;
 namespace Game {
 
     struct Input;
+    struct World;
 
     enum EntityType
     {
@@ -120,6 +121,9 @@ namespace Game {
         void MoveY(float dt);
         bool reachedEndpoint(Vector2 target, float dt);
         void Despawn();
+
+        void InflictDamage(World &world, Entity &attacker, int damageAmount);
+        
         Vector2 GetCenter() const;
 
         bool Serialize(BitStream *stream);

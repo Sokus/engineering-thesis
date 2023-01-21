@@ -67,6 +67,14 @@ namespace Game {
         Entity* CreateShockwave(Vector2 pos, float max_radius);
         void LoadTextures();
         void hitObstacles(Entity &bullet);
+
+        void SprayParticles(
+            int count,
+            const ParticleType *type, 
+            Vector2 position, 
+            Vector2 velocity, float velocitySpread, 
+            float minSize, float maxSize
+        );
     };
 }
 
