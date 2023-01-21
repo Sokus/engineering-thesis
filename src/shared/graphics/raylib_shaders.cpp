@@ -24,9 +24,16 @@ namespace Game::RaylibShaders {
     )glsl";
 
     Shader world;
+
     int worldDepthLoc;
+    int worldEmissivenessLoc;
+
     void worldSetDepth(float value) {
         SetShaderValue(world, worldDepthLoc, &value, SHADER_UNIFORM_FLOAT);
+    }
+
+    void worldSetEmissiveness(float value) {
+        SetShaderValue(world, worldEmissivenessLoc, &value, SHADER_UNIFORM_FLOAT);
     }
 
     void LoadShaders() {
@@ -38,23 +45,27 @@ namespace Game::RaylibShaders {
                 in vec2 fragTexCoord;      
                 in vec4 fragColor;    
 
-                layout(location=0) out vec4 finalColor; 
+                layout(location=0) out vec4 fragAlbedo; 
                 // we only need to output 1 float, but if we output less than 4 components then alpha
                 // is undefined, which messes up the output due to blending
                 layout(location=1) out vec4 fragDepth;
+                layout(location=2) out vec4 fragEmissive;
 
                 uniform sampler2D texture0;
                 uniform vec4 colDiffuse;  
                 uniform float depth;
+                uniform float emissiveness;
 
                 void main() {                                  
-                    vec4 texelColor = texture(texture0, fragTexCoord);   
-                    finalColor = texelColor*colDiffuse*fragColor;
-                    fragDepth = vec4(depth, depth, depth, (texelColor*colDiffuse*fragColor).a);
+                    vec4 albedo = texture(texture0, fragTexCoord)*colDiffuse*fragColor;   
+                    fragAlbedo = albedo;
+                    fragDepth = vec4(depth, 0, 0, albedo.a);
+                    fragEmissive = vec4(albedo.rgb * emissiveness, albedo.a);
                 }                                  
             )glsl"
         );
         worldDepthLoc = GetShaderLocation(world, "depth");
+        worldEmissivenessLoc = GetShaderLocation(world, "emissiveness");
     }
     void UnloadShaders() {
         UnloadShader(world);

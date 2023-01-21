@@ -14,7 +14,8 @@ namespace Game {
 
     enum {
         ATT_GBUFFER_ALBEDO = GL_COLOR_ATTACHMENT0,
-        ATT_GBUFFER_DEPTH = GL_COLOR_ATTACHMENT1
+        ATT_GBUFFER_DEPTH = GL_COLOR_ATTACHMENT1,
+        ATT_GBUFFER_EMISSIVE = GL_COLOR_ATTACHMENT2
     };
 
     glm::mat4 ToGLMMatrix(const Matrix &m) {
@@ -30,20 +31,18 @@ namespace Game {
     GL::TextureUnit
         TEX_ALBEDO_MAP(0),
         TEX_DEPTH_MAP(1),
+        TEX_EMISSIVE_MAP(9),
         TEX_HDR(2),
         TEX_SDR1(3),
         TEX_SDR2(4),
         TEX_BLOOM[] {{5}, {6}, {7}, {8}};
 
-    void BindTextureToTexUnit(GLuint texUnitIndex, GLuint texture) {
-        glActiveTexture(GL_TEXTURE0 + texUnitIndex);
-        glBindTexture(GL_TEXTURE_2D, texture);
-    }
 
     Renderer::Renderer() :
         gbuffer({
             {ATT_GBUFFER_ALBEDO, GL_RGBA8},
-            {ATT_GBUFFER_DEPTH,  GL_R16F}   
+            {ATT_GBUFFER_DEPTH,  GL_R16F},
+            {ATT_GBUFFER_EMISSIVE, GL_RGB16F}   
         }),
         hdrFbo({{GL_COLOR_ATTACHMENT0, GL_RGBA16F}}),
         sdrFbo1({{GL_COLOR_ATTACHMENT0, GL_RGBA8}}),
@@ -107,6 +106,7 @@ namespace Game {
         // Bind textures
         TEX_ALBEDO_MAP.AttachTexture2D(gbuffer.GetTexture(ATT_GBUFFER_ALBEDO));
         TEX_DEPTH_MAP .AttachTexture2D(gbuffer.GetTexture(ATT_GBUFFER_DEPTH));
+        TEX_EMISSIVE_MAP.AttachTexture2D(gbuffer.GetTexture(ATT_GBUFFER_EMISSIVE));
         TEX_HDR       .AttachTexture2D(hdrFbo.GetTexture(GL_COLOR_ATTACHMENT0));
         TEX_SDR1      .AttachTexture2D(sdrFbo1.GetTexture(GL_COLOR_ATTACHMENT0));
         TEX_SDR2      .AttachTexture2D(sdrFbo2.GetTexture(GL_COLOR_ATTACHMENT0));
@@ -124,7 +124,8 @@ namespace Game {
         glClearColor(0,0,0,0);
         glClear(GL_COLOR_BUFFER_BIT);
         lightRenderer.DrawLights(
-            viewProjection, TEX_ALBEDO_MAP, TEX_DEPTH_MAP, 
+            viewProjection, 
+            TEX_ALBEDO_MAP, TEX_DEPTH_MAP, TEX_EMISSIVE_MAP,
             dq.ambientLight, 
             dq.lights.data(), dq.lights.size(),
             dq.energySpheres.data(), dq.energySpheres.size()

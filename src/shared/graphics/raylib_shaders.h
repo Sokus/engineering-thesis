@@ -7,6 +7,7 @@ namespace Game::RaylibShaders {
     
     extern Shader world;
     void worldSetDepth(float value);
+    void worldSetEmissiveness(float value);
 
     void LoadShaders();
     void UnloadShaders();

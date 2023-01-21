@@ -15,6 +15,7 @@ struct ParallaxLayer
     Texture2D texture;
     Rectangle bounds;
     float z;
+    float emissiveness = 0;
 
     /// How fast the layer scrolls horizontally even when the camera is not moving
     float scrollSpeed = 0;

@@ -89,11 +89,14 @@ namespace Game {
 
                 in vec2 v_uv;
                 uniform sampler2D albedoMap;
+                uniform sampler2D emissiveMap;
                 uniform vec3 ambientLight;
                 out vec3 fragColor;
 
                 void main() {
-                    fragColor = texture(albedoMap, v_uv).rgb * ambientLight;
+                    fragColor = 
+                        texture(albedoMap, v_uv).rgb * ambientLight +
+                        texture(emissiveMap, v_uv).rgb;
                 }
             )glsl"
         );
@@ -202,7 +205,7 @@ namespace Game {
 
     void LightRenderer::DrawLights(
         const glm::mat4 &viewProjection, 
-        GL::TextureUnit albedoMap, GL::TextureUnit depthMap,
+        GL::TextureUnit albedoMap, GL::TextureUnit depthMap, GL::TextureUnit emissiveMap,
         const glm::vec3 &ambientLight, 
         const Light *lights, int noLights,
         const Light *energySpheres, int noEnergySpheres
@@ -219,6 +222,7 @@ namespace Game {
         // Ambient light
         ambientLightProgram()
             .SetUniform("albedoMap", albedoMap)
+            .SetUniform("emissiveMap", emissiveMap)
             .SetUniform("ambientLight", ambientLight)
             .DrawPostprocessing();
 

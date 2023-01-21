@@ -2,8 +2,10 @@
 
 #include "raylib.h"
 #include "raymath.h"
+#include "rlgl.h"
 
 #include "macros.h"
+#include <graphics/raylib_shaders.h>
 
 #include <algorithm>
 
@@ -42,10 +44,11 @@ void ParallaxLayer::Draw(const Rectangle visibleArea) const {
         Vector2Divide(displacement, {z,z})
     );
 
-    
-
     Rectangle source = {0, 0, (float)texture.width, (float)texture.height};
     Rectangle dest = RectCentered(centerPos, {bounds.width, bounds.height});
+
+    Game::RaylibShaders::worldSetDepth(z);
+    Game::RaylibShaders::worldSetEmissiveness(emissiveness);
 
     if(repeatX) {
 
@@ -59,6 +62,8 @@ void ParallaxLayer::Draw(const Rectangle visibleArea) const {
     } else if(CheckCollisionRecs(dest, visibleArea)) {
         DrawTexturePro(texture, source, dest, {0, 0}, 0, WHITE);
     }
+
+    rlDrawRenderBatchActive();
 }
 
 void ParallaxBackground::AddParallaxLayer(const ParallaxLayer &layer)
@@ -87,6 +92,9 @@ void ParallaxBackground::Draw(const Rectangle visibleArea) const
 {
     for (auto &layer : parallax_layers)
         layer.Draw(visibleArea);
+
+    Game::RaylibShaders::worldSetDepth(1);
+    Game::RaylibShaders::worldSetEmissiveness(0);
 }
 
 void ParallaxBackground::Clear()

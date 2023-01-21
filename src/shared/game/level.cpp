@@ -62,6 +62,7 @@ void InitPlains(World *world)
 	ParallaxLayer sky = {};
 	sky.bounds = {-160, -90, 320, 180};
 	sky.z = 999;
+	sky.emissiveness = 1;
 
 	if (load_textures)
 	{
