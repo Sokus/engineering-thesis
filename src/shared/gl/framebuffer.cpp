@@ -21,6 +21,8 @@ namespace GL {
         glGenTextures(1, &texture_handle);
         glBindTexture(GL_TEXTURE_2D, texture_handle);
         glTexStorage2D(GL_TEXTURE_2D, 1, internal_format, size.x, size.y);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         return texture_handle;
     }
 
