@@ -6,6 +6,7 @@
 #include "system/pi_time.h"
 #include "system/network.h"
 #include "game/level.h"
+#include <content/content.h>
 
 #include "parg.h"
 
@@ -83,6 +84,7 @@ int main(int argc, char *argv[])
     InitializeTime();
     InitializeNetwork();
     Game::SetLoadTextures(false);
+    Game::InitContentTypes();
 
     int pa_rc = ProcessArguments(argc, argv);
 
@@ -106,6 +108,7 @@ int main(int argc, char *argv[])
         server.world.Update(server.client_input, MAX_CLIENTS, dt);
         server.SendPackets();
         server.SendWorldState();
+        server.SendQueuedParticles();
         server.CheckForTimeOut();
 
         const uint64_t laptime = Time_Now() - t0;

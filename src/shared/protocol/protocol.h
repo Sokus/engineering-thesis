@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <vector>
 
 #include "serialization/bitstream.h"
 #include "serialization/serialize.h"
@@ -13,6 +14,7 @@
 #include "game/entity.h"
 #include "game/world.h"
 #include "game/level.h"
+#include <graphics/particle.h>
 
 #define MAX_PACKET_SIZE 1200
 #define MAX_CLIENTS 16
@@ -33,6 +35,7 @@ enum PacketType
     PACKET_CONNECTION_DISCONNECT,
     PACKET_INPUT,
     PACKET_WORLD_STATE,
+    PACKET_SPAWN_PARTICLES,
     PACKET_TYPE_COUNT,
 };
 
@@ -182,6 +185,27 @@ struct WorldStatePacket : public Packet
         for (int i = 0; i < entity_count; i++)
         {
             if (!entities[i].Serialize(stream))
+                return false;
+        }
+        return true;
+    }
+};
+
+struct SpawnParticlesPacket : public Packet
+{
+    std::vector<Game::Particle> particles;
+
+    SpawnParticlesPacket() : Packet(PACKET_SPAWN_PARTICLES) {}
+
+    bool Serialize(BitStream *stream)
+    {
+        int size = particles.size();
+        SERIALIZE_INT(stream, size, 0, INT_MAX);
+        particles.resize(size);
+
+        for(auto &particle : particles) 
+        {
+            if(!particle.Serialize(stream))
                 return false;
         }
         return true;

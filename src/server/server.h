@@ -39,6 +39,7 @@ struct Server
     void DisconnectClient(int client_index);
     void CheckForTimeOut();
     void SendWorldState();
+    void SendQueuedParticles();
 
     void ProcessConnectionRequestPacket(ConnectionRequestPacket *packet, Address address);
     void ProcessConnectionDisconnectPacket(ConnectionDisconnectPacket *packet, Address address);

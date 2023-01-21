@@ -5,6 +5,7 @@
 #include "macros.h"
 #include "system/pi_time.h"
 #include "game/level.h"
+#include <algorithm>
 
 void Server::Init(Socket socket)
 {
@@ -216,6 +217,41 @@ void Server::SendWorldState()
     }
 
     ASSERT(packet->entity_count > 0);
+    BroadcastPacketToConnectedClients(packet);
+    DestroyPacket(packet);
+}
+
+void Server::SendQueuedParticles()
+{
+    if(world.queuedParticles.empty())
+        return;
+
+    if (!num_connected_clients) {
+        world.queuedParticles.clear();
+        return;
+    }
+
+    SpawnParticlesPacket *packet = (SpawnParticlesPacket *) CreatePacket(PACKET_SPAWN_PARTICLES);
+    
+    BitStream stream = MeasureStream_Create(nullptr, 960);
+    for(auto &particle : world.queuedParticles)
+    {
+        particle.Serialize(&stream);
+        if(BitStream_GetBitsRemaining(&stream) < 0)   
+        {
+            BroadcastPacketToConnectedClients(packet);
+
+            stream = MeasureStream_Create(nullptr, 960);
+            particle.Serialize(&stream);
+            ASSERT(BitStream_GetBitsRemaining(&stream) >= 0);
+
+            packet->particles.clear();
+        }
+        packet->particles.push_back(particle);
+    }
+    world.queuedParticles.clear();
+
+    ASSERT(packet->particles.size() > 0);
     BroadcastPacketToConnectedClients(packet);
     DestroyPacket(packet);
 }

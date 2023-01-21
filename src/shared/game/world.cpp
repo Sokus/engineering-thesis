@@ -8,6 +8,8 @@
 
 #include <string.h>
 #include <macros.h>
+#include <content/particles.h>
+#include <math/geom.h>
 
 
 namespace Game {
@@ -165,7 +167,7 @@ namespace Game {
     }
     void World::hitObstacles(Entity& bullet) {
 
-        bool collided = false;
+        EntityType collidedEntityType = ENTITY_TYPE_NONE;
 
         for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
         {
@@ -174,24 +176,53 @@ namespace Game {
                 && bullet.collidesWith(*entity)
                 && bullet.owner != entity->owner) {
                 entity->health -= bullet.damage;
+                collidedEntityType = entity->type;
                 if (entity->health <= 0) {
 
                     FreeEntity(entity);
                 }
-                collided = true;
                 break;
             }
             if (entity->type != ENTITY_TYPE_NONE && entity->collidable && bullet.collidesWith(*entity)) {
-                collided = true;
+                collidedEntityType = entity->type;
                 break;
             }
         }
 
-        if(collided) {
+        if(collidedEntityType != ENTITY_TYPE_NONE) {
+
             CreateShockwave(
                 Vector2Add(bullet.position, {bullet.size.x/2, bullet.size.y/2}), 
                 MAX(bullet.size.x, bullet.size.y)*6
             );
+
+            const ParticleType *particleType;
+
+            switch(collidedEntityType) {
+
+                case ENTITY_TYPE_TILE:
+                case ENTITY_TYPE_DESTRUCTIBLE_TILE:
+                particleType = Particles::pebble;
+                break;
+
+                default: particleType = nullptr; break;
+            }
+
+            if(particleType != nullptr) {
+                Particle particle;
+                particle.type = particleType;
+                particle.bounds = RectCentered(
+                    Vector2Add(bullet.position, Vector2Multiply(bullet.size, {0.5f,0.5f})),
+                    {4.0f, 4.0f}
+                );
+                particle.velocity = {30, 0};
+                const int noSpawnedParticles = 6;
+                for(int i=0; i<noSpawnedParticles; ++i) {
+                    particle.velocity = Vector2Rotate(particle.velocity, 360/noSpawnedParticles*DEG2RAD);
+                    queuedParticles.push_back(particle);
+                }
+            }
+
             FreeEntity(&bullet);
         }
     }

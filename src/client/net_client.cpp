@@ -119,6 +119,10 @@ void Client::ReceivePackets()
                 ProcessWorldStatePacket((WorldStatePacket *)packet, address);
                 break;
 
+            case PACKET_SPAWN_PARTICLES:
+                ProcessSpawnParticlesPacket((SpawnParticlesPacket *)packet, address);
+                break;
+
             default: break;
         }
 
@@ -255,5 +259,20 @@ void Client::ProcessWorldStatePacket(WorldStatePacket *packet, Address address)
     }
 
     last_packet_receive_time = Time_Now();
+}
+
+void Client::ProcessSpawnParticlesPacket(SpawnParticlesPacket *packet, Address address)
+{
+    if (state != CLIENT_CONNECTED)
+        return;
+
+    if (!AddressCompare(server_address, address))
+        return;
+
+    for(auto &particle : packet->particles)
+    {
+        ASSERT(particle.type != nullptr);
+        game_data.particleSystem.AddParticle(particle);
+    }
 }
 

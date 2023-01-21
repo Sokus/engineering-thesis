@@ -28,3 +28,14 @@ bool SerializeVector3(BitStream *stream, Vector3 *value)
     SERIALIZE_FLOAT(stream, value->z);
     return true;
 }
+
+bool SerializeRectangle(BitStream *stream, Rectangle *value)
+{
+    ASSERT(stream);
+    ASSERT(value);
+    SERIALIZE_FLOAT(stream, value->x);
+    SERIALIZE_FLOAT(stream, value->y);
+    SERIALIZE_FLOAT(stream, value->width);
+    SERIALIZE_FLOAT(stream, value->height);
+    return true;
+}

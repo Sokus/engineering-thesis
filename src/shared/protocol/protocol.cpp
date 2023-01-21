@@ -21,6 +21,7 @@ Packet *CreatePacket(int type)
         case PACKET_CONNECTION_DISCONNECT: return new ConnectionDisconnectPacket();
         case PACKET_INPUT: return new InputPacket();
         case PACKET_WORLD_STATE: return new WorldStatePacket();
+        case PACKET_SPAWN_PARTICLES: return new SpawnParticlesPacket();
         default: return nullptr;
     }
 }

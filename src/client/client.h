@@ -69,6 +69,7 @@ struct Client
     void ProcessConnectionDisconnectPacket(ConnectionDisconnectPacket *packet, Address address);
     void ProcessConnectionKeepAlivePacket(ConnectionKeepAlivePacket *packet, Address address);
     void ProcessWorldStatePacket(WorldStatePacket *packet, Address address);
+    void ProcessSpawnParticlesPacket(SpawnParticlesPacket *packet, Address address);
 };
 
 struct GameData

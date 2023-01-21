@@ -6,6 +6,7 @@
 #include "entity.h"
 #include "game/parallax.h"
 #include <graphics/renderer.h>
+#include <graphics/particle.h>
 
 struct BitStream;
 
@@ -25,6 +26,7 @@ namespace Game {
         Entity entities[max_entity_count] = {};
         Vector2 spawnpoint;
         ParallaxBackground parallax_background;
+        std::vector<Particle> queuedParticles;
 
         bool initialised;
         bool finished;

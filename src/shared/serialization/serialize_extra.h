@@ -23,4 +23,13 @@ bool SerializeVector3(struct BitStream *stream, struct Vector3 *vector3_ptr);
             return false; \
     } while (0)
 
+struct Rectangle;
+bool SerializeRectangle(struct BitStream *stream, struct Rectangle *rect_ptr);
+
+#define SERIALIZE_RECTANGLE(stream_ptr, value) \
+    do { \
+        if (!SerializeRectangle((stream_ptr), &value)) \
+            return false; \
+    } while (0)
+
 #endif // PE_SERIALIZE_EXTRA_H

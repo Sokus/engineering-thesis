@@ -1,5 +1,7 @@
 #include "particle.h"
-#include <stdio.h>
+#include "macros.h"
+#include <serialization/serialize.h>
+#include <serialization/serialize_extra.h>
 
 #ifndef RESOURCE_PATH
 #define RESOURCE_PATH ""
@@ -12,6 +14,19 @@ namespace Game {
     }
 
     bool Particle::Serialize(BitStream *stream) {
+        
+        int typeId = type == nullptr ? 0 : type->GetID();
+        SERIALIZE_INT(stream, typeId, 0, particleRegistry.Size()+1);
+        type = particleRegistry.GetParticleTypeByID(typeId);
+
+        if(type != nullptr) {
+            SERIALIZE_RECTANGLE(stream, bounds);
+            SERIALIZE_VECTOR2(stream, velocity);
+            SERIALIZE_FLOAT(stream, rotation);
+            SERIALIZE_FLOAT(stream, angularVelocity);
+            SERIALIZE_FLOAT(stream, lifetime);
+        }
+
         return true;
     }
 
@@ -56,6 +71,10 @@ namespace Game {
         --id;
         if(id < 0 || id >= particleTypes.size()) return nullptr;
         else return particleTypes[id];
+    }
+
+    int ParticleRegistry::Size() const {
+        return particleTypes.size();
     }
 
     ParticleRegistry particleRegistry;

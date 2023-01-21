@@ -29,7 +29,7 @@ namespace Game {
 
     struct Particle {
 
-        const ParticleType *type;
+        const ParticleType *type = nullptr;
         Rectangle bounds;
         Vector2 velocity = {0.0f, 0.0f};
         float rotation = 0;
@@ -54,6 +54,7 @@ namespace Game {
         ParticleType *CreateParticleType();
         ParticleType *CopyParticleType(const ParticleType *other);
         const ParticleType *GetParticleTypeByID(int id) const;
+        int Size() const;
     };
 
     extern ParticleRegistry particleRegistry;
