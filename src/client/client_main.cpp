@@ -115,6 +115,10 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
 
     if (app_state.multiplayer == false)
     {
+        for(auto &particle: game_data.world.queuedParticles) {
+            game_data.particleSystem.AddParticle(particle);
+        }
+        game_data.world.queuedParticles.clear();
         game_data.world.Update(inputs, ARRAY_SIZE(inputs), dt);
     }
 
@@ -145,20 +149,6 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
                 sine * fxStrength
             );
             dq.blurStrength += sine * fxStrength * 5;
-        }
-
-        if(IsKeyDown(KEY_Q)) {
-            Game::Particle p;
-            p.type = Game::Particles::spark;
-            p.bounds = {
-                .x = player->position.x,
-                .y = player->position.y,
-                .width = 8, 
-                .height = 8
-            };
-            p.velocity = {player->velocity.x*2, player->velocity.y/2};
-            p.angularVelocity = 720;
-            game_data.particleSystem.AddParticle(p);
         }
     }
 
