@@ -214,10 +214,10 @@ namespace Game {
             Light light;
             light.position = glm::vec2(position.x + size.x/2, position.y + size.y/2);
             switch(type) {
-                case ENTITY_TYPE_PLAYER:      light.intensity = glm::vec3(1.0f, 1.0f, 0.75f)*1.0f; light.kQuadratic = 3e-3; break;
-                case ENTITY_TYPE_MOVING_TILE: light.intensity = glm::vec3(0.75f, 1.0f, 1.0f)*0.1f; light.kQuadratic = 1e-3; break;
-                case ENTITY_TYPE_INTERACTIVE: light.intensity = glm::vec3(0.75f, 1.0f, 1.0f)*1.0f; light.kQuadratic = 1e-2; break;
-                case ENTITY_TYPE_BULLET:      light.intensity = glm::vec3(0.50f, 1.0f, 1.0f)*50.0f; light.kQuadratic = 150e-3; break;
+                case ENTITY_TYPE_PLAYER:      light.intensity = glm::vec3(1.0f, 1.0f, 0.75f)*1.0f; light.kQuadratic = (float)3e-3; break;
+                case ENTITY_TYPE_MOVING_TILE: light.intensity = glm::vec3(0.75f, 1.0f, 1.0f)*0.1f; light.kQuadratic = (float)1e-3; break;
+                case ENTITY_TYPE_INTERACTIVE: light.intensity = glm::vec3(0.75f, 1.0f, 1.0f)*1.0f; light.kQuadratic = (float)1e-2; break;
+                case ENTITY_TYPE_BULLET:      light.intensity = glm::vec3(0.50f, 1.0f, 1.0f)*50.0f; light.kQuadratic = (float)150e-3; break;
             }
             dq.DrawLight(light);
         }
@@ -535,8 +535,8 @@ namespace Game {
 
         Color barColor = ColorFromHSV(glm::mix(hueRed, hueGreen, relativeHealth()), 0.75f, 0.75f);
 
-        DrawRectangle(position.x, position.y + size.y + barGap, size.x, barHeight, BLACK);
-        DrawRectangle(position.x, position.y + size.y + barGap, size.x * relativeHealth(), barHeight, barColor);
+        DrawRectangle((int)position.x, position.y + size.y + barGap, (int)size.x, (int)barHeight, BLACK);
+        DrawRectangle((int)position.x, position.y + size.y + barGap, size.x * relativeHealth(), (int)barHeight, barColor);
     }
 
     void Entity::Despawn() {

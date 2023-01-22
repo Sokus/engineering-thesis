@@ -25,13 +25,13 @@ namespace Game {
         glm::vec3 ambientLight = glm::vec3(0.025f) * 10.0f;
 
         // Larger values = stronger bloom
-        float bloomStrength = 0.05;
+        float bloomStrength = 0.05f;
 
         // Exposure time for tone mapping. Larger values improve visibility in dark environments.
-        float exposure = 1.2f; 
-        
+        float exposure = 1.2f;
+
         // Reduces saturation of the image
-        float grayscaleEffectStrength = 0;
+        float grayscaleEffectStrength = 0.0f;
 
         // Controls the size of the vignette effect. Larger values = larger vignette.
         float vignetteExponent = 0.25f;
