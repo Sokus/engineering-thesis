@@ -24,6 +24,8 @@ namespace Game {
         Rectangle textureBounds;
         float maxLifetime = 1;
         float gravity = 0;
+        std::vector<float> sizeKeyframes = {1,1,0};
+        std::vector<float> alphaKeyframes = {1};
 
         int GetID() const;
     };

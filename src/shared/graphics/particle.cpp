@@ -3,12 +3,35 @@
 #include <serialization/serialize.h>
 #include <serialization/serialize_extra.h>
 #include <graphics/raylib_shaders.h>
+#include "raymath.h"
 
 #ifndef RESOURCE_PATH
 #define RESOURCE_PATH ""
 #endif
 
 namespace Game {
+
+    float Interpolate(const std::vector<float> &keyframes, float k) {
+
+        if(k <= 0 || keyframes.size() == 1) 
+            return keyframes.front();
+
+        k *= keyframes.size()-1;
+
+        if(k >= keyframes.size()-1) 
+            return keyframes.back();
+
+        return Lerp(keyframes[floor(k)], keyframes[ceil(k)], k-floor(k));
+    }
+
+    Rectangle RectangleScale(const Rectangle &r, float scale) {
+        return {
+            .x = r.x,
+            .y = r.y,
+            .width  = r.width  * scale,
+            .height = r.height * scale
+        };
+    }
 
     int ParticleType::GetID() const {
         return id;
@@ -41,10 +64,16 @@ namespace Game {
         velocity.y += type->gravity * dt;
         lifetime += dt;
     }
-    void Particle::Draw(Texture atlas) const {
-        DrawTexturePro(atlas, type->textureBounds, bounds, {.x = bounds.width/2, .y = bounds.height/2}, rotation, WHITE);
-    }
 
+    void Particle::Draw(Texture atlas) const {
+
+        const float T = lifetime / type->maxLifetime;
+
+        Rectangle dest = RectangleScale(bounds, Interpolate(type->sizeKeyframes, T));
+        Color tint = ColorAlpha(WHITE, Interpolate(type->alphaKeyframes, T));
+
+        DrawTexturePro(atlas, type->textureBounds, dest, {.x = dest.width/2, .y = dest.height/2}, rotation, tint);
+    }
 
 
     ParticleRegistry::~ParticleRegistry() {
