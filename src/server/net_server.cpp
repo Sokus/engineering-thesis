@@ -9,7 +9,14 @@
 
 void Server::Init(Socket socket)
 {
+    // Dirty fix for crashes caused by memset
+    // TODO properly initialise your variables instead of memsetting like a maniac
+    world.parallax_background.~ParallaxBackground();
+    world.queuedParticles.~vector();
     memset(this, 0, sizeof(Server));
+    new(&world.queuedParticles) decltype(world.queuedParticles);
+    new(&world.parallax_background) decltype(world.parallax_background);
+
     this->socket = socket;
     for (int i = 1; i < MAX_CLIENTS; i++)
         ResetClientState(i);
