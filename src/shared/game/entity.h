@@ -107,7 +107,7 @@ namespace Game {
         bool collidable;
         bool active;
 
-        void Update(float dt);
+        void Update(World &world, float dt);
         void UpdateMovingTile(float dt);
         void setMoveSpeed(Input* input);
         void Draw(DrawQueue &dq) const;

@@ -2,6 +2,7 @@
 #include "macros.h"
 #include <serialization/serialize.h>
 #include <serialization/serialize_extra.h>
+#include <graphics/raylib_shaders.h>
 
 #ifndef RESOURCE_PATH
 #define RESOURCE_PATH ""
@@ -88,8 +89,10 @@ namespace Game {
 
     void ParticleSystem::LoadTextures() {
         atlas = LoadTexture(RESOURCE_PATH "/particle_atlas.png");
+        atlasEmissive = LoadTexture(RESOURCE_PATH "/particle_atlas_emissive.png");
     }
     void ParticleSystem::UnloadTextures() {
+        UnloadTexture(atlasEmissive);
         UnloadTexture(atlas);
     }
 
@@ -113,7 +116,13 @@ namespace Game {
     }
 
     void ParticleSystem::Draw() const {
+        
+        BeginShaderMode(RaylibShaders::particle);
+        RaylibShaders::particleSetEmissiveTexture(atlasEmissive);
+
         for(const auto &particle : particles) 
             particle.Draw(atlas);
+
+        EndShaderMode();
     }
 }

@@ -299,7 +299,7 @@ namespace Game {
         for (int i = 0; i < max_entity_count; i++)
         {
             Entity* entity = &entities[i];
-            entity->Update(dt);
+            entity->Update(*this, dt);
 
             switch (entity->type)
             {
@@ -337,10 +337,9 @@ namespace Game {
 
     void World::Draw(const Rectangle visibleArea, DrawQueue &dq) const
     {
-        // TODO(sokus): Fix this
+        BeginShaderMode(Game::RaylibShaders::world);
+
         parallax_background.Draw(visibleArea);
-        Game::RaylibShaders::worldSetDepth(1000);
-        rlDrawRenderBatchActive();
 
         for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
         {
@@ -349,7 +348,9 @@ namespace Game {
                 entity->Draw(dq);
         }
         Game::RaylibShaders::worldSetDepth(1);
+        
         rlDrawRenderBatchActive();
+        EndShaderMode();
     }
 
     void World::DrawHealthBars() const {

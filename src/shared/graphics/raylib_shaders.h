@@ -9,6 +9,9 @@ namespace Game::RaylibShaders {
     void worldSetDepth(float value);
     void worldSetEmissiveness(float value);
 
+    extern Shader particle;
+    void particleSetEmissiveTexture(Texture2D texture);
+
     void LoadShaders();
     void UnloadShaders();
 }

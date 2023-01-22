@@ -155,15 +155,13 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
     game_data.particleSystem.Update(dt);
 
     renderer.BeginGeometry();
-    BeginShaderMode(Game::RaylibShaders::world);
     BeginMode2D(camera);
-
+    
     ClearBackground(Color{25, 30, 40});
     game_data.world.Draw(GetVisibleArea2D(camera), dq);
     game_data.particleSystem.Draw();
-    
+
     EndMode2D();
-    EndShaderMode();
     renderer.EndGeometry();
     renderer.Draw(dq, camera);
 

@@ -65,6 +65,7 @@ namespace Game {
 
         std::vector<Particle> particles;
         Texture atlas;
+        Texture atlasEmissive;
 
         public:
 

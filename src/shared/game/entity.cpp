@@ -75,7 +75,7 @@ namespace Game {
         }
     }
 
-	void Entity::Update(float dt)
+	void Entity::Update(World &world, float dt)
     {
         if (num_frames)
         {
@@ -89,6 +89,13 @@ namespace Game {
                 if(type == ENTITY_TYPE_SHOCKWAVE && current_frame == 0)
                     Despawn();
             }
+        }
+
+        if(type == ENTITY_TYPE_BULLET && RandomFloat01() < 0.1f) {
+            world.SprayParticles(1, Particles::spark, GetCenter(), {0,0}, 20, 4, 4);
+        }
+        if(type == ENTITY_TYPE_PLAYER && health < base_health/2 && RandomFloat01() < 0.05f) {
+            world.SprayParticles(1, Particles::blood, GetCenter(), {0,-30}, 40, 2, 5);
         }
 
         if (time_until_state_change_allowed > 0.0f)
