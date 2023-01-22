@@ -254,6 +254,7 @@ void Client::ProcessWorldStatePacket(WorldStatePacket *packet, Address address)
             dst->facing = src->facing;
             dst->health = src->health;
             dst->base_health = src->base_health;
+            dst->active = src->active;
         }
 
     }

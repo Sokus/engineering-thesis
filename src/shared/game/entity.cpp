@@ -303,6 +303,7 @@ namespace Game {
             SERIALIZE_INT(stream, base_health, 0, max_base_health);
             if(base_health > 0)
                 SERIALIZE_INT(stream, health, 0, base_health+1);
+            SERIALIZE_BOOL(stream, active);
         }
         return true;
     }
@@ -526,14 +527,14 @@ namespace Game {
 
     void Entity::drawHealthBar() const {
 
-        constexpr float 
-            barHeight = 3, 
-            barGap = 3, 
-            hueRed = 0, 
+        constexpr float
+            barHeight = 3,
+            barGap = 3,
+            hueRed = 0,
             hueGreen = 120;
 
         Color barColor = ColorFromHSV(glm::mix(hueRed, hueGreen, relativeHealth()), 0.75f, 0.75f);
-        
+
         DrawRectangle(position.x, position.y + size.y + barGap, size.x, barHeight, BLACK);
         DrawRectangle(position.x, position.y + size.y + barGap, size.x * relativeHealth(), barHeight, barColor);
     }
