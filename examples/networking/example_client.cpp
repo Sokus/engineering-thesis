@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     InitializeTime();
 
     Socket socket = SocketCreate(SOCKET_IPV4, 50000);
-    Address address = AddressParseEx("127.0.0.1", 60000);
+    Address address = AddressParseEx((char *)"127.0.0.1", 60000);
     int d = 5;
     SocketSend(socket, address, &d, sizeof(d));
 

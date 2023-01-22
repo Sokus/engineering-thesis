@@ -199,11 +199,11 @@ struct SpawnParticlesPacket : public Packet
 
     bool Serialize(BitStream *stream)
     {
-        int size = particles.size();
-        SERIALIZE_INT(stream, size, 0, INT_MAX);
-        particles.resize(size);
+        uint32_t size = (uint32_t)particles.size();
+        SERIALIZE_BITS(stream, size, 32);
+        particles.resize((size_t)size);
 
-        for(auto &particle : particles) 
+        for(auto &particle : particles)
         {
             if(!particle.Serialize(stream))
                 return false;
