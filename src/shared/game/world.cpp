@@ -166,9 +166,9 @@ namespace Game {
 
     void World::SprayParticles(
         int count,
-        const ParticleType *type, 
-        Vector2 position, 
-        Vector2 velocity, float velocitySpread, 
+        const ParticleType *type,
+        Vector2 position,
+        Vector2 velocity, float velocitySpread,
         float minSize, float maxSize
     ) {
         if(type == nullptr) return;
@@ -348,7 +348,7 @@ namespace Game {
                 entity->Draw(dq);
         }
         Game::RaylibShaders::worldSetDepth(1);
-        
+
         rlDrawRenderBatchActive();
         EndShaderMode();
     }
@@ -358,6 +358,8 @@ namespace Game {
         for (int entity_idx = 0; entity_idx < max_entity_count; entity_idx++)
         {
             const Entity* entity = &entities[entity_idx];
+            if (entity->type == ENTITY_TYPE_NONE)
+                continue;
             if (entity->base_health > 0)
                 entity->drawHealthBar();
         }

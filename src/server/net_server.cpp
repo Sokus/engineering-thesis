@@ -141,7 +141,6 @@ void Server::ConnectClient(int client_index, Game::PlayerType player_type, Addre
     ConnectionAcceptedPacket *packet = (ConnectionAcceptedPacket *)CreatePacket(PACKET_CONNECTION_ACCEPTED);
     packet->client_index = client_index;
     packet->level_type = this->level_type;
-    printf("PACKET: %d\n", packet->level_type);
     SendPacketToConnectedClient(client_index, packet);
     DestroyPacket(packet);
 
@@ -232,12 +231,12 @@ void Server::SendQueuedParticles()
     }
 
     SpawnParticlesPacket *packet = (SpawnParticlesPacket *) CreatePacket(PACKET_SPAWN_PARTICLES);
-    
+
     BitStream stream = MeasureStream_Create(nullptr, 960);
     for(auto &particle : world.queuedParticles)
     {
         particle.Serialize(&stream);
-        if(BitStream_GetBitsRemaining(&stream) < 0)   
+        if(BitStream_GetBitsRemaining(&stream) < 0)
         {
             BroadcastPacketToConnectedClients(packet);
 
