@@ -114,8 +114,16 @@ namespace Game {
             }
             else if (collideEntity->type == ENTITY_TYPE_COLLECTIBLE) {
                 if (player.collidesWith(*collideEntity)) {
-                    player.money_count++;
-                    FreeEntity(collideEntity);
+                    if (collideEntity->variant & (COLLECTIBLE_MONEY)) {
+                        player.money_count++;
+                        FreeEntity(collideEntity);
+                    }
+                    if (collideEntity->variant & (COLLECTIBLE_HEALTH)) {
+                        if (player.health < player.base_health) {
+                            player.health++;
+                        }
+                    }
+
                 }
             }
             else if (collideEntity->type == ENTITY_TYPE_DAMAGING_TILE) {
@@ -271,7 +279,7 @@ namespace Game {
         CalculateCollisions(entity, dt, 1);
         CheckStates(entity, Vector2{ entity.velocity.x,entity.velocity.y }, input, dt);
         if ((entity.on_ground && entity.collideTop) || (entity.collideLeft && entity.collideRight)) {
-            entity.health = 0;
+            //entity.health = 0;
         }
         entity.collideLeft = false;
         entity.collideRight = false;
@@ -539,13 +547,14 @@ namespace Game {
         return entity;
     }
 
-    Entity* World::CreateCollectible(float pos_x, float pos_y, float width, float height, int conGroup)
+    Entity* World::CreateCollectible(float pos_x, float pos_y, float width, float height, int conGroup,int32_t property)
     {
         Entity* entity = nullptr;
         if (entity = AddEntity(ENTITY_TYPE_COLLECTIBLE, 0, pos_x, pos_y, width, height).entity)
         {
             entity->entity_group = conGroup;
             entity->active = true;
+            entity->variant = property;
         }
         return entity;
     }

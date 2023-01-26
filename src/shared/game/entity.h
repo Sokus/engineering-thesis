@@ -36,7 +36,9 @@ namespace Game {
         ENEMY_SHOOT_TOP = 2,
         ENEMY_SHOOT_SIDE = 4,
         ENEMY_FOLLOW = 8,
-        ENEMY_JUMP = 16
+        ENEMY_JUMP = 16,
+        COLLECTIBLE_MONEY = 1,
+        COLLECTIBLE_HEALTH = 2
     };
 
     void LoadEntityTextures();

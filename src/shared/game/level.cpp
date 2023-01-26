@@ -23,7 +23,7 @@ void InitPlains(World *world)
 	world->CreateTile(896.0f, 0.0f, 16.0f, 192.0f, 0, 1);
 	world->CreateTile(64.0f, 160.0f, 16.0f, 32.0f, 0, 1);
 	world->CreateTile(880.0f, 160.0f, 16.0f, 32.0f, 0, 1);
-	world->CreateEnemy(96.0f, 176.0f, 16.0f, 16.0f, 16, 5000);
+	world->CreateEnemy(96.0f, 176.0f, 16.0f, 16.0f, 2, 5000);
 	world->CreateDamagingTile(80.0f, 176.0f, 800.0f, 16.0f, 0);
 	world->CreateInteractive(0.0f, 96.0f, 16.0f, 16.0f, 1);
 	world->CreateTile(0.0f, 64.0f, 16.0f, 16.0f,0, 1);
@@ -76,18 +76,57 @@ void InitPlains(World *world)
 	world->parallax_background.AddParallaxLayer(sky);
 }
 
-void InitLake(World *world) {
-    world->spawnpoint = Vector2{ 0.0f, 100.0f };
+void InitTower(World *world) {
+    world->spawnpoint = Vector2{ 160.0f, 168.0f };
 
-	world->CreateTile(0.0f, 192.0f, 464.0f, 16.0f, 0,1);
-	world->CreateTile(208.0f, 160.0f, 16.0f, 32.0f, 0,1);
-	world->CreateTile(400.0f, 160.0f, 16.0f, 32.0f, 0,1);
-	world->CreateInteractive(0.0f, 176.0f, 16.0f, 16.0f, 1);
-	world->CreateMovingTile(96.0f, 80.0f, 32.0f, 16.0f, 1, Vector2{ 0, 30 }, Vector2{ 96.0f, 160.0f }, 1);
-	world->CreateTile(32.0f, 160.0f, 16.0f, 16.0f, 1, 1);
-	world->CreateTile(32.0f, 144.0f, 16.0f, 16.0f, 1, 0);
-	world->CreateExit(432.0f, 160.0f, 32.0f, 32.0f);
-	//world->CreateEnemy(352.0f, 176.0f, 16.0f, 16.0f,27);
+	world->CreateTile(0.0f, 192.0f, 336.0f, 16.0f, 0, 1);
+
+	world->CreateTile(0.0f, -384.0f, 16.0f, 576.0f, 0, 1);
+	world->CreateTile(320.0f, -384.0f, 16.0f, 576.0f, 0, 1);
+
+
+	world->CreateTile(16.0f, 144.0f, 32.0f, 16.0f, 0, 1);
+	world->CreateTile(288.0f, 144.0f, 32.0f, 16.0f, 0, 1);
+
+	world->CreateTile(64.0f, 112.0f, 32.0f, 16.0f, 0, 1);
+	world->CreateTile(240.0f, 112.0f, 32.0f, 16.0f, 0, 1);
+
+	world->CreateTile(128.0f, 64.0f, 80.0f, 16.0f, 0, 1);
+
+	world->CreateEnemy(128.0f, 48.0f, 16.0f, 16.0f, 0,20);
+	world->CreateEnemy(192.0f, 48.0f, 16.0f, 16.0f,0,20);
+
+
+	world->CreateTile(16.0f, 16.0f, 96.0f, 16.0f, 0, 1);
+	world->CreateTile(224.0f, 16.0f, 96.0f, 16.0f, 0, 1);
+
+	world->CreateTile(128.0f, -32.0f, 80.0f, 16.0f, 0, 1);
+	world->CreateCheckpoint(160.0f, -48.0f, 16.0f, 16.0f);
+
+	world->CreateDamagingTile(16.0f, 0.0f, 64.0f, 16.0f, 0);
+	world->CreateDamagingTile(256.0f, 0.0f, 64.0f, 16.0f, 0);
+
+
+	world->CreateTile(16.0f, -80.0f, 96.0f, 16.0f, 0, 1);
+	world->CreateDestroyTile(96.0f, -122.0f, 16.0f, 32.0f, 0);
+
+	world->CreateInteractive(16.0f, -96.0f, 16.0f, 16.0f, 1);
+	world->CreateTile(128.0f, -128.0f, 80.0f, 16.0f, 1,0);
+
+
+	world->CreateTile(208.0f, -176.0f, 112.0f, 16.0f, 0, 1);
+	world->CreateCollectible(304.0f, -192.0f, 16.0f, 16.0f, 0, 2);
+	world->CreateDestroyTile(208.0f, -208.0f, 16.0f, 32.0f, 0);
+
+
+	world->CreateTile(16.0f, -224.0f, 112.0f, 16.0f, 0, 1);
+	
+	world->CreateInteractive(16.0f, -240.0f, 16.0f, 16.0f, 2);
+	world->CreateMovingTile(48.0f, -272.0f, 32.0f, 16.0f, 2, Vector2{ 30, 0 }, Vector2{ 256.0f, -272.0f }, 0);
+
+
+	world->CreateTile(288.0f, -288.0f, 32.0f, 16.0f, 0, 1);
+	world->CreateExit(304.0f, -304.0f, 16.0f, 16.0f);
 	// -- INIT BACKGROUND --
 
 	ParallaxLayer hills = {};
@@ -159,7 +198,7 @@ void InitLevel(World *world, LevelType type)
     switch (type)
     {
         case LEVEL_PLAINS: InitPlains(world); break;
-		case LEVEL_LAKE: InitLake(world); break;
+		case LEVEL_LAKE: InitTower(world); break;
 		case LEVEL_CLOUDS: InitClouds(world); break;
         default: break;
     }

@@ -57,7 +57,7 @@ namespace Game {
         AddEntityResult CreateTile(float pos_x, float pos_y,float width,float height, int conGroup,bool enabled);
         Entity* CreateMovingTile(float pos_x, float pos_y, float width, float height, int conGroup, Vector2 moveDirection, Vector2 endpoint,bool enabled);
         Entity* CreateInteractive(float pos_x, float pos_y, float width, float height, int conGroup);
-        Entity* CreateCollectible(float pos_x, float pos_y, float width, float height, int conGroup);
+        Entity* CreateCollectible(float pos_x, float pos_y, float width, float height, int conGroup, int32_t property);
         Entity* CreateDamagingTile(float pos_x, float pos_y, float width, float height, int conGroup);
         Entity* CreateDestroyTile(float pos_x, float pos_y, float width, float height, int conGroup);
         Entity* CreateCheckpoint(float pos_x, float pos_y, float width, float height);
