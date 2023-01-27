@@ -151,8 +151,7 @@ void Server::ConnectClient(int client_index, Game::PlayerType player_type, Addre
     SendPacketToConnectedClient(client_index, packet);
     DestroyPacket(packet);
 
-    // TODO: Remove hardcoded spawnpoint
-    world.CreatePlayer(client_index, 0.0f, 100.0f, player_type);
+    world.CreatePlayer(client_index, world.spawnpoint.x, world.spawnpoint.y, player_type);
 }
 
 void Server::DisconnectClient(int client_index)
