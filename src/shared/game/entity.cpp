@@ -302,7 +302,7 @@ namespace Game {
             SERIALIZE_INT(stream, facing, -2, 2);
             SERIALIZE_INT(stream, base_health, 0, max_base_health);
             if(base_health > 0)
-                SERIALIZE_INT(stream, health, 0, base_health+1);
+                SERIALIZE_BITS(stream, health, 32);
             SERIALIZE_BOOL(stream, active);
         }
         return true;
