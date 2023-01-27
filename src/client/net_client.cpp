@@ -247,7 +247,7 @@ void Client::ProcessWorldStatePacket(WorldStatePacket *packet, Address address)
             dst->num_frames = src->num_frames;
             if (src->num_frames > 0)
                 dst->current_frame = src->current_frame;
-
+            dst->variant = src->variant;
             dst->size = src->size;
             dst->position = src->position;
             dst->velocity = src->velocity;

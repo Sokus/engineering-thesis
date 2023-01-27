@@ -480,21 +480,25 @@ namespace Game {
             switch (playertype)
             {
             case PLAYER_TYPE_ROUGE:
+                entity->variant = PLAYER_TYPE_ROUGE;
                 entity->base_health = Const::PLAYER.ROUGE.BASE_HEALTH;
                 entity->base_speed = Const::PLAYER.ROUGE.BASE_SPEED;
                 entity->jump_height = Const::PLAYER.ROUGE.JUMP_HEIGHT;
                 break;
             case PLAYER_TYPE_SNIPER:
+                entity->variant = PLAYER_TYPE_SNIPER;
                 entity->base_health = Const::PLAYER.SNIPER.BASE_HEALTH;
                 entity->base_speed = Const::PLAYER.SNIPER.BASE_SPEED;
                 entity->jump_height = Const::PLAYER.SNIPER.JUMP_HEIGHT;
                 break;
             case PLAYER_TYPE_HEALER:
+                entity->variant = PLAYER_TYPE_HEALER;
                 entity->base_health = Const::PLAYER.HEALER.BASE_HEALTH;
                 entity->base_speed = Const::PLAYER.HEALER.BASE_SPEED;
                 entity->jump_height = Const::PLAYER.HEALER.JUMP_HEIGHT;
                 break;
             case PLAYER_TYPE_WARRIOR:
+                entity->variant = PLAYER_TYPE_WARRIOR;
                 entity->base_health = Const::PLAYER.HEALER.BASE_HEALTH;
                 entity->base_speed = Const::PLAYER.HEALER.BASE_SPEED;
                 entity->jump_height = Const::PLAYER.WARRIOR.JUMP_HEIGHT;

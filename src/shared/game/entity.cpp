@@ -183,6 +183,7 @@ namespace Game {
             case ENTITY_TYPE_PLAYER:
             {
                 source.y += (ABSF(velocity.x) <= 0.001f ? 0.0f : size.y);
+                source.y += 2 * variant * source.height;
             } break;
 
             case ENTITY_TYPE_INTERACTIVE:
@@ -296,6 +297,7 @@ namespace Game {
             SERIALIZE_INT(stream, num_frames, 0, 32);
             if (num_frames > 0)
                 SERIALIZE_INT(stream, current_frame, 0, num_frames);
+            SERIALIZE_INT(stream, variant, 0, PLAYER_TYPE_COUNT);
             SERIALIZE_VECTOR2(stream, size);
             SERIALIZE_VECTOR2(stream, position);
             SERIALIZE_VECTOR2(stream, velocity);
