@@ -64,7 +64,7 @@ Rectangle GetVisibleArea2D(const Camera2D camera) {
     Vector2 cornersScreen[4] = {
         {0,0},
         {(float)GetScreenWidth(), 0},
-        {0, (float)GetScreenHeight()}, 
+        {0, (float)GetScreenHeight()},
         {(float)GetScreenWidth(), (float)GetScreenHeight()}
     };
     Rectangle result;
@@ -81,9 +81,9 @@ Rectangle GetVisibleArea2D(const Camera2D camera) {
     }
 
     return {
-        .x = lo.x, 
-        .y = lo.y, 
-        .width = hi.x - lo.x, 
+        .x = lo.x,
+        .y = lo.y,
+        .width = hi.x - lo.x,
         .height = hi.y - lo.y
     };
 }
@@ -108,6 +108,12 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
         }
 
         game_data.world.initialised = true;
+    }
+
+    if (app_state.multiplayer && client_state.state != CLIENT_CONNECTED)
+    {
+        app_state.current_scene = GAME_SCENE_TITLE_SCREEN;
+        app_state.current_menu = GAME_MENU_NONE;
     }
 
     Game::Input inputs[2] = {};
@@ -156,7 +162,7 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
 
     renderer.BeginGeometry();
     BeginMode2D(camera);
-    
+
     ClearBackground(Color{25, 30, 40});
     game_data.world.Draw(GetVisibleArea2D(camera), dq);
     game_data.particleSystem.Draw();
@@ -177,7 +183,7 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
             app_state.current_menu = GAME_MENU_NONE;
     }
 
-    if (game_data.world.finished)
+    if (!app_state.multiplayer && game_data.world.finished)
     {
         game_data.world.Clear();
         game_data.world.initialised = false;
@@ -257,7 +263,7 @@ int main(int, char**)
             }
 
             client_state.SendPackets();
-            
+
             EndDrawing();
 
             if(WindowShouldClose()) app_state.should_quit = true;

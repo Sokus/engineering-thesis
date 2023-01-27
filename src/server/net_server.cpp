@@ -262,6 +262,14 @@ void Server::SendQueuedParticles()
     DestroyPacket(packet);
 }
 
+void Server::GameFinished()
+{
+    for (int i = 1; i < MAX_CLIENTS; i++)
+    {
+        if (client_connected[i]) DisconnectClient(i);
+    }
+}
+
 void Server::ProcessConnectionRequestPacket(ConnectionRequestPacket *packet, Address address)
 {
     int existing_client_index = FindExistingClientIndex(address);

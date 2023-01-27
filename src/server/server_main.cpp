@@ -99,8 +99,9 @@ int main(int argc, char *argv[])
 
     float hz = 60.0f; // refresh rate
     float dt = 1.0f / hz;
-    
-    while (true)
+
+    bool should_quit = false;
+    while (!should_quit)
     {
         const uint64_t t0 = Time_Now();
 
@@ -110,6 +111,13 @@ int main(int argc, char *argv[])
         server.SendWorldState();
         server.SendQueuedParticles();
         server.CheckForTimeOut();
+
+        if (server.world.finished)
+        {
+            printf("game finished!\n");
+            server.GameFinished();
+            should_quit = true;
+        }
 
         const uint64_t laptime = Time_Now() - t0;
         double laptime_ms = Time_Ms(laptime);
