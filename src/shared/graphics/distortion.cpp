@@ -60,7 +60,7 @@ namespace Game {
                     float arg = (dist_from_center - v_radius)/v_scale;
                     float alpha = max(0, exp(-arg*arg) - bias);
 
-                    vec2 uv_offset = -normalize(displacement)*alpha*v_strength*pixel_size;
+                    vec2 uv_offset = normalize(displacement)*alpha*v_strength*pixel_size*vec2(-1,1);
 
                     frag_color = vec4(
                         texture(tex, v_uv + uv_offset).rgb,
