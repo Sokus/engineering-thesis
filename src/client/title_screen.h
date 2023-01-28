@@ -7,7 +7,6 @@ void DoConnectingMenu();
 void DoHostMenu();
 void DoLevelMenu();
 void DoPlayerSelectionMenu();
-void DoOptionsMenu();
 void DoTitleScreenScene();
 
 #endif // TITLE_SCREEN_H

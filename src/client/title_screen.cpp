@@ -6,18 +6,20 @@
 #include "macros.h"
 #include "system.h"
 #include "server_control.h"
+#include "raylib.h"
 
 #include <string.h>
 
 extern AppData app_state;
 extern Client client_state;
 
+extern Texture2D backdrop;
+
 void DoMainMenu()
 {
     UI::Button solo_play_button = UI::Button("Solo Play");
     UI::Button join_game_button = UI::Button("Join Multiplayer");
     UI::Button host_game_button = UI::Button("Host Game");
-    UI::Button options_button = UI::Button("Options");
     UI::Button exit_button = UI::Button("Exit");
 
     UI::Begin();
@@ -25,7 +27,6 @@ void DoMainMenu()
         UI::Add(&solo_play_button.base); UI::EndRow();
         UI::Add(&join_game_button.base);
         UI::Add(&host_game_button.base); UI::EndRow();
-        UI::Add(&options_button.base); UI::EndRow();
         UI::Add(&exit_button.base); UI::EndRow();
     }
     UI::End();
@@ -42,16 +43,12 @@ void DoMainMenu()
     if (host_game_button.IsReleased())
         app_state.current_menu = GAME_MENU_HOST;
 
-    if (options_button.IsReleased())
-        app_state.current_menu = GAME_MENU_OPTIONS;
-
     if (exit_button.IsReleased())
         app_state.should_quit = true;
 
     solo_play_button.Draw();
     join_game_button.Draw();
     host_game_button.Draw();
-    options_button.Draw();
     exit_button.Draw();
 }
 
@@ -252,26 +249,13 @@ void DoPlayerSelectionMenu()
     close_button.Draw();
 }
 
-void DoOptionsMenu()
-{
-    UI::Button close_button = UI::Button("Close");
-
-    UI::Begin();
-    {
-        UI::Add(&close_button.base); UI::EndRow();
-    }
-    UI::End();
-
-    if(close_button.IsReleased())
-        app_state.current_menu = GAME_MENU_MAIN;
-
-    close_button.Draw();
-}
 
 void DoTitleScreenScene()
 {
     if(app_state.current_menu == GAME_MENU_NONE)
         app_state.current_menu = GAME_MENU_MAIN;
+
+    DrawTexture(backdrop, 0, 0, WHITE);
 
     UI::SetPosition(GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
     UI::SetOrigin(0.5f, 0.5f);
@@ -284,7 +268,6 @@ void DoTitleScreenScene()
         case GAME_MENU_CONNECTING: DoConnectingMenu(); break;
         case GAME_MENU_HOST: DoHostMenu(); break;
         case GAME_MENU_LEVEL: DoLevelMenu(); break;
-        case GAME_MENU_OPTIONS: DoOptionsMenu(); break;
         case GAME_MENU_PLAYER_SELECTION: DoPlayerSelectionMenu(); break;
         case GAME_MENU_WON: DoLevelMenu(); break;
         default: break;

@@ -22,22 +22,19 @@ AppData app_state = {};
 GameData game_data = {};
 Client client_state = {};
 
+Texture2D backdrop = {};
+
 void DoPauseMenu()
 {
-    UI::Button options_button = UI::Button("Options");
     UI::Button return_button = UI::Button("Return");
     UI::Button exit_button = UI::Button("Exit");
 
     UI::Begin();
     {
-        UI::Add(&options_button.base); UI::EndRow();
         UI::Add(&return_button.base);
         UI::Add(&exit_button.base); UI::EndRow();
     }
     UI::End();
-
-    if(options_button.IsReleased())
-        app_state.current_menu = GAME_MENU_OPTIONS;
 
     if(return_button.IsReleased())
         app_state.current_menu = GAME_MENU_NONE;
@@ -54,7 +51,6 @@ void DoPauseMenu()
         game_data.world.initialised = false;
     }
 
-    options_button.Draw();
     return_button.Draw();
     exit_button.Draw();
 }
@@ -202,7 +198,6 @@ void DoGameScene(Game::Renderer &renderer, Game::DrawQueue &dq, float dt)
         switch(app_state.current_menu)
         {
             case GAME_MENU_MAIN: DoPauseMenu(); break;
-            case GAME_MENU_OPTIONS: DoOptionsMenu(); break;
             case GAME_MENU_WON: DoLevelMenu(); break;
             default: break;
         }
@@ -213,7 +208,7 @@ int main(int, char**)
 {
     SetTraceLogLevel(LOG_INFO);
 
-    InitWindow(960, 540, "PI");
+    InitWindow(960, 540, "Online game implementation");
     SetTargetFPS(60);
     SetExitKey(KEY_END);
 
@@ -224,6 +219,8 @@ int main(int, char**)
     Game::RaylibShaders::LoadShaders();
     game_data.particleSystem.LoadTextures();
     UI::Init();
+
+    backdrop = LoadTexture(RESOURCE_PATH "/backdrop.png");
 
     Socket socket = SocketCreate(SOCKET_IPV4, 0);
     client_state.Init(socket);
