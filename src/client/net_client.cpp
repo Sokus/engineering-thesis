@@ -234,7 +234,7 @@ void Client::ProcessWorldStatePacket(WorldStatePacket *packet, Address address)
     ASSERT(packet->entity_count >= 0);
     ASSERT(packet->start_index + packet->entity_count <= Game::max_entity_count);
 
-    for (int i = packet->start_index; i < packet->entity_count; i++)
+    for (int i = 0; i < packet->entity_count; i++)
     {
         Game::Entity *dst = &game_data.world.entities[i + packet->start_index];
         Game::Entity *src = &packet->entities[i];
