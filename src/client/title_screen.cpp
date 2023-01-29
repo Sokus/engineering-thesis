@@ -211,10 +211,10 @@ void DoPlayerSelectionMenu()
 {
     struct ButtonTypePair { UI::Button button; Game::PlayerType player_type; };
     ButtonTypePair buttons[] = {
-        { UI::Button("Rouge"), Game::PLAYER_TYPE_ROUGE },
-        { UI::Button("Sniper"), Game::PLAYER_TYPE_SNIPER },
-        { UI::Button("Healer"), Game::PLAYER_TYPE_HEALER },
-        { UI::Button("Warrior"), Game::PLAYER_TYPE_WARRIOR }};
+        { UI::Button("Red"), Game::PLAYER_TYPE_ROUGE },
+        { UI::Button("Green"), Game::PLAYER_TYPE_SNIPER },
+        { UI::Button("Blue"), Game::PLAYER_TYPE_HEALER },
+        { UI::Button("Gray"), Game::PLAYER_TYPE_WARRIOR }};
     UI::Button close_button = UI::Button("Return");
 
     UI::Begin();

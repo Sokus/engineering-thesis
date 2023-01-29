@@ -10,19 +10,19 @@ namespace Const {
 	};
 	struct Sniper_Data
 	{
-		float JUMP_HEIGHT = 11.0f;
+		float JUMP_HEIGHT = 14.0f;
 		int BASE_HEALTH = 70;
-		float BASE_SPEED = 50.0f;
+		float BASE_SPEED = 90.0f;
 	};
 	struct Healer_Data
 	{
-		float JUMP_HEIGHT = 10.0f;
+		float JUMP_HEIGHT = 12.0f;
 		int BASE_HEALTH = 100;
 		float BASE_SPEED = 45.0f;
 	};
 	struct Warrior_Data
 	{
-		float JUMP_HEIGHT = 9.0f;
+		float JUMP_HEIGHT = 12.0f;
 		int BASE_HEALTH = 120;
 		float BASE_SPEED = 37.5f;
 	};
@@ -53,7 +53,7 @@ namespace Const {
 		float VELOCITY_X = 10.0f;
 		int DAMAGE = 15;
 		float SHOT_COOLDOWN = 2.0f;
-		float JUMP_HEIGHT = 15.0f;
+		float JUMP_HEIGHT = 12.0f;
 		float JUMP_COOLDOWN = 4.0f;
 		float MOVE_SPEED = 50.0f;
 		float FALL_SPEED = 30.0f;
