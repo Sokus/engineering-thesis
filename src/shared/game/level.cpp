@@ -156,7 +156,6 @@ void InitTower(World *world) {
 
 void InitClouds(World* world) {
 	world->spawnpoint = Vector2{ 0.0f, 168.0f };
-	//world->spawnpoint = Vector2{ 768.0f, -32.0f };
 
 	world->CreateTile(0.0f, 192.0f, 1168.0f, 16.0f, 0,1);
 	world->CreateTile(1168.0f, -192.0f, 16.0f, 400.0f, 0, 1);
@@ -168,10 +167,12 @@ void InitClouds(World* world) {
 
 	world->CreateTile(352.0f, 144.0f, 32.0f, 16.0f, 0, 1);
 	world->CreateTile(480.0f, 144.0f, 32.0f, 16.0f, 0, 1);
+	world->CreateCollectible(360.0f, 112.0f, 16.0f, 16.0f, 0, 1);
+	world->CreateCollectible(488.0f, 112.0f, 16.0f, 16.0f, 0, 1);
 
-	world->CreateEnemy(320.0f, 176.0f, 16.0f, 16.0f, 11, 100);
-	world->CreateEnemy(416.0f, 176.0f, 16.0f, 16.0f, 11, 100);
-	world->CreateEnemy(512.0f, 176.0f, 16.0f, 16.0f, 11, 100);
+	world->CreateEnemy(320.0f, 176.0f, 16.0f, 16.0f, 11, 50);
+	world->CreateEnemy(416.0f, 176.0f, 16.0f, 16.0f, 11, 50);
+	world->CreateEnemy(512.0f, 176.0f, 16.0f, 16.0f, 11, 50);
 
 	world->CreateTile(608.0f, 176.0f, 144.0f, 16.0f, 0, 1);
 	world->CreateTile(608.0f, 160.0f, 96.0f, 16.0f, 0, 1);
@@ -190,23 +191,31 @@ void InitClouds(World* world) {
 
 	world->CreateTile(0.0f, 0.0f, 1104.0f, 16.0f, 0, 1);
 	world->CreateCheckpoint(1008.0f, -16.0f, 16.0f, 16.0f);
-	world->CreateDestroyTile(976.0f, -64.0f, 16.0f, 64.0f, 0);
-	//world->CreateEnemy(944.0f, -16.0f, 16.0f, 16.0f, 25, 50);
-	//world->CreateEnemy(880.0f, -16.0f, 16.0f, 16.0f, 25, 50);
-	//world->CreateEnemy(816.0f, -16.0f, 16.0f, 16.0f, 25, 50);
+	world->CreateDestroyTile(976.0f, -96.0f, 16.0f, 96.0f, 0);
+	world->CreateEnemy(944.0f, -16.0f, 16.0f, 16.0f, 25, 30);
+	world->CreateEnemy(880.0f, -16.0f, 16.0f, 16.0f, 25, 30);
+	world->CreateEnemy(816.0f, -16.0f, 16.0f, 16.0f, 25, 30);
 
 	world->CreateTile(560.0f, -48.0f, 256, 16.0f, 0, 1);
 	world->CreateTile(560.0f, -96.0f, 272, 16.0f, 0, 1);
 	world->CreateTile(752.0f, -32.0f, 16.0f, 32.0f, 1, 1);
 	world->CreateTile(752.0f, -80.0f, 16.0f, 32.0f, 1, 0);
+
 	world->CreateTile(688.0f, -32.0f, 16.0f, 32.0f, 2, 0);
 	world->CreateTile(768.0f, -32.0f, 16.0f, 32.0f, 2, 0);
 	world->CreateTile(688.0f, -80.0f, 16.0f, 32.0f, 2, 1);
+
 	world->CreateTile(656.0f, -32.0f, 16.0f, 32.0f, 3, 1);
 	world->CreateTile(656.0f, -80.0f, 16.0f, 32.0f, 3, 0);
+	world->CreateTile(768.0f, -80.0f, 16.0f, 32.0f, 3, 0);
 	world->CreateInteractive(816.0f, -16.0f, 16.0f, 16.0f, 1);
 	world->CreateInteractive(736.0f, -16.0f, 16.0f, 16.0f, 2);
 	world->CreateInteractive(736.0f, -64.0f, 16.0f, 16.0f, 3);
+	world->CreateDestroyTile(624.0f, -32.0f, 16.0f, 32.0f, 0);
+	world->CreateDestroyTile(624.0f, -80.0f, 16.0f, 32.0f, 0);
+
+	world->CreateExit(432.0f, -16.0f, 16.0f, 16.0f);
+	world->CreateTile(368.0f, -128.0f, 16.0f, 128.0f,0,1);
 
 	// -- INIT BACKGROUND --
 
