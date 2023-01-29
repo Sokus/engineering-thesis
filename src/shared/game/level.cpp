@@ -155,7 +155,8 @@ void InitTower(World *world) {
 }
 
 void InitClouds(World* world) {
-	world->spawnpoint = Vector2{ 0.0f, 168.0f };
+	//world->spawnpoint = Vector2{ 0.0f, 168.0f };
+	world->spawnpoint = Vector2{ 752.0f, -168.0f };
 
 	world->CreateTile(0.0f, 192.0f, 1168.0f, 16.0f, 0,1);
 	world->CreateTile(1168.0f, -192.0f, 16.0f, 400.0f, 0, 1);
@@ -213,6 +214,11 @@ void InitClouds(World* world) {
 	world->CreateInteractive(736.0f, -64.0f, 16.0f, 16.0f, 3);
 	world->CreateDestroyTile(624.0f, -32.0f, 16.0f, 32.0f, 0);
 	world->CreateDestroyTile(624.0f, -80.0f, 16.0f, 32.0f, 0);
+
+	world->CreateInteractive(592.0f, -16.0f, 16.0f, 16.0f, 4);
+
+	world->CreateTile(816.0f, -48.0f, 32.0f, 16.0f, 4, 0);
+
 
 	world->CreateExit(432.0f, -16.0f, 16.0f, 16.0f);
 	world->CreateTile(368.0f, -128.0f, 16.0f, 128.0f,0,1);
