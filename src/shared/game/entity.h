@@ -83,25 +83,20 @@ namespace Game {
         float time_until_state_change_allowed;
         float shot_cooldown;
         int health;
-        int base_health; // move it out?
+        int base_health; 
         float move_speed;
-        float base_speed; // move it out?
+        float base_speed; 
         int damage;
 
-        int money_count; // move it out when implementing the server
+        int money_count; 
         bool on_ground;
-        float jump_height; // move it out?
+        float jump_height; 
         int facing;
         bool ability_reset;
         float dash_cooldown;
 
         bool collideLeft, collideRight, collideTop;
 
-        // TODO: Decide what to do with everything below this line
-        // most of the things are either:
-        // - weidly phrased/used
-        // - unnecessary/derived from what is above
-        // - do not belong to entity structure and should be held outside
 
         Vector2 move_direction;
         Vector2 velocity;

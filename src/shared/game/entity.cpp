@@ -31,7 +31,6 @@ namespace Game {
         ASSERT(!entity_textures_loaded);
         if (!entity_textures_loaded)
         {
-            // TODO: stub texture
             // entity_textures[ENTITY_TYPE_NONE] = LoadTexture(RESOURCE_PATH "");
             entity_textures[ENTITY_TYPE_PLAYER] = LoadTexture(RESOURCE_PATH "/character.png");
             entity_textures[ENTITY_TYPE_TILE] = LoadTexture(RESOURCE_PATH "/tiles/tile.png");
@@ -318,7 +317,7 @@ namespace Game {
         if (ent_vel.y < 0) {
             if (velo.y > 0) {
                 float offset = ent_pos.y - ent.position.y;
-                position.y = ent.position.y - size.y + offset - 0.5f; //WORKS, BUT LIKE SHIT
+                position.y = ent.position.y - size.y + offset - 0.5f;
                 position.x += ent.velocity.x * dt;
                 on_ground = true;
             }
@@ -419,7 +418,7 @@ namespace Game {
         if (ent_vel.y < 0) {
             if (velo.y > 0) {
                 float offset = ent_pos.y - ent.position.y;
-                position.y = ent.position.y - size.y + offset + ent.move_direction.y / 1.8f; //WORKS, BUT LIKE SHIT
+                position.y = ent.position.y - size.y + offset + ent.move_direction.y / 1.8f;
                 position.x += ent.velocity.x * dt;
                 on_ground = true;
             }

@@ -22,14 +22,14 @@ namespace Game {
             enemy.velocity.x = 0;
         }
         if (enemy.variant&(ENEMY_SHOOT_TOP)) {
-            if (enemy.shot_cooldown <= 0) { //center out shot
+            if (enemy.shot_cooldown <= 0) { 
                 CreateBullet(enemy.position.x, enemy.position.y, 16, 16, 0, Const::ENTITY.BULLET_VELOCITY_Y,0);
                 shot_cooldown = Const::ENEMY.SHOT_COOLDOWN;
                 enemy.shot_cooldown = shot_cooldown;
             }
         }
         if (enemy.variant&(ENEMY_SHOOT_SIDE)) {
-            if (enemy.shot_cooldown <= 0) { //center out shot
+            if (enemy.shot_cooldown <= 0) { 
                 CreateBullet(enemy.position.x, enemy.position.y, 16, 16, Const::ENTITY.BULLET_VELOCITY_X*enemy.facing, 0, 0);
                 shot_cooldown = Const::ENEMY.SHOT_COOLDOWN;
                 enemy.shot_cooldown = shot_cooldown;
@@ -103,7 +103,7 @@ namespace Game {
     void World::CheckStates(Entity& player, Vector2 velocity, Input* input, float dt) {
         for (int collide_idx = 0; collide_idx < max_entity_count; collide_idx++)
         {
-            Entity* collideEntity = entities + collide_idx; //TODO add reaction to squishing - dmg, teleport?
+            Entity* collideEntity = entities + collide_idx; 
             if (collideEntity->type == ENTITY_TYPE_INTERACTIVE) {
                 if (player.collidesWith(*collideEntity) && input->interact
                     && collideEntity->time_until_state_change_allowed <= 0.0f) {
@@ -247,7 +247,7 @@ namespace Game {
         }
         parallax_background.Clear();
     }
-    void World::CheckPlayerShot(Entity& player, Input* input, float dt) { //Add to check which player shoot
+    void World::CheckPlayerShot(Entity& player, Input* input, float dt) { 
         if (input->shoot && player.shot_cooldown <= 0.0f) {
             float x_vel = Const::ENTITY.BULLET_VELOCITY_X * player.facing;
             float y_vel = player.velocity.y * !player.on_ground * 0.5f;
@@ -260,7 +260,7 @@ namespace Game {
 
         ASSERT(entity.type == ENTITY_TYPE_PLAYER);
         if (entity.health <= 0) {
-            entity.position = spawnpoint; //Add some death animation
+            entity.position = spawnpoint;
             entity.health = entity.base_health;
             return;
         }
@@ -278,9 +278,6 @@ namespace Game {
         entity.MoveY(dt);
         CalculateCollisions(entity, dt, 1);
         CheckStates(entity, Vector2{ entity.velocity.x,entity.velocity.y }, input, dt);
-        if ((entity.on_ground && entity.collideTop) || (entity.collideLeft && entity.collideRight)) {
-            //entity.health = 0;
-        }
         entity.collideLeft = false;
         entity.collideRight = false;
         entity.collideTop = false;
