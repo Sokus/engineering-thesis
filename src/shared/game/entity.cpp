@@ -297,7 +297,7 @@ namespace Game {
             SERIALIZE_INT(stream, num_frames, 0, 32);
             if (num_frames > 0)
                 SERIALIZE_INT(stream, current_frame, 0, num_frames);
-            SERIALIZE_INT(stream, variant, 0, PLAYER_TYPE_COUNT);
+            SERIALIZE_INT(stream, variant, 0, 32);
             SERIALIZE_VECTOR2(stream, size);
             SERIALIZE_VECTOR2(stream, position);
             SERIALIZE_VECTOR2(stream, velocity);
