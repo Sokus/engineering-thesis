@@ -208,7 +208,7 @@ int main(int, char**)
 {
     SetTraceLogLevel(LOG_INFO);
 
-    InitWindow(960, 540, "Online game implementation");
+    InitWindow(900, 506, "Online game implementation");
     SetTargetFPS(60);
     SetExitKey(KEY_END);
 
